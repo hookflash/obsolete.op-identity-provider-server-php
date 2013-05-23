@@ -1,0 +1,28 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "sign-up",
+	
+		"identity": {
+			"type": "",
+			"identifier": "",
+			"passwordHash": "",
+			"secretSalt": "",
+			"serverPasswordSalt": "",
+			
+			"displayName": "",
+			"avatars": {
+				"avatar": [
+					{
+						"name": "",
+						"url": "",
+						"width": "",
+						"height": ""
+					}
+				]
+			}
+		}
+	}
+}

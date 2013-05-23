@@ -1,0 +1,21 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "lockbox-half-key-store",
+	
+		"clientNonce": "",
+		"identity": {
+			"accessToken": "",
+			"accessSecretProof": "",
+			"accessSecretProofExpires": "",
+			"type": "",
+			"identifier": "",
+			"uri": ""
+		},		
+		"lockbox": {
+			"keyEncrypted": ""
+		}
+	}
+}

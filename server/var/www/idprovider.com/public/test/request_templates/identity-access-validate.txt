@@ -1,0 +1,18 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "identity-access-validate",
+	
+		"clientNonce": "",
+		"purpose": "",
+		"identity": {
+			"accessToken": "",
+			"accessSecretProof": "",
+			"accessSecretProofExpires": "",
+			"uri": "",
+			"provider": ""
+		}
+	}
+}

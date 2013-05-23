@@ -1,0 +1,12 @@
+<request domain="provider.com" id="abc" handler="identity-provider" method="oauth-provider-authentication">
+	<clientAuthenticationToken></clientAuthenticationToken>
+	<callbackURL></callbackURL>
+	<identity>
+		<type></type>
+	</identity>
+</request>
+<!--
+<result domain="provider.com" id="abc" handler="identity-provider" method="oauth-provider-authentication" epoch="12345678">
+	<providerRedirectURL></providerRedirectURL>
+</result>
+-->

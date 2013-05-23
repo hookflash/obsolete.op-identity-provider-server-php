@@ -1,0 +1,14 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "oauth-provider-authentication",
+	
+		"clientAuthenticationToken": "",
+		"callbackURL": "",
+		"identity": {
+			"type": ""
+		}
+	}
+}

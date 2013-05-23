@@ -1,0 +1,7 @@
+<request domain="provider.com" id="abc" handler="identity-provider" method="server-nonce-get">
+</request>
+<!--
+<result domain="provider.com" id="abc" handler="identity-provider" method="server-nonce-get" epoch="12345678">
+	<serverNonce></serverNonce>
+</result>
+-->

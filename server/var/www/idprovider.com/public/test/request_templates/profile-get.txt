@@ -1,0 +1,13 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "profile-get",
+	
+		"identity": {
+			"type": "",
+			"identifier": ""
+		}
+	}
+}

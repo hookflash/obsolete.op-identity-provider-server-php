@@ -1,0 +1,13 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "linkedin-token-exchange",
+	
+		"identity": {
+			"identifier": "",
+			"publicProfileURL": ""
+		}
+	}
+}

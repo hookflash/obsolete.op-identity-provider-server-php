@@ -1,0 +1,373 @@
+Copyright (c) 2012, SMB Phone Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The views and conclusions contained in the software and documentation are those
+of the authors and should not be interpreted as representing official policies,
+either expressed or implied, of the FreeBSD Project.
+
+
+
+////////////////////////////////////////////////////
+
+
+1. serverNonceGet
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "server-nonce-get"
+    }
+}
+
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "server-nonce-get",
+        "$epoch": 439439493,
+        
+        "serverNonce": "fwefew...dewed"
+    }
+}
+
+////////////////////////////////////////////////////
+
+2. signUp
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "sign-up",
+        
+        "identity": {
+                        "type": "federated",
+                        "identifier": "alice",
+                        "passwordHash": "hdfhYT....6HGs5gsG",
+                        "secretSalt": "gsety..5gwWE53",
+                        "serverPasswordSalt": "FtrnRT...SETHtrh
+                    }
+    }
+}
+
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "sign-up",
+        "$epoch": 439439493,
+        
+        "signUpSucceeded": "true"
+    }
+}
+
+////////////////////////////////////////////////////
+
+3. Identity Salts Get
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "identity-salts-get",
+        
+        "identity": {
+                        "type": "facebook",
+                        "identifier": "3433...0898"
+                    }
+    }
+}
+
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "identity-salts-get",
+        "$epoch": 439439493,
+        
+        "identity": {
+                        "type": "facebook",
+                        "identifier": "3433...0898",
+                        "secretSalt": "jie3...mve9",
+                        "serverPasswordSalt": "ferv...434fr"
+                    }
+    }
+}
+
+////////////////////////////////////////////////////
+
+4. OAuth Provider Authentication
+
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "oauth-provider-authentication",
+        
+        "clientAuthenticationToken": "mer...tws9tb",
+        "identity": {
+                        "type": "facebook"
+                    }
+    }
+}
+
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "oauth-provider-authentication",
+        "$epoch": 439439493,
+        
+        "providerRedirectURL": "provider.com/oauth_login.php"
+    }
+}
+
+
+////////////////////////////////////////////////////
+
+5. Identity Salts Set
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "identity-salts-set",
+        
+        "clientAuthenticationToken": "mer...tws9tb",
+        "serverAuthenticationToken": "dfr...twsssb",
+        "identity": {
+                        "type": "facebook",
+                        "identifier": "3433...0898",
+                        "secretSalt": "jie3...mve9",
+                        "serverPasswordSalt": "ferv...434fr"
+                    }
+    }
+}
+
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "identity-salts-set",
+        "$epoch": 439439493,
+        
+        "identitySaltsSettingSucceeded": "true"
+    }
+}
+
+////////////////////////////////////////////////////
+
+6. Login
+a) Federated 
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "login",
+        
+        "freshStart": "true",
+        "clientToken": "trher...65g5t",
+        "serverToken": "tbrtb...twvre",
+        "proof": {
+                    "serverNonce": "fwefew...dewed",
+                    "serverLoginFinalProof": "asdf...jnfad"
+                 },
+        "identity": {
+                        "type": "federated",
+                        "identifier": "alice",
+                        "uri": "identity://provider.com/alice",
+                        "uriEncrypted": "j8bsfjfr...fsjwvo",
+                        "secretDecryptionKeyEncrypted": "gdsYT....nyh5gsG",
+                        "reloginAccessKeyEncrypted": "gdsYT....nyh5gsG",
+                        "secretSalt": "gsety..5gwWE53",
+                        "secretEncrypted": "ojisf...b4gHrh
+                    }
+    }
+}
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "server-nonce-get",
+        "$epoch": 439439493,
+        
+        "loginState: "succeeded",
+        "hostingData": {
+                            "nonce": "yafa...argrg",
+                            "hostingProof": "tegst...lnivr",
+                            "hostingProofExpires": "345323235"
+                       },
+        "identity": {
+                         "accessToken": "5gd5gw...62gtw5",
+                         "accessSecret": "9ufy...fr4rash",
+                         "accessSecretExpires": "345353235"
+                    }
+    }
+}
+
+__________________________________________________
+
+b) Legacy OAuth 
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "login",
+        
+        "freshStart": "true",
+        "clientToken": "trher...65g5t",
+        "serverToken": "tbrtb...twvre",
+        "identity": {
+                        "type": "facebook",
+                        "identifier": "32452657487",
+                        "uri": "identity://facebook.com/32452657487",
+                        "uriEncrypted": "j8bsfjfr...fsjwvo",
+                        "secretDecryptionKeyEncrypted": "gdsYT....nyh5gsG",
+                        "reloginAccessKeyEncrypted": "gdsYT....nyh5gsG"
+                    }
+    }
+}
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "server-nonce-get",
+        "$epoch": 439439493,
+        
+        "loginState: "succeeded",
+        "hostingData": {
+                            "nonce": "yafa...argrg",
+                            "hostingProof": "tegst...lnivr",
+                            "hostingProofExpires": "345323235"
+                       },
+        "identity": {
+                         "accessToken": "5gd5gw...62gtw5",
+                         "accessSecret": "9ufy...fr4rash",
+                         "accessSecretExpires": "345353235"
+                    }
+    }
+}
+__________________________________________________
+
+b) PIN validation 
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "login",
+        
+        "freshStart": "true",
+        "clientToken": "trher...65g5t",
+        "serverToken": "tbrtb...twvre",
+        "proof": {
+                    "serverNonce": "fwefew...dewed",
+                    "serverLoginFinalProof": "asdf...jnfad"
+                 },
+        "identity": {
+                        "type": "email",
+                        "identifier": "alice@gmail.com",
+                        "uri": "identity:email:alice@gmail.com",
+                        "uriEncrypted": "j8bsfjfr...fsjwvo",
+                        "secretDecryptionKeyEncrypted": "gdsYT....nyh5gsG",
+                        "reloginAccessKeyEncrypted": "gdsYT....nyh5gsG",
+                        "secretSalt": "gsety..5gwWE53",
+                        "secretEncrypted": "ojisf...b4gHrh
+                    }
+    }
+}
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "example-identity-provider",
+        "$method": "server-nonce-get",
+        "$epoch": 439439493,
+        
+        "loginState: "pinValidationRequired",
+        "providerRedirectURL": "provider.com/pin_validation.html",
+        "pin": {
+                    "pinExpiry": "5343435345",
+                    "pinGenerationCooldown": "432342344"
+               }
+    }
+}
+
+////////////////////////////////////////////////////
+
+7. PIN Validation
+
+request:
+{
+    "request": {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "pin-validation",
+        
+        "pin": "123456"
+    }
+}
+
+response:
+{
+    "result: {
+        "$domain": "provider.com",
+        "$id": "abd23",
+        "$handler": "identity-provider",
+        "$method": "pin-validation",
+        "$epoch": 439439493,
+        
+        "pinValidationSucceeded": "true"
+    }
+}
+
+
+

@@ -1,0 +1,17 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "identity-salts-set",
+	
+		"clientAuthenticationToken": "",
+		"serverAuthenticationToken": "",
+		"identity": {
+			"type": "",
+			"identifier": "",
+			"secretSalt": "",
+			"serverPasswordSalt": ""
+		}
+	}
+}

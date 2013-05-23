@@ -1,0 +1,16 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "internal_cslfp",
+	
+		"identity": {
+			"identifier": "",
+			"passwordHash": "",
+			"secretSalt": "",
+			"serverPasswordSalt": ""
+		},
+		"serverNonce": ""
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "profile-update",
+	
+		"identity": {
+			"identifier": "",
+			"uri": "",
+			
+			"displayName": "",
+			"avatars": {
+				"avatar": [
+					{
+						"name": "",
+						"url": "",
+						"width": "",
+						"height": ""
+					}
+				]
+			},
+			"removeAvatars": {
+				"avatar": [
+					{
+						"url": ""
+					}
+				]
+			}
+		}
+	}
+}

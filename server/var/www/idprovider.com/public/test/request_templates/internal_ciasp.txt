@@ -1,0 +1,17 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "internal_ciasp",
+		
+		"clientNonce": "",
+		"purpose": "lockbox-update",
+		"identity": {
+			"accessToken": "",
+			"accessSecret": "",
+			"accessSecretExpires": "",
+			"uri": ""
+		}
+	}
+}
