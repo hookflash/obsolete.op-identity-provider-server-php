@@ -267,7 +267,7 @@ class LoginUtil {
 		require_once(APP . 'php/main/utils/cryptoUtil.php');
 		
 		// URL of identityService server
-		$url = 'http://unstable.hookflash.me/registration';
+		$url = HF_SERVICE_DOMAIN . 'registration';
 		
 		// Request data
 		$requestData = '' .

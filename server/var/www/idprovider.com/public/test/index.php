@@ -71,7 +71,7 @@
 		$('#btn_start').click( function() {
 	
 			$.ajax({
-				url: '<?php echo 'http://' . $_SERVER['HTTP_HOST'] ?>/api.php',
+				url: '<?php echo 'https://' . $_SERVER['HTTP_HOST'] ?>/api.php',
 				type: $('#frm_type').val(),
 				data: $('#frm_req').val(),
 				success: function(data, textStatus, jqXHR) {
@@ -89,7 +89,7 @@
 		$('#demoreq').click( function() {
 			
 			$.ajax({
-				url: '<?php echo 'http://' . $_SERVER['HTTP_HOST'] ?>' + "/test/load_request.php?method=" + escape ( $('#frm_method').val() ) + "&fileType=" + escape ( $('#frm_fileType').val() ),
+				url: '<?php echo 'https://' . $_SERVER['HTTP_HOST'] ?>' + "/test/load_request.php?method=" + escape ( $('#frm_method').val() ) + "&fileType=" + escape ( $('#frm_fileType').val() ),
 				type: 'GET',
 				success: function(data, textStatus, jqXHR) {
 					$('#frm_req').val(data);

@@ -208,8 +208,14 @@ function login()
 		// Determine if it's a regulare login or a login after the pin validation
 		// (in which case we look for login data in the session).
 		if ( !( isset($oRequest->aPars['request']['afterPinValidation']) ) ) {
-			// Set the loginType based on given identity type
-			$sIdentityType = $oRequest->aPars['request']['identity']['type'];
+			if ( isset($oRequest->aPars['request']['identity']['reloginKey']) ) {
+				// Fetch identity type from relogin key
+				$aReloginKey = explode('-',$oRequest->aPars['request']['identity']['reloginKey']);
+				$sIdentityType = $aReloginKey[0];
+			} else {
+				// Set the loginType based on given identity type
+				$sIdentityType = $oRequest->aPars['request']['identity']['type'];
+			}
 		} else {
 			if ( isset($_SESSION['requestData']['identity']['type']) ) {
 				$sIdentityType = $_SESSION['requestData']['identity']['type'];

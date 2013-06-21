@@ -39,14 +39,17 @@ date_default_timezone_set('UTC');
 require_once(APP . 'php/main/utils/cryptoUtil.php');
 require_once(APP . 'php/main/utils/jsonUtil.php');
 
+define('PROFILE_ULR_BASE_CONST', MY_DOMAIN . 'php/profile/profile.php?');
+define('VPROFILE_ULR_BASE_CONST', MY_DOMAIN . 'php/profile/profile.php?vprofile=1&');
+
 /**
  * Class ProfileUtil is a utility class that provides public profile data for given input.
  */
 class ProfileUtil {
 	
 	// Usefull public constants
-	const PROFILE_ULR_BASE = 'https://example.unstable.hookflash.me/php/profile/profile.php?';
-	const VPROFILE_ULR_BASE = 'https://example.unstable.hookflash.me/php/profile/profile.php?vprofile=1&';
+	const PROFILE_ULR_BASE = PROFILE_ULR_BASE_CONST;
+	const VPROFILE_ULR_BASE = VPROFILE_ULR_BASE_CONST;
 	
 	/**
 	 * Try sending a profile-get request using cURL, for given data
@@ -60,7 +63,7 @@ class ProfileUtil {
 		require_once(APP . 'php/main/utils/curlUtil.php');
 		
 		// URL of identityService server
-		$url = 'http://example.unstable.hookflash.me/api.php';
+		$url = MY_DOMAIN . 'api.php';
 		
 		// Request data
 		$requestData = '' .

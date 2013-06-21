@@ -11,8 +11,7 @@
 			"accessToken": "",
 			"accessSecretProof": "",
 			"accessSecretProofExpires": "",
-			"uri": "",
-			"provider": ""
+			"uri": ""
 		}
 	}
 }

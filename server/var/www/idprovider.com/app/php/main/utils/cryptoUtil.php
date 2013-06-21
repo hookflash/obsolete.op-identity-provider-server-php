@@ -268,8 +268,7 @@ class CryptoUtil {
 		// Generate token and secret
 		$sAccessToken = CryptoUtil::generateNonce();
 		$sAccessSecretExpires = time() + 60*1440*60; // 60secs * 1440mins/day * 60days = 2months
-		$sAccessSecret = CryptoUtil::gimmeHmac('identity-access-secret:' . $sAccessToken . ':' . $sIdentityType . ':' . $sIdentifier . ':' . $sAccessSecretExpires,
-												PROVIDER_MAGIC_VALUE);
+		$sAccessSecret = CryptoUtil::calculateAccessSecret($sAccessToken);
 		
 		// return the identity access data
 		return array (
@@ -277,6 +276,16 @@ class CryptoUtil {
 		'accessSecret'			=> $sAccessSecret,
 		'accessSecretExpires'	=> $sAccessSecretExpires
 		);		
+	}
+	
+	/**
+	 * Calculate AccessSecret based on given accessToken
+	 *
+	 * @param string $sAccessToken Access token
+	 * @return string Returns calculated accessSecret
+	 */
+	public function calculateAccessSecret ( $sAccessToken ) {
+		return CryptoUtil::gimmeHash("identity-access-secret:" . $sAccessToken . PROVIDER_MAGIC_VALUE); 
 	}
 	
 	/**
@@ -294,8 +303,7 @@ class CryptoUtil {
 	 */
 	public function validateIdentityAccessSecretProof ( $sClientNonce, $sAccessToken, $sAccessSecretProof, $sAccessSecretExpires, $sIdentityType, $sIdentifier, $sUri, $sPurpose ) {
 		// Calculate accessSecret first
-		$sAccessSecret = CryptoUtil::gimmeHmac('identity-access-secret:' . $sAccessToken . ':' . $sIdentityType . ':' . $sIdentifier . ':' . $sAccessSecretExpires,
-												PROVIDER_MAGIC_VALUE);
+		$sAccessSecret = CryptoUtil::calculateAccessSecret($sAccessToken);
 											
 		// Calculate accessSecretProof
 		$sAccessSecretProofCalculated = CryptoUtil::generateAccessSecretProof( $sUri , $sClientNonce , $sAccessSecretExpires , $sAccessToken , $sPurpose, $sAccessSecret );

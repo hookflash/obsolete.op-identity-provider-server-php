@@ -336,7 +336,7 @@ $sEnveloplessResponse
 	}
 	
 	private function createJsonResponse ( $aResponse ) {
-		if ( key_exists( 'error', $aResponse ) && !key_exists( '#text', $aResponse['error'] ) ) {
+		if ( key_exists( 'error', $aResponse ) && !is_array( $aResponse['error'] ) ) {
 			$this->sResponse = '"error":' . $aResponse['error'];
 		}
 		else {

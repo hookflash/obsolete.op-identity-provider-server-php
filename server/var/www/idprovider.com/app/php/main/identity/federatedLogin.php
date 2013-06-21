@@ -76,6 +76,9 @@ class FederatedLogin {
 	public function login() {
 		// Take data from the request
 		$aRequestData = RequestUtil::takeLoginRequestData($this->aRequest);
+		if ( key_exists( 'reloginKey', $aRequestData['identity'] ) ) {
+			$aRequestData = $this->oUser->fetchIdentityBasedOnReloginKey($aRequestData);
+		}
 		
 		// Try logging the user in using the given identity
 		$aUser = $this->oUser->signInUsingFederated($aRequestData['identity']['identifier']);
@@ -89,20 +92,24 @@ class FederatedLogin {
 		}
 		
 		// Validate the client that is performing the login request
-		$bServerLoginProofValidity = $this->validateClientPerformingLogin ( $aRequestData['proof']['serverNonce'], 
-																			$aRequestData['identity']['identifier'],
-																			$aUser['password_hash'],
-																			$aUser['secret_salt'],
-																			$aUser['server_password_salt'],
-																			$aRequestData['proof']['serverLoginProof']
-																			);
+		if ( ( key_exists('reloginValidated', $aRequestData['identity']) && !$aRequestData['identity']['reloginValidated']) ||
+			 !key_exists('reloginValidated', $aRequestData['identity']) ) {
+			$bServerLoginProofValidity = $this->validateClientPerformingLogin ( $aRequestData['proof']['serverNonce'], 
+																				$aRequestData['identity']['identifier'],
+																				$aUser['password_hash'],
+																				$aUser['secret_salt'],
+																				$aUser['server_password_salt'],
+																				$aRequestData['proof']['serverLoginProof']
+																				);
 																			
-		// Return 'Server login proof failed' error code
-		if ( !$bServerLoginProofValidity ) {
-			throw new RestServerException('007', array(
-												 'parameter' => 'serverLoginFinalProof',
-												 'parameterValue' => $aRequestData['proof']['serverLoginFinalProof']
-												 ));
+		
+			// Return 'Server login proof failed' error code
+			if ( !$bServerLoginProofValidity ) {
+				throw new RestServerException('007', array(
+													 'parameter' => 'serverLoginProof',
+													 'parameterValue' => $aRequestData['proof']['serverLoginProof']
+													 ));
+			}
 		}
 		
 		/**
@@ -125,9 +132,14 @@ class FederatedLogin {
 		}
 		*/
 		
-		// Generate and store accessToken and accessSecret for logged in identity
+		// Generate accessToken and accessSecret for logged in identity
 		$aIdentityAccessResult = CryptoUtil::generateIdentityAccess($aRequestData['identity']['type'], $aRequestData['identity']['identifier']);
 		$aIdentityAccessResult['updated'] = $aUser['updated'];
+		
+		// Generate and store a federated relogin key if needed, otherwise return the same reloginKey that has just been used
+		$sReloginKey = key_exists('reloginKey',$aRequestData['identity']) ?
+						$aRequestData['identity']['reloginKey'] : $this->oUser->generateAndStoreReloginKey($aRequestData['identity']);
+		$aIdentityAccessResult['reloginKey'] = $sReloginKey;
 				
 		// Keep info about logged in identity in session
 		$_SESSION['logged-in-identity'] = $aRequestData['identity'];

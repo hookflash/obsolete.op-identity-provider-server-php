@@ -54,7 +54,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateLoginRequest ( $oRequest ){
+	public function validateLoginRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
 		if ( key_exists( 'afterPinValidation', $req ) ) {
 			if ( $req['afterPinValidation'] != 'true' ) {
@@ -62,7 +62,7 @@ class RequestUtil {
 													 'parameter' => 'afterPinValidation'
 													 ));
 			}
-		} else {
+		} elseif ( !key_exists( 'reloginKey', $req['identity'] ) ) {
 			if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
 				throw new RestServerException('002', array(
 													 'parameter' => 'identity'
@@ -637,6 +637,13 @@ class RequestUtil {
 			return array (
 			'afterPinValidation'				=> DatabaseUtil::protectFromSqlInjection( $req['afterPinValidation'] )
 			);
+		} elseif ( key_exists( 'reloginKey', $req['identity'] ) ) {
+			$aIdentity = array (
+			'reloginKey'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['reloginKey'] )
+			);
+			return array (
+			'identity'							=> $aIdentity
+			);
 		} else {
 			$aIdentity = array (
 			'type'								=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
@@ -906,8 +913,7 @@ class RequestUtil {
 		'accessToken'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessToken'] ),
 		'accessSecretProof'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessSecretProof'] ),
 		'accessSecretProofExpires'				=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessSecretProofExpires'] ),
-		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] ),
-		'provider'								=> DatabaseUtil::protectFromSqlInjection( $req['identity']['provider'] )
+		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
 		);
 		return array(
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),

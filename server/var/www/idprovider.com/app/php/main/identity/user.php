@@ -384,6 +384,63 @@ class User {
 	}
 	
 	/**
+	 * Get the identity based on relogin key
+	 * 
+	 * @param array $aRequestData request data
+	 * @return array $aRequestData Returns request data filled in using all needed stuff to go and login
+	 */
+	public function fetchIdentityBasedOnReloginKey ( $aRequestData ) {
+		// Usage of globals
+		global $DB;
+		
+		// Interpret relogin key
+		$aReloginKeyData = $aReloginKeyData = explode("-",$aRequestData['identity']['reloginKey']);
+		$aRequestData['identity']['type'] = $aReloginKeyData[0];
+		
+		// Decide what table to look at
+		$sDBTable = $this->getAppropriateDatabaseTable($aRequestData['identity']['type']);
+		
+		// Validate relogin
+		$aIdentity = $DB->select_single_to_array($sDBTable, '*', 'where identifier="' . $aReloginKeyData[1] . '"');
+		$this->validateReloginAccess($aReloginKeyData,$aIdentity);
+		
+		// Fill data inside $aRequestData
+		$aRequestData['identity']['identifier'] = $aReloginKeyData[1];
+		$aRequestData['identity']['reloginValidated'] = true;
+		return $aRequestData;
+	}
+	
+	/**
+	 * Generate and store relogin key
+	 *
+	 * @param unknown_type $aIdentity
+	 */
+	public function generateAndStoreReloginKey ( $aIdentity ) {
+		// Usage of globals
+		global $DB;
+		
+		// Generate the relogin key
+		$sReloginKey = CryptoUtil::generateNonce();
+		$sNow = time();
+		$sReloginKeyExires = $sNow + 60 * 60 * 24 * 30; // 30 days long
+		
+		// Decide what table to look at
+		$sDBTable = $this->getAppropriateDatabaseTable($aIdentity['type']);
+		
+		// Update the db
+		$DB->update($sDBTable,
+					array (
+					'relogin_key'		=> $sReloginKey,
+					'relogin_expires'	=> $sReloginKeyExires,
+					'updated'			=> $sNow
+					),
+					'where identifier="' . $aIdentity['identifier'] . '"');
+					
+		$sReloginKeyString = $aIdentity['type'] . '-' . $aIdentity['identifier'] . '-' . $sReloginKey . '-' . $sReloginKeyExires;
+		return $sReloginKeyString;
+	}
+	
+	/**
 	 * Get the identity data out of the database
 	 *
 	 * @param string $sIdentifier An identity to be logged in
@@ -747,6 +804,16 @@ class User {
 		require_once(APP . 'php/main/utils/cryptoUtil.php');
 		LoginUtil::sendHostedIdentityUpdate(CryptoUtil::generateRequestId(), $aRequestToBeSent, $aHostingData, $aIdentityFromDB);
 		return;
+	}
+	
+	private function validateReloginAccess( $aReloginKey, $aIdentity ) {
+		if ($aIdentity['relogin_key'] != $aReloginKey[2] ||
+			$aIdentity['relogin_expires'] != $aReloginKey[3] ||
+			$aReloginKey < time() ) {
+			throw new RestServerException('007', array (
+													'parameter' => 'reloginKey',
+													'parameterValue' => implode('-',$aReloginKey) ) );		
+		}
 	}
 
 }
