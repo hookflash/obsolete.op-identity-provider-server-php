@@ -596,11 +596,6 @@ class RequestUtil {
 												 'parameter' => 'uri'
 												 ));
 		}
-		if ( !( key_exists( 'provider', $req['identity'] ) && $req['identity']['provider'] != null ) ) {
-			throw new RestServerException('002', array(
-												 'parameter' => 'provider'
-												 ));
-		}
 	}
 	
 	/**
@@ -609,16 +604,41 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateLinkedinTokenExchangeRequest ( $oRequest ){
+	public function validateIdentityAccessRolodexCredentialsGetRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
-		if ( key_exists( 'identifier', $req ) && $req['identifier'] != null ) {
-			return true;
+		if ( !( key_exists( 'clientNonce', $req ) && $req['clientNonce'] != null ) ) {
+			throw new RestServerException('002', array(
+												 'parameter' => 'clientNonce'
+												 ));
 		}
-		else {
-			return false;
+		if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
+			throw new RestServerException('002', array(
+												 'parameter' => 'identity'
+												 ));
+		}
+		if ( !( key_exists( 'accessToken', $req['identity'] ) && $req['identity']['accessToken'] != null ) ) {
+			throw new RestServerException('002', array(
+												 'parameter' => 'accessToken'
+												 ));
+		}
+		if ( !( key_exists( 'accessSecretProof', $req['identity'] ) && $req['identity']['accessSecretProof'] != null ) ) {
+			throw new RestServerException('002', array(
+												 'parameter' => 'accessSecretProof'
+												 ));
+		}
+		if ( !( key_exists( 'accessSecretProofExpires', $req['identity'] ) && $req['identity']['accessSecretProofExpires'] != null ) ) {
+			throw new RestServerException('002', array(
+												 'parameter' => 'accessSecretProofExpires'
+												 ));
+		}
+		if ( !( key_exists( 'uri', $req['identity'] ) && $req['identity']['uri'] != null ) ) {
+			throw new RestServerException('002', array(
+												 'parameter' => 'uri'
+												 ));
 		}
 	}
 	
+		
 	//----------------------------------------------------------------------------------------------------------------------------------------//
 	
 	/*------------------------
@@ -918,6 +938,26 @@ class RequestUtil {
 		return array(
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
 		'purpose'								=> DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
+		'identity' 								=> $aIdentity
+		);
+	}
+	
+	/**
+	 * Take data from the request in a safe manner and return an array of it
+	 *
+	 * @param array $req The request to take data from
+	 * @return array of needed given-by-request data
+	 */
+	public function takeIdentityAccessRolodexCredentialsGetRequestData ( $oRequest ){
+		$req = $oRequest->aPars['request'];
+		$aIdentity = array(
+		'accessToken'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessToken'] ),
+		'accessSecretProof'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessSecretProof'] ),
+		'accessSecretProofExpires'				=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessSecretProofExpires'] ),
+		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
+		);
+		return array(
+		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
 		'identity' 								=> $aIdentity
 		);
 	}

@@ -71,6 +71,58 @@ class CryptoUtil {
 	}
 	
 	/**
+	 * Encrypts given value using secret key
+	 *
+	 * @param string $sValue Value to be encrypted
+	 * @param string $sSecretKey Key to be used for encryption
+	 * @return string 
+	 */
+	public function encrypt($sValue, $sSecretKey)
+	{
+	    return rtrim(
+	        base64_encode(
+	            mcrypt_encrypt(
+	                MCRYPT_RIJNDAEL_256,
+	                $sSecretKey, $sValue, 
+	                MCRYPT_MODE_ECB, 
+	                mcrypt_create_iv(
+	                    mcrypt_get_iv_size(
+	                        MCRYPT_RIJNDAEL_256, 
+	                        MCRYPT_MODE_ECB
+	                    ), 
+	                    MCRYPT_RAND)
+	                )
+	            ), "\0"
+	        );
+	}
+	
+	/**
+	 * Decrypts given value using secret key
+	 *
+	 * @param string $sValue Value to be decrypted
+	 * @param string $sSecretKey Key to be used for decryption
+	 * @return string 
+	 */
+	public function decrypt($sValue, $sSecretKey)
+	{
+	    return rtrim(
+	        mcrypt_decrypt(
+	            MCRYPT_RIJNDAEL_256, 
+	            $sSecretKey, 
+	            base64_decode($sValue), 
+	            MCRYPT_MODE_ECB,
+	            mcrypt_create_iv(
+	                mcrypt_get_iv_size(
+	                    MCRYPT_RIJNDAEL_256,
+	                    MCRYPT_MODE_ECB
+	                ), 
+	                MCRYPT_RAND
+	            )
+	        ), "\0"
+	    );
+	}
+	
+	/**
 	 * Returns just a random requestId
 	 *
 	 * @return number Returns random requestId
@@ -285,7 +337,9 @@ class CryptoUtil {
 	 * @return string Returns calculated accessSecret
 	 */
 	public function calculateAccessSecret ( $sAccessToken ) {
-		return CryptoUtil::gimmeHash("identity-access-secret:" . $sAccessToken . PROVIDER_MAGIC_VALUE); 
+		$sAccessSecretBase = "identity-access-secret:" . $sAccessToken . PROVIDER_MAGIC_VALUE;
+		$sTestAddition = 'FOO'; // TODO remove this
+		return CryptoUtil::gimmeHash($sAccessSecretBase) . $sTestAddition; 
 	}
 	
 	/**
@@ -302,12 +356,16 @@ class CryptoUtil {
 	 * @return boolean Returns true if validation succeeded. Otherwise returns false.
 	 */
 	public function validateIdentityAccessSecretProof ( $sClientNonce, $sAccessToken, $sAccessSecretProof, $sAccessSecretExpires, $sIdentityType, $sIdentifier, $sUri, $sPurpose ) {
+		APIEventLog('function call: validateIdentityAccessSecretProof(' .
+					'clientNonce=' . $sClientNonce . ' accessToken=' . $sAccessToken . ' accessSecretProof=' . $sAccessSecretProof . ' accessSecretExpires=' . $sAccessSecretExpires . ' uri=' . $sUri . ' purpose=' . $sPurpose);
 		// Calculate accessSecret first
 		$sAccessSecret = CryptoUtil::calculateAccessSecret($sAccessToken);
+		APIEventLog('accessSecret=' . $sAccessSecret);
 											
 		// Calculate accessSecretProof
 		$sAccessSecretProofCalculated = CryptoUtil::generateAccessSecretProof( $sUri , $sClientNonce , $sAccessSecretExpires , $sAccessToken , $sPurpose, $sAccessSecret );
-																
+		APIEventLog('accessSecretProofCalculated=' . $sAccessSecretProofCalculated);
+			
 		// Challange accessSecretProof
 		if ( $sAccessSecretProof != $sAccessSecretProofCalculated ) {
 			return false;
@@ -345,8 +403,9 @@ class CryptoUtil {
 	}
 	// TODO private
 	public function generateAccessSecretProof ( $sUri, $sClientNonce, $sAccessSecretExpires, $sAccessToken, $sPurpose, $sAccessSecret ) {
-		return CryptoUtil::gimmeHmac( 'identity-access-validate:' . $sUri . ':' . $sClientNonce . ':' . $sAccessSecretExpires . ':' . $sAccessToken . ':' . $sPurpose,
-									  $sAccessSecret );
+		$sMessage = 'identity-access-validate:' . $sUri . ':' . $sClientNonce . ':' . $sAccessSecretExpires . ':' . $sAccessToken . ':' . $sPurpose;
+		APIEventLog('identityAccessSecretProof generation message=' . $sMessage);
+		return CryptoUtil::gimmeHmac( $sMessage, $sAccessSecret );
 	}
 	
 }

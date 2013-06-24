@@ -97,6 +97,7 @@ class LegacyOAuthLogin {
 		
 		// Return the redirect URL 
 		$aAuthenticationResult['redirectURL'] = MY_DOMAIN . 'php/oauth/oauthLogin.php';
+		APIEventLog('aAuthenticationResult[redirectURL]=' . $aAuthenticationResult['redirectURL']);
 		return $aAuthenticationResult;
 	}
 	
@@ -134,26 +135,6 @@ class LegacyOAuthLogin {
 												 ));
 		}
 		
-		/**
-		 * Due to JS compatibility changes, this should be thrown away, but it is not yet done just in case...
-		 */
-		/*
-		// Generate hosting data
-		$aHostingData = LoginUtil::generateHostingData('hosted-identity-login-confirm');
-		
-		// Send hookflash-login-confirm request to the IdentityService server
-		$aLoginConfirmResult = LoginUtil::sendHostedLoginConfirm( CryptoUtil::generateRequestId(), $aRequestData, $aHostingData, $aUser );
-		
-		// Return 'Login failed' error
-		if ( $aLoginConfirmResult == null || key_exists( 'error', $aLoginConfirmResult ) ) {
-			throw new RestServerException('005', array(
-												 'message' => is_array($aLoginConfirmResult['error']['reason']) ?
-												 			  $aLoginConfirmResult['error']['reason']['#text'] :
-												 			  $aLoginConfirmResult['error']['reason']
-												 ));
-		}
-		*/
-		
 		// Generate and store accessToken and accessSecret for logged in identity
 		$aIdentityAccessResult = CryptoUtil::generateIdentityAccess($aRequestData['identity']['type'], $aRequestData['identity']['identifier']);
 		$aIdentityAccessResult['updated'] = $aUser['updated'];
@@ -168,101 +149,101 @@ class LegacyOAuthLogin {
 		);
 	}
 	
-	/**
-	 * Exchange the JavaScript OAuth 2.0 compatible access token that is being red from the cookie
-	 * for an OAuth 1.0a compatible access token.
-	 * 
-	 * This has two benefits:
-	 * 1. An exchanged token will expire much later then the first one
-	 * 2. A php side will be able to fetch the logged-in user profile data directly from LinkedIn using it's REST API
-	 *
-	 * @param array $aRequestData Array of data that is red out of the request
-	 * @return array $aTokenExchangeResult = ( 'errorIndicator' => 'none', 					// If there is no error...
-	 * 										   'errorMessage', 								// Empty by deafult...
-	 *                                         'identitySecretSalt',
-	 * 										   'serverPasswordSalt', 						// These two are set only if there is some data about these in the database for the given identity.
-	 *                                         'nonce' 										// A nonce for the client to be able to verify the login request
-	 * 																						// that is about to happen immediatelly after this one.
-	 * 										  )
-	 */
-	public function performTokenExchange( $aRequestData ) {
-		// Set required imports
-		require (APP . 'php/libs/oauth/linkedin/LinkedIn.php');
-		require_once (APP . 'php/main/rest/request.php');
-		
-		// Create the object to be returned by this method
-		$aTokenExchangeResult = array(
-		'errorIndicator' => 'none',
-		);
-		
-		// Read the cookie
-		$sCookieName = 'linkedin_oauth_' . LINKEDIN_CONSUMER_KEY;
-		$oCredentials = json_decode($_COOKIE[$sCookieName]);
-		
-		// Validate the signature
-		$aSignatureValidationResult = $this->validateSignatureForTokenExchange(LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET, $oCredentials);
-		if ( $aSignatureValidationResult['validationSucceeded'] === 'false' ) {
-			$aTokenExchangeResult['errorIndicator'] = '007';
-			$aTokenExchangeResult['errorMessage'] = $aSignatureValidationResult['validationMessage'];
-			return $aTokenExchangeResult;
-		}
-		
-		// Try fetching the token
-		$linkedin = new LinkedInOAuth(LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET);
-		$token = $linkedin->exchangeAccessToken($oCredentials->access_token);
-		if ( !key_exists('oauth_token', $token) || $token['oauth_token'] == '' ||
-			 !key_exists('oauth_token_secret', $token) || $token['oauth_token_secret'] == '' )
-		{
-			$aTokenExchangeResult['errorIndicator'] = '007';
-			return $aTokenExchangeResult;
-		}
-		
-		// Save the tokens for future use (login request that is expected to happen immediatelly after, will need these tokens)
-		$_SESSION['oauth_token'] = $token['oauth_token'];
-		$_SESSION['oauth_token_secret'] = $token['oauth_token_secret'];
-		
-		// Fetch the profile
-		$linkedin = new LinkedInOAuth(
-			LINKEDIN_CONSUMER_KEY,
-			LINKEDIN_CONSUMER_SECRET,
-			$token['oauth_token'],
-			$token['oauth_token_secret']
-		);
-		$profile_result = $linkedin->oAuthRequest('http://api.linkedin.com/v1/people/~:(id,first-name,last-name,public-profile-url,headline,location,picture-url,date-of-birth,phone-numbers,summary)');
-		$oRequest = new Request($profile_result);
-		$aProfile = $oRequest->aPars;
-		
-		// Validate the profile
-		$aProfileValidationResult = $this->validateProfileForTokenExchange( $aRequestData['identity']['identifier'], $aProfile );
-		if ( $aProfileValidationResult['validationSucceeded'] == 'false' ) {
-			$aTokenExchangeResult['errorIndicator'] = '007';
-			$aTokenExchangeResult['errorMessage'] = $aSignatureValidationResult['validationMessage'];
-			return $aTokenExchangeResult;
-		}
-		
-		$aIdentitySalts = array (
-		'identitySecretSalt' => '',
-		'serverPasswordSalt' => '',
-		);
-		// If this is not the first time this user appears, there should be something about him in the database, 
-		// otherwise we don't even try fetching user's salts
-		if ( $this->oUser->isThereSuchUser('linkedin', $aProfile['person']['id']) ) {
-			// Try fetching the salts based on given identifier
-			$aIdentitySalts = $this->oUser->getIdentitySalts('linkedin', $aProfile['person']['id']);
-		}
-		if ( $aIdentitySalts['identitySecretSalt'] != '' && $aIdentitySalts['serverPasswordSalt'] != '' ) {
-			$aTokenExchangeResult = array_merge( $aTokenExchangeResult, 
-												 array( 'identitySecretSalt' => $aIdentitySalts['identity_secret_salt'],
-								   						'serverPasswordSalt' => $aIdentitySalts['server_password_salt']
-								  						)
-						   						);
-		}
-		
-		// Add nonce to the result
-		$aTokenExchangeResult['nonce'] = CryptoUtil::generateSelfValidatingNonce(10);
-		
-		return $aTokenExchangeResult;
-	}
+//	/**
+//	 * Exchange the JavaScript OAuth 2.0 compatible access token that is being red from the cookie
+//	 * for an OAuth 1.0a compatible access token.
+//	 * 
+//	 * This has two benefits:
+//	 * 1. An exchanged token will expire much later then the first one
+//	 * 2. A php side will be able to fetch the logged-in user profile data directly from LinkedIn using it's REST API
+//	 *
+//	 * @param array $aRequestData Array of data that is red out of the request
+//	 * @return array $aTokenExchangeResult = ( 'errorIndicator' => 'none', 					// If there is no error...
+//	 * 										   'errorMessage', 								// Empty by deafult...
+//	 *                                         'identitySecretSalt',
+//	 * 										   'serverPasswordSalt', 						// These two are set only if there is some data about these in the database for the given identity.
+//	 *                                         'nonce' 										// A nonce for the client to be able to verify the login request
+//	 * 																						// that is about to happen immediatelly after this one.
+//	 * 										  )
+//	 */
+//	public function performTokenExchange( $aRequestData ) {
+//		// Set required imports
+//		require (APP . 'php/libs/oauth/linkedin/LinkedIn.php');
+//		require_once (APP . 'php/main/rest/request.php');
+//		
+//		// Create the object to be returned by this method
+//		$aTokenExchangeResult = array(
+//		'errorIndicator' => 'none',
+//		);
+//		
+//		// Read the cookie
+//		$sCookieName = 'linkedin_oauth_' . LINKEDIN_CONSUMER_KEY;
+//		$oCredentials = json_decode($_COOKIE[$sCookieName]);
+//		
+//		// Validate the signature
+//		$aSignatureValidationResult = $this->validateSignatureForTokenExchange(LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET, $oCredentials);
+//		if ( $aSignatureValidationResult['validationSucceeded'] === 'false' ) {
+//			$aTokenExchangeResult['errorIndicator'] = '007';
+//			$aTokenExchangeResult['errorMessage'] = $aSignatureValidationResult['validationMessage'];
+//			return $aTokenExchangeResult;
+//		}
+//		
+//		// Try fetching the token
+//		$linkedin = new LinkedInOAuth(LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET);
+//		$token = $linkedin->exchangeAccessToken($oCredentials->access_token);
+//		if ( !key_exists('oauth_token', $token) || $token['oauth_token'] == '' ||
+//			 !key_exists('oauth_token_secret', $token) || $token['oauth_token_secret'] == '' )
+//		{
+//			$aTokenExchangeResult['errorIndicator'] = '007';
+//			return $aTokenExchangeResult;
+//		}
+//		
+//		// Save the tokens for future use (login request that is expected to happen immediatelly after, will need these tokens)
+//		$_SESSION['oauth_token'] = $token['oauth_token'];
+//		$_SESSION['oauth_token_secret'] = $token['oauth_token_secret'];
+//		
+//		// Fetch the profile
+//		$linkedin = new LinkedInOAuth(
+//			LINKEDIN_CONSUMER_KEY,
+//			LINKEDIN_CONSUMER_SECRET,
+//			$token['oauth_token'],
+//			$token['oauth_token_secret']
+//		);
+//		$profile_result = $linkedin->oAuthRequest('http://api.linkedin.com/v1/people/~:(id,first-name,last-name,public-profile-url,headline,location,picture-url,date-of-birth,phone-numbers,summary)');
+//		$oRequest = new Request($profile_result);
+//		$aProfile = $oRequest->aPars;
+//		
+//		// Validate the profile
+//		$aProfileValidationResult = $this->validateProfileForTokenExchange( $aRequestData['identity']['identifier'], $aProfile );
+//		if ( $aProfileValidationResult['validationSucceeded'] == 'false' ) {
+//			$aTokenExchangeResult['errorIndicator'] = '007';
+//			$aTokenExchangeResult['errorMessage'] = $aSignatureValidationResult['validationMessage'];
+//			return $aTokenExchangeResult;
+//		}
+//		
+//		$aIdentitySalts = array (
+//		'identitySecretSalt' => '',
+//		'serverPasswordSalt' => '',
+//		);
+//		// If this is not the first time this user appears, there should be something about him in the database, 
+//		// otherwise we don't even try fetching user's salts
+//		if ( $this->oUser->isThereSuchUser('linkedin', $aProfile['person']['id']) ) {
+//			// Try fetching the salts based on given identifier
+//			$aIdentitySalts = $this->oUser->getIdentitySalts('linkedin', $aProfile['person']['id']);
+//		}
+//		if ( $aIdentitySalts['identitySecretSalt'] != '' && $aIdentitySalts['serverPasswordSalt'] != '' ) {
+//			$aTokenExchangeResult = array_merge( $aTokenExchangeResult, 
+//												 array( 'identitySecretSalt' => $aIdentitySalts['identity_secret_salt'],
+//								   						'serverPasswordSalt' => $aIdentitySalts['server_password_salt']
+//								  						)
+//						   						);
+//		}
+//		
+//		// Add nonce to the result
+//		$aTokenExchangeResult['nonce'] = CryptoUtil::generateSelfValidatingNonce(10);
+//		
+//		return $aTokenExchangeResult;
+//	}
 	
 	/**
 	 * Just a switch that branches out the execution based on given identity type
@@ -406,7 +387,8 @@ class LegacyOAuthLogin {
 		$sLastname = isset( $aProfile['lastName'] ) ? $aProfile['lastName'] : '';
 		$sName = $sFirstname . ' ' . $sLastname;
 		
-		$this->identityServiceAuthentication('linkedin.com/' . $aProfile['id'], $sProviderUsername, $sName, $aProfile['publicProfileUrl'], $aProfile['pictureUrl']);
+		$this->identityServiceAuthentication('linkedin.com/' . $aProfile['id'], $sProviderUsername, $sName, $aProfile['publicProfileUrl'], $aProfile['pictureUrl'],
+										     $accessToken['oauth_token'], $accessToken['oauth_token_secret']);
 	}
 	
 	private function afterSuccessfullFacebookLogin () {
@@ -434,8 +416,8 @@ class LegacyOAuthLogin {
 		}
 		
 		// Call identityServiceLoginFunction if there is an authenticated user, else redirect to login page
-		if ($nUser) {			
-			$this->identityServiceAuthentication($aResult['id'], $aResult['username'], $aResult['name'], $aResult['link'], '');
+		if ($nUser) {						
+			$this->identityServiceAuthentication($aResult['id'], $aResult['username'], $aResult['name'], $aResult['link'], '', $facebook->getAccessToken(), '');
 		} else {	
 			header( 'Location: ' . 
 					$facebook->getLoginUrl( array( 'scope' => 'email, read_stream, publish_stream, offline_access, status_update, share_item' ) )
@@ -467,7 +449,7 @@ class LegacyOAuthLogin {
 	  Common login functions
 	------------------------*/
 	
-	private function identityServiceAuthentication( $sProviderUserId, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl ) {
+	private function identityServiceAuthentication( $sProviderUserId, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sToken, $sSecret ) {
 		// Create a default result
 		$aAuthenticationResult = array (
 		'errorMessage' => 'none'
@@ -495,7 +477,9 @@ class LegacyOAuthLogin {
 																	  $sProviderUsername,
 																	  $sProfileFullname,
 																	  $sProfileUrl,
-																	  $sProfileAvatarUrl
+																	  $sProfileAvatarUrl,
+																	  $sToken,
+																	  $sSecret
 																	  );
 		
 		// If there is no identity returned by signInAfterOAuthProviderLogin()

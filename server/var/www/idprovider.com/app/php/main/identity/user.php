@@ -609,6 +609,11 @@ class User {
 		return;
 	}
 	
+	/**
+	 * TODO
+	 *
+	 * @param unknown_type $oRequest
+	 */
 	public function validateIdentityAccess ( $oRequest ) {
 		// Usage of globals
 		global $DB;
@@ -639,6 +644,48 @@ class User {
 		// Since everything went well, just return
 		return;
 	}
+	
+	public function getIdentityAccessRolodexCredentials ( $oRequest ) {
+		// Usage of globals
+		global $DB;
+		
+		// Take datat from the request
+		$aRequestData = RequestUtil::takeIdentityAccessRolodexCredentialsGetRequestData($oRequest);
+		
+		// Challange the accessSecretProof
+		require_once(APP . 'php/main/utils/cryptoUtil.php');
+		
+		$aIdentity = $this->parseIdentityUri($aRequestData['identity']['uri']);
+		
+		$bAccessSecretProofValidity = CryptoUtil::validateIdentityAccessSecretProof($aRequestData['clientNonce'],
+																					$aRequestData['identity']['accessToken'],
+																					$aRequestData['identity']['accessSecretProof'],
+																					$aRequestData['identity']['accessSecretProofExpires'],
+																					$aIdentity['type'],
+																					$aIdentity['identifier'],
+																					$aRequestData['identity']['uri'],
+																					'rolodex-credentials-get' );
+		if ( !$bAccessSecretProofValidity ) {
+			throw new RestServerException('007', array(
+												 'parameter' 		=> 'accessSecretProof',
+												 'parameterValue' 	=> $aRequestData['identity']['accessSecretProof']
+												 ));
+		}
+		
+		// Get the identity
+		$aIdentityFromDB = $DB->select_single_to_array('legacy_oauth', '*',
+				'where provider_type="' . $aIdentity['type'] . '" and identifier="' . $aIdentity['identifier'] . '"');
+		if (!$aIdentityFromDB || empty($aIdentityFromDB)) {
+			throw new RestServerException('003', array(
+												 'type' 		=> $aIdentity['type'],
+												 'identifier' 	=> $aIdentity['identifier']
+												 ));
+		}
+		
+		$sServerTokenCredentials = $this->generateServerTokenCredentials($aIdentityFromDB);
+		$sServerToken = CryptoUtil::encrypt($sServerTokenCredentials, PROVIDER_MAGIC_VALUE);
+		return $sServerToken;
+	}
 
 	/**
 	 * Create a user and it's identity in the database if the user doesn't already exist.
@@ -649,7 +696,7 @@ class User {
 	 * @param string $sProfileFullname First name + last name (some providers have a full name field already)
 	 * @return array Returns array of data that will be added into the header URL after a final redirect
 	 */
-	public function signInAfterOAuthProviderLogin( $sProviderType, $sIdentifier, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl ) {
+	public function signInAfterOAuthProviderLogin( $sProviderType, $sIdentifier, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sToken, $sSecret ) {
 			
 		// Try getting a user and an identity from the database for the given providerType and identifier
 		$aOAuthIdentity = $this->DB->select_single_to_array('legacy_oauth', '*', 'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"');
@@ -675,6 +722,8 @@ class User {
 													 'full_name' => $sProfileFullname,
 													 'profile_url' => $sProfileUrl,
 													 'avatar_url' => $sProfileAvatarUrl,
+													 'token' => $sToken,
+													 'secret' => $sSecret,
 													 'updated' => $sUpdated,
 													 )
 							  );
@@ -814,6 +863,32 @@ class User {
 													'parameter' => 'reloginKey',
 													'parameterValue' => implode('-',$aReloginKey) ) );		
 		}
+	}
+	
+	private function generateServerTokenCredentials( $aIdentity ) {
+		$sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
+		switch($aIdentity['provider_type']) {
+			case 'facebook':
+				$sServerToken .= '"token":"' . $aIdentity['token'] . '"';
+				break;
+			case 'linkedin':
+				$sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
+				$sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
+				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
+				$sServerToken .= '"token":"' . $aIdentity['secret'] . '"';
+				break;
+			case 'twitter':
+				$sServerToken .= '"consumer_key":"' . TWITTER_APP_ID . '",';
+				$sServerToken .= '"consumer_secret":"' . TWITTER_APP_SECRET . '",';
+				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
+				$sServerToken .= '"token":"' . $aIdentity['secret'] . '"';
+				break;
+			case 'github':
+				// TODO implement
+				break;
+		}
+		$sServerToken .= '}';
+		return $sServerToken;		
 	}
 
 }

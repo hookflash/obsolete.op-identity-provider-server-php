@@ -91,6 +91,7 @@ $server->registerPostMethod('profile-update', 'profileUpdate');
 $server->registerPostMethod('password-change', 'passwordChange');
 $server->registerPostMethod('lockbox-half-key-store', 'lockboxHalfKeyStore');
 $server->registerPostMethod('identity-access-validate', 'identityAccessValidate');
+$server->registerPostMethod('identity-access-rolodex-credentials-get', 'identityAccessRolodexCredentialsGet');
 
 // Create Request and Response objects, and RequestUtils as well
 $oRequest = $server->oRequest;
@@ -367,9 +368,9 @@ function oAuthProviderAuthentication()
 	try {
 		// Check request validity
 		RequestUtil::validateOAuthProviderAuthenticationRequest( $oRequest );
-		
+
 		// Create LegacyOAuthLogin object
-		$sIdentityType = $oRequest->aPars['request']['identity']['type'];	
+		$sIdentityType = $oRequest->aPars['request']['identity']['type'];
 		require_once(APP . 'php/main/identity/legacyOAuthLogin.php');
 		$oLegacyOAuthLogin = new LegacyOAuthLogin( $sIdentityType, $oRequest );
 		
@@ -613,6 +614,34 @@ function identityAccessValidate ()
 	}
 	
 	// Result
+	$oResponse->run();
+}
+
+/**
+ * Implementation if identity-access-rolodex-credentials-get method
+ * 
+ */
+function identityAccessRolodexCredentialsGet ()
+{
+	global $oRequest;
+	global $oResponse;
+	global $DB;
+	
+	try {
+		// Check request validity
+		RequestUtil::validateIdentityAccessRolodexCredentialsGetRequest( $oRequest );
+		
+		// Try inserting the key
+		require_once(APP . 'php/main/identity/user.php');
+		$oUser = new User($DB);
+		$sServerToken = $oUser->getIdentityAccessRolodexCredentials( $oRequest );
+		$aRolodex['serverToken'] = $sServerToken;
+	} catch (Exception $exception) {
+		$oResponse->run($exception);
+	}
+	
+	// Result
+	$oResponse->addPar('rolodex', $aRolodex);
 	$oResponse->run();
 }
 

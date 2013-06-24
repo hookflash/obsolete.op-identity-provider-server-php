@@ -140,6 +140,8 @@ CREATE TABLE `legacy_oauth` (
   `secret_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `server_password_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `lockbox_half_key_encrypted` varchar(100) COLLATE utf8_bin DEFAULT NULL,
+  `token` varchar(100) COLLATE utf8_bin DEFAULT NULL,
+  `secret` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `updated` bigint(10) DEFAULT NULL,
   PRIMARY KEY (`oauth_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1034 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;

@@ -50,6 +50,7 @@
 		<option value="pin-validation">pin-validation</option>
 		<option value="lockbox-half-key-store">lockbox-half-key-store</option>
 		<option value="identity-access-validate">identity-access-validate</option>
+		<option value="identity-access-rolodex-credentials-get">identity-access-rolodex-credentials-get</option>
 		<option value="internal_cslfp">internal_cslfp</option>
 		<option value="internal_thfs">internal_thfs</option>
 		<option value="internal_ciasp">internal_ciasp</option>
