@@ -71,13 +71,22 @@ class CryptoUtil {
 	}
 	
 	/**
+	 * Generate a 32 long string and hash using MD5
+	 *
+	 */
+	public function generateIv () {
+		return md5( CryptoUtil::makeRandomString() );
+	}
+	
+	/**
 	 * Encrypts given value using secret key
 	 *
 	 * @param string $sValue Value to be encrypted
+	 * @param string $iv Initialization vector
 	 * @param string $sSecretKey Key to be used for encryption
 	 * @return string 
 	 */
-	public function encrypt($sValue, $sSecretKey)
+	public function encrypt($sValue, $iv, $sSecretKey)
 	{
 	    return rtrim(
 	        base64_encode(
@@ -85,25 +94,21 @@ class CryptoUtil {
 	                MCRYPT_RIJNDAEL_256,
 	                $sSecretKey, $sValue, 
 	                MCRYPT_MODE_ECB, 
-	                mcrypt_create_iv(
-	                    mcrypt_get_iv_size(
-	                        MCRYPT_RIJNDAEL_256, 
-	                        MCRYPT_MODE_ECB
-	                    ), 
-	                    MCRYPT_RAND)
-	                )
-	            ), "\0"
-	        );
+	                $iv
+	            )
+	        ), "\0"
+	    );
 	}
 	
 	/**
 	 * Decrypts given value using secret key
 	 *
 	 * @param string $sValue Value to be decrypted
+	 * @param string $iv Initialization vector
 	 * @param string $sSecretKey Key to be used for decryption
 	 * @return string 
 	 */
-	public function decrypt($sValue, $sSecretKey)
+	public function decrypt($sValue, $iv, $sSecretKey)
 	{
 	    return rtrim(
 	        mcrypt_decrypt(
@@ -111,13 +116,7 @@ class CryptoUtil {
 	            $sSecretKey, 
 	            base64_decode($sValue), 
 	            MCRYPT_MODE_ECB,
-	            mcrypt_create_iv(
-	                mcrypt_get_iv_size(
-	                    MCRYPT_RIJNDAEL_256,
-	                    MCRYPT_MODE_ECB
-	                ), 
-	                MCRYPT_RAND
-	            )
+	            $iv
 	        ), "\0"
 	    );
 	}

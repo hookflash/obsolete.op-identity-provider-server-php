@@ -682,8 +682,10 @@ class User {
 												 ));
 		}
 		
+		
 		$sServerTokenCredentials = $this->generateServerTokenCredentials($aIdentityFromDB);
-		$sServerToken = CryptoUtil::encrypt($sServerTokenCredentials, PROVIDER_MAGIC_VALUE);
+		$sIV = CryptoUtil::generateIv();
+		$sServerToken = $sIV . '-' . CryptoUtil::encrypt($sServerTokenCredentials, $sIV, PROVIDER_MAGIC_VALUE);
 		return $sServerToken;
 	}
 
@@ -776,7 +778,7 @@ class User {
 				$aIdentity['identifier'] = substr( $sUriWithoutIdentity, 15, strlen($sUriWithoutIdentity) );
 			} else if ( strpos( $sUriWithoutIdentity, 'linkedin.com' ) ) {
 				$aIdentity['type'] = 'linkedin';
-				$aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(MY_DOMAIN)-6 + strlen('linkedin.com/'), strlen($sUriWithoutIdentity) );
+				$aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(MY_DOMAIN)-6, strlen($sUriWithoutIdentity) );
 			} else {
 				$aIdentity['type'] = 'federated';
 				$aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(MY_DOMAIN)-6, strlen($sUriWithoutIdentity) );
@@ -875,13 +877,13 @@ class User {
 				$sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
 				$sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
 				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-				$sServerToken .= '"token":"' . $aIdentity['secret'] . '"';
+				$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
 				break;
 			case 'twitter':
 				$sServerToken .= '"consumer_key":"' . TWITTER_APP_ID . '",';
 				$sServerToken .= '"consumer_secret":"' . TWITTER_APP_SECRET . '",';
 				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-				$sServerToken .= '"token":"' . $aIdentity['secret'] . '"';
+				$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
 				break;
 			case 'github':
 				// TODO implement
