@@ -82,7 +82,9 @@ class User {
 			// Since everything went well, return no error code and fill identitySaltsResult with the rest of the data
 			$aSalts['serverPasswordSalt'] = $aIdentity['server_password_salt'];
 			$aSalts['secretSalt'] = $aIdentity['secret_salt'];
+			require_once(APP . 'php/main/utils/cryptoUtil.php');			
 		}
+		$aSalts['reloginEncryptionKey'] = CryptoUtil::gimmeHash(PROVIDER_MAGIC_VALUE . '-' . $sIdentifier);
 		
 		return $aSalts;
 	}
@@ -394,18 +396,20 @@ class User {
 		global $DB;
 		
 		// Interpret relogin key
-		$aReloginKeyData = $aReloginKeyData = explode("-",$aRequestData['identity']['reloginKey']);
-		$aRequestData['identity']['type'] = $aReloginKeyData[0];
+		$aReloginKey = explode('-',$aRequestData['identity']['reloginKeyServerPart']);
+		$sReloginKey = CryptoUtil::decrypt($aReloginKey[2], CryptoUtil::gimmeHash($aReloginKey[1]), PROVIDER_MAGIC_VALUE);
+		$aReloginKeyData = explode('-',$sReloginKey);
+		$aRequestData['identity']['type'] = $aReloginKey[0];
+		$aRequestData['identity']['identifier'] = $aReloginKey[1];
 		
 		// Decide what table to look at
 		$sDBTable = $this->getAppropriateDatabaseTable($aRequestData['identity']['type']);
 		
 		// Validate relogin
-		$aIdentity = $DB->select_single_to_array($sDBTable, '*', 'where identifier="' . $aReloginKeyData[1] . '"');
+		$aIdentity = $DB->select_single_to_array($sDBTable, '*', 'where identifier="' . $aReloginKey[1] . '"');
 		$this->validateReloginAccess($aReloginKeyData,$aIdentity);
 		
 		// Fill data inside $aRequestData
-		$aRequestData['identity']['identifier'] = $aReloginKeyData[1];
 		$aRequestData['identity']['reloginValidated'] = true;
 		return $aRequestData;
 	}
@@ -436,7 +440,10 @@ class User {
 					),
 					'where identifier="' . $aIdentity['identifier'] . '"');
 					
-		$sReloginKeyString = $aIdentity['type'] . '-' . $aIdentity['identifier'] . '-' . $sReloginKey . '-' . $sReloginKeyExires;
+		$sReloginKeyInnerEncription = CryptoUtil::encrypt($sReloginKey . '-' . $sReloginKeyExires,
+				CryptoUtil::gimmeHash($aIdentity['identifier']), PROVIDER_MAGIC_VALUE);
+		$sReloginKeyString = $aIdentity['type'] . '-' . $aIdentity['identifier'] . '-' . $sReloginKeyInnerEncription;
+				
 		return $sReloginKeyString;
 	}
 	
@@ -858,12 +865,12 @@ class User {
 	}
 	
 	private function validateReloginAccess( $aReloginKey, $aIdentity ) {
-		if ($aIdentity['relogin_key'] != $aReloginKey[2] ||
-			$aIdentity['relogin_expires'] != $aReloginKey[3] ||
-			$aReloginKey < time() ) {
+		if ($aIdentity['relogin_key'] != $aReloginKey[0] ||
+			$aIdentity['relogin_expires'] != $aReloginKey[1] ||
+			$aReloginKey[1] < time() ) {
 			throw new RestServerException('007', array (
 													'parameter' => 'reloginKey',
-													'parameterValue' => implode('-',$aReloginKey) ) );		
+													'parameterValue' => implode('-',$aReloginKey) ) );
 		}
 	}
 	

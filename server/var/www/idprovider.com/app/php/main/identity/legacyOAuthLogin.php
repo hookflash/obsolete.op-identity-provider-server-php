@@ -145,7 +145,8 @@ class LegacyOAuthLogin {
 		// Since everything went well, return no error code and fill loginResult with the rest of the data
 		return array(
 		'identity'		=> $aIdentityAccessResult,
-		'lockboxReset'	=> 'false'
+		'lockboxReset'	=> 'false',
+		'lockboxKey'	=> !empty($aUser['lockbox_half_key_encrypted']) ? $aUser['lockbox_half_key_encrypted'] : ''
 		);
 	}
 	

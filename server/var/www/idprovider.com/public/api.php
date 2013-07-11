@@ -209,9 +209,9 @@ function login()
 		// Determine if it's a regulare login or a login after the pin validation
 		// (in which case we look for login data in the session).
 		if ( !( isset($oRequest->aPars['request']['afterPinValidation']) ) ) {
-			if ( isset($oRequest->aPars['request']['identity']['reloginKey']) ) {
+			if ( isset($oRequest->aPars['request']['identity']['reloginKeyServerPart']) ) {
 				// Fetch identity type from relogin key
-				$aReloginKey = explode('-',$oRequest->aPars['request']['identity']['reloginKey']);
+				$aReloginKey = explode('-',$oRequest->aPars['request']['identity']['reloginKeyServerPart']);
 				$sIdentityType = $aReloginKey[0];
 			} else {
 				// Set the loginType based on given identity type
@@ -243,6 +243,9 @@ function login()
 		$aLockbox = array (
 		'reset'	=> $aLoginResult['lockboxReset']
 		);
+		if ( key_exists( 'lockboxKey', $aLoginResult ) && $aLoginResult['lockboxKey'] != '' ) {
+			$aLockbox['key'] = $aLoginResult['lockboxKey'];
+		}
 		 	
 		$oResponse->addPar('loginState', LoginStates::SUCCEEDED );
 		$oResponse->addPar('identity', $aLoginResult['identity']);
@@ -312,7 +315,8 @@ function identitySaltsGet()
 	$aIdentity = array (
 	'type'					=> $aRequestData['identity']['type'],
 	'identifier' 			=> $aRequestData['identity']['identifier'],
-	'serverPasswordSalt'	=> $aSalts['serverPasswordSalt']
+	'serverPasswordSalt'	=> $aSalts['serverPasswordSalt'],
+	'reloginEncryptionKey'	=> $aSalts['reloginEncryptionKey']
 	);
 	if ( key_exists( 'secretSalt', $aSalts ) ) {
 		$aIdentity['secretSalt'] = $aSalts['secretSalt'];

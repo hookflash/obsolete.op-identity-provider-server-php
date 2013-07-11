@@ -62,7 +62,7 @@ class RequestUtil {
 													 'parameter' => 'afterPinValidation'
 													 ));
 			}
-		} elseif ( !key_exists( 'reloginKey', $req['identity'] ) ) {
+		} elseif ( !key_exists( 'reloginKeyServerPart', $req['identity'] ) ) {
 			if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
 				throw new RestServerException('002', array(
 													 'parameter' => 'identity'
@@ -657,9 +657,9 @@ class RequestUtil {
 			return array (
 			'afterPinValidation'				=> DatabaseUtil::protectFromSqlInjection( $req['afterPinValidation'] )
 			);
-		} elseif ( key_exists( 'reloginKey', $req['identity'] ) ) {
+		} elseif ( key_exists( 'reloginKeyServerPart', $req['identity'] ) ) {
 			$aIdentity = array (
-			'reloginKey'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['reloginKey'] )
+			'reloginKeyServerPart'				=> DatabaseUtil::protectFromSqlInjection( $req['identity']['reloginKeyServerPart'] )
 			);
 			return array (
 			'identity'							=> $aIdentity

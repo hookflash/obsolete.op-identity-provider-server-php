@@ -88,16 +88,14 @@ class CryptoUtil {
 	 */
 	public function encrypt($sValue, $iv, $sSecretKey)
 	{
-	    return rtrim(
-	        base64_encode(
-	            mcrypt_encrypt(
-	                MCRYPT_RIJNDAEL_256,
-	                $sSecretKey, $sValue, 
-	                MCRYPT_MODE_ECB, 
-	                $iv
-	            )
-	        ), "\0"
-	    );
+	    $sEncr = mcrypt_encrypt(
+            MCRYPT_RIJNDAEL_256,
+            $sSecretKey, $sValue, 
+            MCRYPT_MODE_ECB, 
+            $iv
+        );
+        $sEncr = base64_encode($sEncr);
+	    return rtrim($sEncr, "\0");
 	}
 	
 	/**
@@ -110,15 +108,14 @@ class CryptoUtil {
 	 */
 	public function decrypt($sValue, $iv, $sSecretKey)
 	{
-	    return rtrim(
-	        mcrypt_decrypt(
-	            MCRYPT_RIJNDAEL_256, 
-	            $sSecretKey, 
-	            base64_decode($sValue), 
-	            MCRYPT_MODE_ECB,
-	            $iv
-	        ), "\0"
-	    );
+	    $sValue = base64_decode($sValue);
+	    $sDecr = mcrypt_decrypt(
+            MCRYPT_RIJNDAEL_256,
+            $sSecretKey, $sValue, 
+            MCRYPT_MODE_ECB, 
+            $iv
+        );
+        return rtrim($sDecr, "\0");
 	}
 	
 	/**
@@ -337,8 +334,7 @@ class CryptoUtil {
 	 */
 	public function calculateAccessSecret ( $sAccessToken ) {
 		$sAccessSecretBase = "identity-access-secret:" . $sAccessToken . PROVIDER_MAGIC_VALUE;
-		$sTestAddition = 'FOO'; // TODO remove this
-		return CryptoUtil::gimmeHash($sAccessSecretBase) . $sTestAddition; 
+		return CryptoUtil::gimmeHash($sAccessSecretBase); 
 	}
 	
 	/**

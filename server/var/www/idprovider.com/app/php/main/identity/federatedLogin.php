@@ -76,7 +76,7 @@ class FederatedLogin {
 	public function login() {
 		// Take data from the request
 		$aRequestData = RequestUtil::takeLoginRequestData($this->aRequest);
-		if ( key_exists( 'reloginKey', $aRequestData['identity'] ) ) {
+		if ( key_exists( 'reloginKeyServerPart', $aRequestData['identity'] ) ) {
 			$aRequestData = $this->oUser->fetchIdentityBasedOnReloginKey($aRequestData);
 		}
 		
@@ -137,9 +137,9 @@ class FederatedLogin {
 		$aIdentityAccessResult['updated'] = $aUser['updated'];
 		
 		// Generate and store a federated relogin key if needed, otherwise return the same reloginKey that has just been used
-		$sReloginKey = key_exists('reloginKey',$aRequestData['identity']) ?
-						$aRequestData['identity']['reloginKey'] : $this->oUser->generateAndStoreReloginKey($aRequestData['identity']);
-		$aIdentityAccessResult['reloginKey'] = $sReloginKey;
+		$sReloginKey = key_exists('reloginKeyServerPart',$aRequestData['identity']) ?
+						$aRequestData['identity']['reloginKeyServerPart'] : $this->oUser->generateAndStoreReloginKey($aRequestData['identity']);
+		$aIdentityAccessResult['reloginKeyServerPart'] = $sReloginKey;
 				
 		// Keep info about logged in identity in session
 		$_SESSION['logged-in-identity'] = $aRequestData['identity'];
@@ -147,7 +147,8 @@ class FederatedLogin {
 		// Since everything went well, return no error code and fill loginResult with the rest of the data
 		return array(
 		'identity'		=> $aIdentityAccessResult,
-		'lockboxReset'	=> 'false'
+		'lockboxReset'	=> 'false',
+		'lockboxKey'	=> !empty($aUser['lockbox_half_key_encrypted']) ? $aUser['lockbox_half_key_encrypted'] : ''
 		);
 	}
 	
