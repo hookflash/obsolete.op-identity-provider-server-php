@@ -54,6 +54,8 @@
 		<option value="internal_cslfp">internal_cslfp</option>
 		<option value="internal_thfs">internal_thfs</option>
 		<option value="internal_ciasp">internal_ciasp</option>
+                <option value="internal_prct">internal_prct</option>
+                <option value="internal_erct">internal_erct</option>
 	</select>
 	
 	<input type="button" id="demoreq" value="REQ template"/>

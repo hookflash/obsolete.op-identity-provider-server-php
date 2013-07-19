@@ -692,7 +692,8 @@ class User {
 		
 		$sServerTokenCredentials = $this->generateServerTokenCredentials($aIdentityFromDB);
 		$sIV = CryptoUtil::generateIv();
-		$sServerToken = $sIV . '-' . CryptoUtil::encrypt($sServerTokenCredentials, $sIV, PROVIDER_MAGIC_VALUE);
+		$sServerToken = CryptoUtil::strToHex($sIV) . '-' . 
+                        CryptoUtil::encrypt($sServerTokenCredentials, $sIV, hash('sha256',DOMAIN_HOSTING_SECRET));
 		return $sServerToken;
 	}
 
