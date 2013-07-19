@@ -71,12 +71,92 @@ class CryptoUtil {
 	}
 	
 	/**
-	 * Generate a 32 long string and hash using MD5
+	 * Generate a 20 bytes long random
 	 *
 	 */
 	public function generateIv () {
-		return md5( CryptoUtil::makeRandomString() );
+		return CryptoUtil::makeRandomString(16 * 8);
 	}
+        
+        /**
+         * Convert string to hex
+         * @param type $string
+         * @return type
+         */
+        function strToHex($string)
+        {
+            $hex='';
+            for ($i=0; $i < strlen($string); $i++)
+            {
+                $hex .= dechex(ord($string[$i]));
+            }
+            return $hex;
+        }
+        
+        /**
+         * Convert hex to string
+         * @param type $hex
+         * @return type
+         */
+        function hexToStr($hex)
+        {
+            $string='';
+            for ($i=0; $i < strlen($hex)-1; $i+=2)
+            {
+                $string .= chr(hexdec($hex[$i].$hex[$i+1]));
+            }
+            return $string;
+        }
+        
+        /**
+         * TEST.
+         */
+        function hexbin($hex) {
+            $bin = decbin(hexdec($hex)); 
+            return $bin; 
+        }
+        /**
+         * TEST. Result = 0 (after called binhex(hexbin(hex)))
+         */
+        function binhex($bin) {
+            $hex = dechex(bindec($bin)); 
+            return $hex;
+        }
+        /**
+         * TEST. **WORKS**
+         */
+        function hexbin1($hex){
+            $bin='';
+            for($i=0;$i<strlen($hex);$i++)
+                $bin.=str_pad(decbin(hexdec($hex{$i})),4,'0',STR_PAD_LEFT);
+            return $bin;
+        } 
+        /**
+         * TEST. **WORKS** (after called binhex1(hexbin1(hex)))
+         */
+        function binhex1($bin){
+            $hex='';
+            for($i=strlen($bin)-4;$i>=0;$i-=4)
+                $hex.=dechex(bindec(substr($bin,$i,4)));
+            return strrev($hex);
+        }
+        /**
+         * TEST. Result = Error: pack(): Type H: illegal hex digit -
+         */
+        function hextobin($hexstr){
+            $n = strlen($hexstr);
+            $sbin="";  
+            $i=0;
+            while($i<$n)
+            {      
+                $a =substr($hexstr,$i,2);          
+                $c = pack("H*",$a);
+                if ($i==0){$sbin=$c;}
+                else {$sbin.=$c;}
+                $i+=2;
+            }
+            return $sbin;
+        } 
 	
 	/**
 	 * Encrypts given value using secret key
@@ -88,13 +168,21 @@ class CryptoUtil {
 	 */
 	public function encrypt($sValue, $iv, $sSecretKey)
 	{
+            /*
 	    $sEncr = mcrypt_encrypt(
-            MCRYPT_RIJNDAEL_256,
-            $sSecretKey, $sValue, 
-            MCRYPT_MODE_ECB, 
-            $iv
-        );
-        $sEncr = base64_encode($sEncr);
+                MCRYPT_RIJNDAEL_128,
+                $sSecretKey, $sValue, 
+                MCRYPT_MODE_ECB, 
+                $iv
+            );
+            $sEncr = base64_encode($sEncr);
+	    return rtrim($sEncr, "\0");*/
+            $sEncr = mcrypt_encrypt(
+                MCRYPT_RIJNDAEL_128,
+                $sSecretKey, $sValue, 
+                MCRYPT_MODE_NOFB, 
+                $iv
+            );
 	    return rtrim($sEncr, "\0");
 	}
 	
@@ -108,14 +196,23 @@ class CryptoUtil {
 	 */
 	public function decrypt($sValue, $iv, $sSecretKey)
 	{
+            /*
 	    $sValue = base64_decode($sValue);
 	    $sDecr = mcrypt_decrypt(
-            MCRYPT_RIJNDAEL_256,
-            $sSecretKey, $sValue, 
-            MCRYPT_MODE_ECB, 
-            $iv
-        );
-        return rtrim($sDecr, "\0");
+                MCRYPT_RIJNDAEL_256,
+                $sSecretKey, $sValue, 
+                MCRYPT_MODE_ECB, 
+                $iv
+            );
+            return rtrim($sDecr, "\0");*/
+            //$sValue = CryptoUtil::hexToStr($sValue);
+	    $sDecr = mcrypt_decrypt(
+                MCRYPT_RIJNDAEL_128,
+                $sSecretKey, $sValue, 
+                MCRYPT_MODE_NOFB,
+                $iv
+            );
+            return rtrim($sDecr, "\0");
 	}
 	
 	/**
@@ -134,16 +231,6 @@ class CryptoUtil {
 	 */
 	public function generateNonce () {
 		return CryptoUtil::gimmeHash((CryptoUtil::makeRandomString()));
-	}
-	
-	/**
-	 * Generate identity access secret
-	 * 	 
-	 * @param string $sAccessToken access token to carete accessSecret from
-	 * @return Returns generated accessSecret
-	 */
-	public function generateAccessSecret ( $sAccessToken ) {
-		
 	}
 	
 	/**
@@ -314,8 +401,8 @@ class CryptoUtil {
 	 */
 	public function generateIdentityAccess ( $sIdentityType, $sIdentifier ) {
 		// Generate token and secret
-		$sAccessToken = CryptoUtil::generateNonce();
-		$sAccessSecretExpires = time() + 60*1440*60; // 60secs * 1440mins/day * 60days = 2months
+                $sAccessSecretExpires = time() + 60*1440*60; // 60secs * 1440mins/day * 60days = 2months
+		$sAccessToken = $sIdentityType . '-' . $sIdentifier . '-' . $sAccessSecretExpires . CryptoUtil::generateNonce();
 		$sAccessSecret = CryptoUtil::calculateAccessSecret($sAccessToken);
 		
 		// return the identity access data
@@ -353,7 +440,13 @@ class CryptoUtil {
 	public function validateIdentityAccessSecretProof ( $sClientNonce, $sAccessToken, $sAccessSecretProof, $sAccessSecretExpires, $sIdentityType, $sIdentifier, $sUri, $sPurpose ) {
 		APIEventLog('function call: validateIdentityAccessSecretProof(' .
 					'clientNonce=' . $sClientNonce . ' accessToken=' . $sAccessToken . ' accessSecretProof=' . $sAccessSecretProof . ' accessSecretExpires=' . $sAccessSecretExpires . ' uri=' . $sUri . ' purpose=' . $sPurpose);
-		// Calculate accessSecret first
+		// Challange the token first
+                $aAccessToken = explode('-', $sAccessToken);
+                if ($aAccessToken[0] != $sIdentityType || $aAccessToken[1] != $sIdentifier) {
+                    return false;
+                }
+
+                // Calculate accessSecret
 		$sAccessSecret = CryptoUtil::calculateAccessSecret($sAccessToken);
 		APIEventLog('accessSecret=' . $sAccessSecret);
 											
