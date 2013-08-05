@@ -165,16 +165,16 @@ function internal_parseRolodexCredentialsToken () {
     global $oRequest;
     require_once(APP . 'php/main/utils/cryptoUtil.php');
     include(APP . 'php/libs/seclib/Crypt/AES.php');
-    $sSecret = 'klksd9887w6uysjkksd89893kdnvbter';
+    $key = hash('sha256', "01234567890123456789012345678901");
+    
     $sTokenEncrypted = $oRequest->aPars['request']['rolodexCredentialsTokenEncrypted'];
     $aTokenEncrypted = explode('-', $sTokenEncrypted);
     
     $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
-    $cipher->setKeyLength(256);
-    $cipher->setKey(hash('sha256',$sSecret,TRUE));
-    $cipher->setIV(CryptoUtil::hextobin($aTokenEncrypted[0]));
+    $cipher->setKey(DOMAIN_HOSTING_SECRET);
+    $cipher->setIV(CryptoUtil::hexToStr($aTokenEncrypted[0]));
     
-    echo $cipher->decrypt(CryptoUtil::hextobin($aTokenEncrypted[1]));
+    echo CryptoUtil::hexToStr(CryptoUtil::decrypt($aTokenEncrypted[1],CryptoUtil::hexToStr($aTokenEncrypted[0]),DOMAIN_HOSTING_SECRET));
 }
 
 // TODO delete
@@ -201,15 +201,13 @@ function internal_encryptRolodexCredentialsToken () {
     include(APP . 'php/libs/seclib/Crypt/AES.php');
 
     $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
-    // keys are null-padded to the closest valid size
-    // longer than the longest key and it's truncated
-    $cipher->setKeyLength(256);
-    $sSecret = 'klksd9887w6uysjkksd89893kdnvbter';
-    $sIV = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CFB));
-    $cipher->setKey(hash('sha256',$sSecret,TRUE));
-    $cipher->setIV($sIV);
+    $key = hash('sha256', "01234567890123456789012345678901");
+    $iv = hash('md5', "0123456789012345");
+    $cipher->setKey($key);
+    $cipher->setIV($iv);
 
-    $plaintext = '{"service":"github","consumer_key":"264ea34924b00a5fa84e","consumer_secret":"6d21988222de0f9cc3c0257b70357a5b22bd23b8","token":"ffd648ab7b9461bbfc48405dd26e0fc12aedbb57"}';
+    //$plaintext = '{"service":"github","consumer_key":"264ea34924b00a5fa84e","consumer_secret":"6d21988222de0f9cc3c0257b70357a5b22bd23b8","token":"ffd648ab7b9461bbfc48405dd26e0fc12aedbb57"}';
+    $plaintext = 'MY-DATA-AND-HERE-IS-MORE-DATA';
     echo $cipher->decrypt($cipher->encrypt($plaintext));
 }
 
