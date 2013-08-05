@@ -397,7 +397,8 @@ class User {
 		
 		// Interpret relogin key
 		$aReloginKey = explode('-',$aRequestData['identity']['reloginKeyServerPart']);
-		$sReloginKey = CryptoUtil::decrypt($aReloginKey[2], CryptoUtil::gimmeHash($aReloginKey[1]), PROVIDER_MAGIC_VALUE);
+                // TODO replace CryptoUtil::hexToStr() with hex2bin() as soon as PHP 5.4. is installed
+		$sReloginKey = CryptoUtil::decrypt(CryptoUtil::hexToStr($aReloginKey[2]), CryptoUtil::gimmeHash($aReloginKey[1]), PROVIDER_MAGIC_VALUE);
 		$aReloginKeyData = explode('-',$sReloginKey);
 		$aRequestData['identity']['type'] = $aReloginKey[0];
 		$aRequestData['identity']['identifier'] = $aReloginKey[1];
@@ -442,7 +443,7 @@ class User {
 					
 		$sReloginKeyInnerEncription = CryptoUtil::encrypt($sReloginKey . '-' . $sReloginKeyExires,
 				CryptoUtil::gimmeHash($aIdentity['identifier']), PROVIDER_MAGIC_VALUE);
-		$sReloginKeyString = $aIdentity['type'] . '-' . $aIdentity['identifier'] . '-' . $sReloginKeyInnerEncription;
+		$sReloginKeyString = $aIdentity['type'] . '-' . $aIdentity['identifier'] . '-' . bin2hex($sReloginKeyInnerEncription);
 				
 		return $sReloginKeyString;
 	}
@@ -665,18 +666,18 @@ class User {
 		$aIdentity = $this->parseIdentityUri($aRequestData['identity']['uri']);
 		
 		$bAccessSecretProofValidity = CryptoUtil::validateIdentityAccessSecretProof($aRequestData['clientNonce'],
-																					$aRequestData['identity']['accessToken'],
-																					$aRequestData['identity']['accessSecretProof'],
-																					$aRequestData['identity']['accessSecretProofExpires'],
-																					$aIdentity['type'],
-																					$aIdentity['identifier'],
-																					$aRequestData['identity']['uri'],
-																					'rolodex-credentials-get' );
+                                                                                            $aRequestData['identity']['accessToken'],
+                                                                                            $aRequestData['identity']['accessSecretProof'],
+                                                                                            $aRequestData['identity']['accessSecretProofExpires'],
+                                                                                            $aIdentity['type'],
+                                                                                            $aIdentity['identifier'],
+                                                                                            $aRequestData['identity']['uri'],
+                                                                                            'rolodex-credentials-get' );
 		if ( !$bAccessSecretProofValidity ) {
 			throw new RestServerException('007', array(
-												 'parameter' 		=> 'accessSecretProof',
-												 'parameterValue' 	=> $aRequestData['identity']['accessSecretProof']
-												 ));
+                                                            'parameter'         => 'accessSecretProof',
+                                                            'parameterValue' 	=> $aRequestData['identity']['accessSecretProof']
+                                                            ));
 		}
 		
 		// Get the identity
@@ -692,8 +693,8 @@ class User {
 		
 		$sServerTokenCredentials = $this->generateServerTokenCredentials($aIdentityFromDB);
 		$sIV = CryptoUtil::generateIv();
-		$sServerToken = CryptoUtil::strToHex($sIV) . '-' . 
-                        CryptoUtil::encrypt($sServerTokenCredentials, $sIV, hash('sha256',DOMAIN_HOSTING_SECRET));
+		$sServerToken = bin2hex($sIV) . '-' . 
+                        bin2hex(CryptoUtil::encrypt($sServerTokenCredentials, $sIV, DOMAIN_HOSTING_SECRET));
 		return $sServerToken;
 	}
 

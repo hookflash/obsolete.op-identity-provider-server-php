@@ -1,5 +1,10 @@
 {
 	"name": "op-identity-provider-server-php",
 	"version": "0.1.0",
-	"private": true
+	"private": true,
+	"config": {
+		"run": {
+			"packagePath": "server/var/www/idprovider.com/public"
+		}
+	}
 }
