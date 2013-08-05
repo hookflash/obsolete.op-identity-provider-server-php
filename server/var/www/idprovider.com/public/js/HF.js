@@ -33,41 +33,23 @@ either expressed or implied, of the FreeBSD Project.
  * Hookflash Identity Provider API
  */
 
-var HF_API = function() {
+var HF_LoginAPI = function() {
     var _version = '0.1';                   // The current version
 
     var identity = {};                      // identity
     var identityAccessStart;                // identityAccessStart notify
-    var identityAccessLockboxUpdate         // identityAccessLockboxUpdate
     var initData;                           // init data
     var imageBundle = {};                   // imageBundle (used for avatar upload)
     var $identityProviderDomain;            // used for every request
     var serverMagicValue;                   // serverMagicValue
     var loginResponse;                      // response from login
-
-    // Global cross-domain message handler.
-    window.onmessage = function(message) {
-        var notifyBundle;
-        try {
-            notifyBundle = message.data;
-            // parse notifyBundle
-            var notifyJSON = JSON.parse(notifyBundle);
-            // set data
-            if (notifyJSON.notify.$method == "identity-access-start") {
-                // start login/sign up procedure
-                identityAccessStart = notifyJSON.notify;
-                startLogin();
-            } else if (notifyJSON.notify.$method == "identity-access-lockbox-update") {
-                // start identity-access-lockbox-update procedure
-                identityAccessLockboxUpdate = notifyJSON.notify;
-                startLockboxUpdate();
-            }
-        } catch (e) {
-            // TODO: handle exception
-            logIt("ERROR", "window.onmessage -" + e);
-        }
-    };
-
+    var waitForNotifyResponseId;            // id of "identity-access-window" request
+    var secretSetResults = 0;               // 
+    
+    //  passwordServers
+    var passwordServer1 = 'hcs-javascript.hookflash.me/';
+    var passwordServer2 = '';
+    
     /**
      * Gets the current version
      * 
@@ -80,19 +62,65 @@ var HF_API = function() {
     var init = function(bundle) {
         try {
             initData = bundle;
+            $appid = initData.$appid;
             $identityProviderDomain = initData.$identityProvider;
             
             // reload scenario
-            var url = document.location.href;
+            var url = window.location.href;
             if (url.indexOf("?reload=true") > 0){
-                identityAccessWindowNotify(true, false);
                 finishOAuthScenario(url);
+            } else {
+                identityAccessWindowNotify(true, false);
             }
         } catch (e) {
             // TODO: handle exception
+            alert('init error' + e);
         }
-        identityAccessWindowNotify(true, false);
+        logIt("DEBUG", "init -finished");
     };
+    
+    // Global cross-domain message handler.
+    window.onmessage = function(message) {
+        var data;
+        logIt("DEBUG", "-onmessage");
+        try {
+            data = message.data;
+            // parse data
+            var dataJSON = JSON.parse(data);
+            // handle "notify" 
+            if (dataJSON.notify !== undefined){
+                if (dataJSON.notify.$method == "identity-access-start") {
+                    // start login/sign up procedure
+                    identityAccessStart = dataJSON.notify;
+                    if (identityAccessStart.identity.reloginKey !== undefined){
+                        //relogin
+                        startRelogin();
+                    }else {
+                        startLogin();
+                    }
+                }
+            // handle "result"
+            } else if (dataJSON.result){
+                if (dataJSON.result.$method == 'identity-access-window'){
+                    // handle identity-access-window result
+                    logIt("DEBUG", "-onmessage: identity-access-window");
+                    if (dataJSON.result.$id === waitForNotifyResponseId ||
+                            dataJSON.result.$id === "FAKE"  ){
+                        redirectToURL(identity.redirectURL);
+                    }
+                }
+            } else if (dataJSON.request){
+                //TODO
+                if (dataJSON.request.$method === "identity-access-lockbox-update"){
+                    identityAccessLockboxUpdate(dataJSON);
+                }
+            }
+        } catch (e) {
+            // TODO: handle exception
+            logIt("ERROR", "window.onmessage -" + e);
+        }
+    };
+
 
     /**
      * Permission Grant Complete notify
@@ -104,6 +132,7 @@ var HF_API = function() {
         var message = {
             "notify" : {
                 "$domain" : $identityProviderDomain,
+                "$appid" : $appid,
                 "$id" : generateId(),
                 "$handler" : "lockbox",
                 "$method" : "lockbox-permission-grant-complete",
@@ -116,7 +145,7 @@ var HF_API = function() {
                 }
             }
         };
-        window.parent.postMessage(message, "*");
+        window.parent.postMessage(JSON.stringify(message), "*");
     };
 
     /**
@@ -126,6 +155,8 @@ var HF_API = function() {
      */
     var redirectToURL = function(url) {
         logIt("DEBUG", 'redirectToURL');
+        localStorage.clientAuthenticationToken = identity.clientAuthenticationToken;
+        localStorage.identityURI  = identity.uri;
         window.top.location = url;
     };
 
@@ -136,10 +167,12 @@ var HF_API = function() {
      * @param visibility
      */
     var identityAccessWindowNotify = function(ready, visibility) {
+        var id = generateId();
         var readyMessage = {
-            "notify" : {
+            "request" : {
                 "$domain" : $identityProviderDomain,
-                "$id" : generateId(),
+                "$appid" : $appid,
+                "$id" : id,
                 "$handler" : "identity",
                 "$method" : "identity-access-window",
 
@@ -149,30 +182,45 @@ var HF_API = function() {
                 }
             }
         };
+        if (visibility && identity.type == 'facebook'){
+            waitForNotifyResponseId = id;
+        }
+        logIt("DEBUG", "identityAccessWindowNotify");
         window.parent.postMessage(JSON.stringify(readyMessage), "*");
     };
 
     /**
-     * Decrypts lockbox
+     * Decrypts lockbox keyhalf.
      * 
      * @param passwordStreched
      * @param userId
      * @param userSalt
      * 
-     * @return lockbox
+     * @return decrypted lockbox key half 
      */
-    var decryptLockbox = function(passwordStretched, userId, userSalt) {
-        // TODO: implement it
+    var decryptLockbox =  function(lockboxKeyHalf, passwordStretched, userId, userSalt) {
+            var key = hmac(passwordStretched, userId);
+            var iv = hash(userSalt);
+            var dec = decrypt(lockboxKeyHalf, key, iv);
+
+            return dec;
+    };
+    
+    /**
+     * Encrypts lockbox key half.
+     * 
+     * @param passwordStreched
+     * @param userId
+     * @param userSalt
+     * 
+     * @return encrypted lockbox key half
+     */
+    var encryptLockbox = function(lockboxKeyHalf, passwordStretched, userId, userSalt) {
         var key = hmac(passwordStretched, userId);
         var iv = hash(userSalt);
+        var enc = encrypt(lockboxKeyHalf, key, iv);
 
-        // lockbox­‐key = decrypt(<lockbox­‐key‐encrypted>, iv),
-        // key = hmac(key_strectch(<user-password>), <user‐id>),
-        // iv = hash(<user­‐salt>)
-
-        var lockbox = '';
-
-        return lockbox;
+        return enc;
     };
 
     /**
@@ -189,12 +237,42 @@ var HF_API = function() {
             startLoginFederated();
         }
     };
+    
+    /**
+     * Start relogin procedure.
+     */
+    var startRelogin = function() {
+        setType(identityAccessStart);
+        //getSalts (and then call relogin)
+        getIdentitySalts(relogin);
+    };
+    
+    /**
+     * Start relogin procedure.
+     */
+    var relogin = function() {
+        var reloginKeyDecrypted = decrypt(identityAccessStart.identity.reloginKey, identity.reloginEncryptionKey);
+        var reloginKeyServerPart = reloginKeyDecrypted.split("--")[1];
+        var reloginData = {
+                "request": {
+                    "$domain": $identityProviderDomain,
+                    "$id": generateId(),
+                    "$handler": "identity-provider",
+                    "$method": "login",
+                    
+                    "identity": {
+                                    "reloginKeyServerPart": reloginKeyServerPart
+                                }
+                }
+        };
+        login(reloginData);
+    };
 
     var setType = function(identityAccessStart) {
         var id;
         try {
             id = identityAccessStart.identity.base ? identityAccessStart.identity.base
-                    : identityAccessStart.identity.url;
+                    : identityAccessStart.identity.uri;
         } catch (e) {
         }
         if (id.startsWith("identity:phone:")) {
@@ -213,6 +291,7 @@ var HF_API = function() {
         } else if (id.startsWith("identity://" + $identityProviderDomain)) {
             identity.type = "federated";
             identity.uri = "identity://" + $identityProviderDomain + "/";
+            identity.identifier = id.split($identityProviderDomain + "/")[1];
         } else if (id.startsWith("identity://facebook.com")) {
             identity.type = "facebook";
             identity.uri = "identity://facebook/";
@@ -229,7 +308,6 @@ var HF_API = function() {
      */
     var startLoginFederated = function() {
         // show login/sign up form
-        identityAccessWindowNotify(true, true);
         // show federated div
         $("#" + initData.federatedId).css("display", "block");
         // add onclick listeners
@@ -245,6 +323,7 @@ var HF_API = function() {
         $("#" + initData.login.click).click(function() {
             loginOnClick();
         });
+        identityAccessWindowNotify(true, true);
     };
 
     /**
@@ -267,12 +346,12 @@ var HF_API = function() {
     var signUp = function() {
         logIt("DEBUG", 'signUp started');
         // stretch password
-        identity.passwordStretch = generatePasswordStretched(
+        identity.passwordStretched = generatePasswordStretched(
                 identity.identifier, identity.password,
                 identity.serverPasswordSalt);
         // generate secretSalt
         identity.secretSalt = generateIdentitySecretSalt(identity.identifier,
-                identity.password, identity.passwordStretch,
+                identity.password, identity.passwordStretched,
                 identity.serverPasswordSalt);
 
         var requestData = {
@@ -285,7 +364,7 @@ var HF_API = function() {
                 "identity" : {
                     "type" : identity.type,
                     "identifier" : identity.identifier,
-                    "passwordHash" : identity.passwordStretch,
+                    "passwordHash" : identity.passwordStretched,
                     "secretSalt" : identity.secretSalt,
                     "serverPasswordSalt" : identity.serverPasswordSalt,
                     "uri" : identity.uri + identity.identifier
@@ -433,6 +512,9 @@ var HF_API = function() {
                     if (result.serverMagicValue){
                         serverMagicValue = result.serverMagicValue;
                     }
+                    if (result.identity && result.identity.reloginEncryptionKey){
+                        identity.reloginEncryptionKey = result.identity.reloginEncryptionKey;
+                    }
                     return true;
                 } else {
                     return false;
@@ -448,7 +530,7 @@ var HF_API = function() {
      * 
      * @param callback
      */
-    var getServerNonce = function (callback) {
+    var getServerNonce = function(callback) {
         var requestData = {
             "request" : {
                 "$domain" : $identityProviderDomain,
@@ -498,8 +580,11 @@ var HF_API = function() {
         identity.password = $("#" + initData.login.password).val();
 
         // get salts
-        getIdentitySalts(loginFederated);
+        getIdentitySalts(getIdentitySaltsCallbackFederated);
     };
+    var getIdentitySaltsCallbackFederated = function(){
+        getServerNonce(loginFederated);
+    }
     
     /**
      * Login request.
@@ -527,25 +612,32 @@ var HF_API = function() {
             }
         });
         
-        // handle afterLogin
-        function afterLogin(){
-            logIt("DEBUG", 'login - afterLogin()');
-            try {
-                var responseJSON = JSON.parse(loginResponse);
-                // pin validation scenario
-                if (responseJSON.result 
-                        && responseJSON.result.loginState == "PinValidationRequired"){
-                    pinValidateStart();
-                }
-                if (responseJSON.result 
-                        && responseJSON.result.loginState == "succeeded"){
-                    // login is valid
-                    accessCompleteNotify(responseJSON.result);
-                }
-            } catch (e) {
-                logIt("ERROR", 'login - afterLogin()');
-            }
-        }
+//        // handle afterLogin
+//        function afterLogin(){
+//            logIt("DEBUG", 'login - afterLogin()');
+//            try {
+//                var responseJSON = JSON.parse(loginResponse);
+//                // pin validation scenario
+//                if (responseJSON.result 
+//                        && responseJSON.result.loginState == "PinValidationRequired"){
+//                    pinValidateStart();
+//                }
+//                if (responseJSON.result 
+//                        && responseJSON.result.loginState == "succeeded"){
+//                    
+//                    // login is valid
+//                    if ()
+//                    if (responseJSON.result.lockbox && responseJSON.result.lockbox.key){
+//                        // 
+//                    } else {
+//                        accessCompleteNotify(responseJSON.result);
+//                        
+//                    }
+//                }
+//            } catch (e) {
+//                logIt("ERROR", 'login - afterLogin()');
+//            }
+//        }
     };
     
     /**
@@ -590,7 +682,7 @@ var HF_API = function() {
         identity.clientAuthenticationToken = generateClientAuthenticationToken(generateId(), 
                generateId(),
                generateId());
-
+        
         var requestData = {
             "request": {
                 "$domain": $identityProviderDomain,
@@ -615,8 +707,8 @@ var HF_API = function() {
                 // log a message to the console
                 logIt("DEBUG", "loginOAuth - on success");
                 // handle response
-                if (oauthProviderAuthentication(response)){
-                    window.top.location = identity.redirectURL;
+                if (validateOauthProviderAuthentication(response)){
+                    redirectParentOnIdentityAccessWindowResponse();
                 } else {
                     logIt("ERROR", "loginOAuth - validation error");
                 }
@@ -629,7 +721,7 @@ var HF_API = function() {
         });
         
         // loginOAuthStartScenario callback.
-        function oauthProviderAuthentication(response) {
+        function validateOauthProviderAuthentication(response) {
             try {
                 var responseJSON = JSON.parse(response);
                 var redirectURL = responseJSON.result.providerRedirectURL;
@@ -644,30 +736,78 @@ var HF_API = function() {
         }
     };
     
+    //
+    var redirectParentOnIdentityAccessWindowResponse = function() {
+        redirectReady = true;
+        identityAccessWindowNotify(true, true);
+    }
+    
     //TODO finish it
     var identityAccessCompleteNotify = function(data){
-        var message = {
-                "notify": {
-                    "$domain": $identityProviderDomain,
-                    "$id": generateId(),
-                    "$handler": "identity-provider",
-                    "$method": "identity-access-complete",
-                    
-                    "identity": {
-                        "accessToken": data,
-                        "accessSecret": "b7277a5e49b3f5ffa9a8cb1feb86125f75511988",
-                        "accessSecretExpires": 8483943493,
-                        "uri": "identity://domain.com/alice",
-                        "provider": "domain.com"
-                    },
-                    "lockbox": {
-                        "domain": "domain.com",
-                        "key": "V20x...IbGFWM0J5WTIxWlBRPT0=",
-                    },
-                    "reset": false
-                }
-        };
-        window.parent.postMessage(message, "*");
+        var uri = generateIdentityURI(identity.type, identity.identifier);
+        var lockboxkey = data.lockbox.key;
+        
+        // create reloginKey (only first time)
+        var reloginKey;
+        if (identityAccessStart.identity.reloginKey !== undefined){
+            reloginKey = identityAccessStart.identity.reloginKey;
+        } else {
+            var message = identity.passwordStretched + "--" + data.identity.reloginKeyServerPart;
+            reloginKey = encrypt(message, identity.reloginEncryptionKey);
+        }
+
+        if (lockboxkey !== undefined){
+            var iv = hash(identity.secretSalt);
+            var key = decryptLockbox(lockboxkey, identity.passwordStretched, identity.identifier, iv);
+            
+            
+            var message = {
+                    "notify": {
+                        "$domain": $identityProviderDomain,
+                        "$appid" : $appid,
+                        "$id": generateId(),
+                        "$handler": "identity",
+                        "$method": "identity-access-complete",
+                        
+                        "identity": {
+                            "accessToken": data.identity.accessToken,
+                            "accessSecret": data.identity.accessSecret,
+                            "accessSecretExpires": data.identity.accessSecretExpires,
+                            
+                            "uri": uri ,
+                            "provider": $identityProviderDomain,
+                            "reloginKey": reloginKey
+                        },
+                        "lockbox": {
+                            "domain": data.$domain,
+                            "key": key,
+                            "reset": data.lockbox.reset
+                        }
+                    }
+            };
+        } else {
+            var message = {
+                    "notify": {
+                        "$domain": $identityProviderDomain,
+                        "$appid" : $appid,
+                        "$id": generateId(),
+                        "$handler": "identity",
+                        "$method": "identity-access-complete",
+                        
+                        "identity": {
+                            "accessToken": data.identity.accessToken,
+                            "accessSecret": data.identity.accessSecret,
+                            "accessSecretExpires": data.identity.accessSecretExpires,
+                            
+                            "uri": uri,
+                            "provider": $identityProviderDomain,
+                            "reloginKey": reloginKey
+                        }
+                    }
+            };
+        }
+        
+        window.parent.postMessage(JSON.stringify(message), "*");
     };
     
     /**
@@ -683,8 +823,302 @@ var HF_API = function() {
         params = decodeURIComponent(params);
         var paramsJSON = JSON.parse(params);
         
+        var clientAuthenticationToken = localStorage.clientAuthenticationToken;
+        identity.type = paramsJSON.result.identity.type;
+        identity.identifier = paramsJSON.result.identity.identifier;
         
+        // prepare login data
+        var loginData = {
+                "request": {
+                    "$domain": $identityProviderDomain,
+                    "$appid" : $appid,
+                    "$id": generateId(),
+                    "$handler": "identity",
+                    "$method": "login",
+                    
+                    "proof" : {
+                                  "clientAuthenticationToken" : clientAuthenticationToken,
+                                  "serverAuthenticationToken" : paramsJSON.result.serverAuthenticationToken
+
+                              },
+                    "identity": {
+                                    "type": paramsJSON.result.identity.type,
+                                    "identifier": paramsJSON.result.identity.identifier
+                                }
+                }
+            }
+        login(loginData);
+    };
+    
+    /**
+     * Login api call.
+     * 
+     * @param loginData
+     */
+    var login = function(loginData){
+        var loginDataString = JSON.stringify(loginData);
+        $.ajax({
+            url : "/api.php",
+            type : "post",
+            data : loginDataString,
+            // callback handler that will be called on success
+            success : function(response, textStatus, jqXHR) {
+                // log a message to the console
+                logIt("DEBUG", "login - on success");
+                loginResponse = response;
+                if (validateLogin){
+                    afterLogin();
+                }
+            },
+            // callback handler that will be called on error
+            error : function(jqXHR, textStatus, errorThrown) {
+                // log the error to the console
+                logIt("ERROR", "login - on error" + textStatus);
+            }
+        });
+        function validateLogin(data){
+            var resJSON = JSON.parse(data);
+            if (resJSON.result.error == undefined){
+                return true;
+            } else {
+                return false;
+            }
+        }
+    };
+
+    // AfterLogin callback.
+    var afterLogin = function(){
+        logIt("DEBUG", 'login - afterLogin()');
+        try {
+            var responseJSON = JSON.parse(loginResponse);
+            // pin validation scenario
+            if (responseJSON.result 
+                    && responseJSON.result.loginState == "PinValidationRequired"){
+                pinValidateStart();
+            }
+            if (responseJSON.result 
+                    && responseJSON.result.loginState == "Succeeded"){
+                // login is valid
+                // OAuth
+                if (identity.type == "facebook" || identity.type == "twitter" || identity.type == "linkedin"){
+                    if (responseJSON.result.lockbox.key == undefined)
+                    {
+                        // if first time seen identity
+                        hostedIdentitySecretSet12(responseJSON);
+                    } else {
+                        // if seen this before
+                        hostedIdentitySecretGet(responseJSON);
+                    }
+                    
+                } else {
+                    // all other scenarios
+                    identityAccessCompleteNotify(responseJSON.result);
+                }
+            }
+        } catch (e) {
+            logIt("ERROR", 'login - afterLogin()');
+        }
+    };
+    
+    /**
+     * Generates identity URI.
+     * 
+     * @param type
+     * @param identifier
+     */
+    var generateIdentityURI = function(type, identifier){
         
+        if (type === 'facebook'){
+            return "identity://facebook.com/" + identifier;
+        } else if (type == 'federated'){
+            return "identity://" + $identityProviderDomain + '/' + identifier;
+        }
+    };
+    
+    /**
+     * Identity-access-lockbox-update request.
+     * 
+     * @param data
+     */
+    var identityAccessLockboxUpdate = function(data){
+        var key = data.request.lockbox.key;
+        var type = identity.type;
+        var keyEncrypted = encryptLockbox(key, identity.passwordStretched, identity.identifier, identity.secretSalt);
+        
+        var requestData = {
+                "request": {
+                    "$domain": $identityProviderDomain,
+                    "$id": data.request.$id,
+                    "$handler": "identity-provider",
+                    "$method": "lockbox-half-key-store",
+                
+                    "nonce": data.request.clientNonce,
+                    "identity": {
+                        "accessToken": data.request.identity.accessToken,
+                        "accessSecretProof": data.request.identity.accessSecretProof,
+                        "accessSecretProofExpires": data.request.identity.accessSecretProofExpires,
+                        
+                        "type": identity.type,
+                        "identifier": identity.identifier,
+                        "uri": data.request.identity.uri
+                    },      
+                    "lockbox": {
+                        "keyEncrypted": keyEncrypted
+                    }
+                }
+        };
+        
+        var requestDataString = JSON.stringify(requestData);
+        $.ajax({
+            url : "/api.php",
+            type : "post",
+            data : requestDataString,
+            // callback handler that will be called on success
+            success : function(response, textStatus, jqXHR) {
+                if (validateIdentityAccessLockboxUpdateFedereated(response)) {
+                    identityAccessLockboxUpdateResult(response);
+                } else {
+                    logIt("ERROR", "SubmitSignup");
+                }
+            },
+            // callback handler that will be called on error
+            error : function(jqXHR, textStatus, errorThrown) {
+                logIt("ERROR", "identityAccessLockboxUpdate-> The following error occured: "
+                        + textStatus + errorThrown);
+            }
+        });
+        
+        function validateIdentityAccessLockboxUpdateFedereated(response){
+            try {
+                var responseJSON = JSON.parse(response);
+                if (responseJSON.result.error !== undefined){
+                    return true;
+                }
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+    };
+    
+    var identityAccessLockboxUpdateResult = function(response){
+        var responseJSON = JSON.parse(response);
+        var date = new Date();
+        var message = {
+                "result": {
+                    "$domain": responseJSON.result.$domain,
+                    "$appid": $appid,
+                    "$id": responseJSON.result.$id,
+                    "$handler": "identity",
+                    "$method": "identity-access-lockbox-update",
+                    "$timestamp": date.getTime()
+                  }
+                };
+        window.parent.postMessage(JSON.stringify(message), "*");
+    };
+    
+    var hostedIdentitySecretSet12 = function(responseJSON){
+//        var part1 = generateSecretPart(generateId(), responseJSON.identity.accessToken);
+//        var part2 = generateSecretPart(generateId(), responseJSON.identity.accessSecret);
+//        var parts12 = xorEncode(part1, part2);
+//        var parts21 = xorEncode(part2, part1);
+//alert(parts12 + " " + part21);
+//        hostedIdentitySecretSet(responseJSON, part1, passwordServer1);
+//        hostedIdentitySecretSet(responseJSON, part1, passwordServer2);
+    };
+    
+    var hostedIdentitySecretSet = function(responseJSON, secretPart, server){
+        var nonce = generateNonce();
+        var hostingProof = generateHostingProof();
+        var hostingProofExpires = generateHostingProofExpires();
+        var clientNonce = generateClientNonce();
+        var accessSecretProof = generateAccessSecretProof();
+        var accessSecretProofExpires = generateAccessSecretProofExpires();
+        var uri = generateIdentityURI();
+        
+        // hosted-identity-secret-set scenario
+        var req = {
+                "request": {
+                    "$domain": responseJSON.result.$domain,
+                    "$id": generateId(),
+                    "$method": "hosted-identity-secret-part-set",
+                    
+                    "nonce": nonce,
+                    "hostingProof": hostingProof,
+                    "hostingProofExpires": hostingProofExpires,
+                    "nonce": clientNonce,
+                    "identity": {
+                        "accessToken": data.identity.accessToken,
+                        "accessSecretProof": accessSecretProof,
+                        "accessSecretProofExpires": accessSecretProofExpires,
+                        
+                        "uri": uri,
+                        "secretSalt": identity.salt,
+                        "secretPart": secretPart
+                    }
+                }
+        };
+
+        var reqString = JSON.stringify(req);
+        $.ajax({
+            url : server,
+            type : "post",
+            data : reqString,
+            // callback handler that will be called on success
+            success : function(response, textStatus, jqXHR) {
+                // log a message to the console
+                logIt("DEBUG", "hostedIdentitySecretSet - on success");
+                // handle response
+                afterSecretSet(response);
+            },
+            // callback handler that will be called on error
+            error : function(jqXHR, textStatus, errorThrown) {
+                // log the error to the console
+                logIt("ERROR", "hostedIdentitySecretSet - on error" + textStatus);
+            }
+        });
+    };
+        
+    var afterSecretSet = function(data){
+        var dataJSON = JSON.parse(data);
+        if (dataJSON.result.error == undefined){
+            secretSetResults++;
+        }
+        if (secretSetResults == 2){
+            identityAccessCompleteNotify();
+        }
+    };
+    
+    var hostedIdentitySecretGet = function(data){
+        // hosted-identity-secret-get scenario
+        var loginDataString = JSON.stringify(loginData);
+        $.ajax({
+            url : "/api.php",
+            type : "post",
+            data : loginDataString,
+            // callback handler that will be called on success
+            success : function(response, textStatus, jqXHR) {
+                // log a message to the console
+                logIt("DEBUG", "hostedIdentitySecretGet - on success");
+                // handle response
+                //loginResponse = response;
+                afterSecretGet(response);
+            },
+            // callback handler that will be called on error
+            error : function(jqXHR, textStatus, errorThrown) {
+                // log the error to the console
+                logIt("ERROR", "login - on error" + textStatus);
+            }
+        });
+        var afterSecretGet = function(response){
+            if (identity.secretPart == undefined){
+                identity.secretPart = responseJSON.identity.secretPart;
+            } else {
+                identity.secretPart = xorEncode(identity.secretPart, responseJSON.identity.secretPart);
+                identityAccessCompleteNotify();
+            }
+        }
     };
     
     return {
@@ -704,6 +1138,19 @@ function logIt(type, msg) {
     console.log(type + ": " + msg);
 }
 
+function logToClient(msg){
+    var iframe = document.createElement("IFRAME");
+    var locationProtocol;
+      if (location.protocol === 'https:'){
+          locationProtocol = "https:";
+      } else {
+          locationProtocol = "http:";
+      }
+    iframe.setAttribute("src", locationProtocol + "//datapass.hookflash.me/?method=logToClient;data=" + msg);
+    document.documentElement.appendChild(iframe);
+    iframe.parentNode.removeChild(iframe);
+    iframe = null;
+}
 // startsWith method definition
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function(str) {
@@ -711,12 +1158,61 @@ if (typeof String.prototype.startsWith != 'function') {
     };
 }
 function generateId() {
-    return Math.floor(Math.random() * 1000000) + 1;
+    return (Math.floor(Math.random() * 1000000) + 1 + "");
 }
 
 // /////////////////////////////////////////////////////////
 // generate methods
 // /////////////////////////////////////////////////////////
+
+// Generates secret.
+//
+// @param p1
+// @param p2
+//
+// @return secret
+function generateSecretPart(p1, p2) {
+    var secret;
+    var sha1 = CryptoJS.algo.SHA1.create();
+    // add entropy
+    sha1.update(p1);
+    sha1.update(p2);
+    secret = sha1.finalize();
+    return secret.toString();
+}
+
+String.prototype.toHex = function() {
+    var hex = '', tmp;
+    for(var i=0; i<this.length; i++) {
+        tmp = this.charCodeAt(i).toString(16)
+        if (tmp.length == 1) {
+            tmp = '0' + tmp;
+        }
+        hex += tmp
+    }
+    return hex;
+}
+
+String.prototype.xor = function(other)
+{
+    var xor = "";
+    for (var i = 0; i < this.length && i < other.length; ++i) {
+        xor += String.fromCharCode(this.charCodeAt(i) ^ other.charCodeAt(i));
+    }
+    return xor;
+}
+function xorEncode(txt1, txt2) {
+    var ord = [];
+    var buf = "";
+    for (z = 1; z <= 255; z++) {
+        ord[String.fromCharCode(z)] = z;
+    }
+    for (j = z = 0; z < txt1.length; z++) {
+        buf += String.fromCharCode(ord[txt1.substr(z, 1)] ^ ord[txt2.substr(j, 1)]);
+        j = (j < txt2.length) ? j + 1 : 0;
+    }
+    return buf;
+}
 
 // Generates passwordStretched.
 //
@@ -846,6 +1342,23 @@ function encrypt(message, key, iv) {
         }).toString();
     } else {
         return CryptoJS.AES.encrypt(message, key).toString();
+    }
+
+}
+
+//AES decrypt method
+//
+// @param message
+// @param key
+// @param iv
+// @return encrypted
+function decrypt(message, key, iv) {
+    if (iv) {
+        return CryptoJS.AES.decrypt(message, key, {
+            iv : iv
+        }).toString(CryptoJS.enc.Utf8);
+    } else {
+        return CryptoJS.AES.decrypt(message, key).toString(CryptoJS.enc.Utf8);
     }
 
 }
