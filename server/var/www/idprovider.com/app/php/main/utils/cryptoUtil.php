@@ -177,13 +177,28 @@ class CryptoUtil {
             );
             $sEncr = base64_encode($sEncr);
 	    return rtrim($sEncr, "\0");*/
+            
+            //--------------//
+            
+            /*
             $sEncr = mcrypt_encrypt(
                 MCRYPT_RIJNDAEL_128,
                 $sSecretKey, $sValue, 
                 MCRYPT_MODE_NOFB, 
                 $iv
             );
-	    return rtrim($sEncr, "\0");
+	    return rtrim($sEncr, "\0");*/
+            
+            //--------------//
+            
+            require_once(APP . 'php/libs/seclib/Crypt/AES.php');
+
+            $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
+            $key = hash('sha256', $sSecretKey);
+            $iv = hash('md5', $iv);
+            $cipher->setKey($key);
+            $cipher->setIV($iv);
+            return $cipher->encrypt($sValue);
 	}
 	
 	/**
@@ -206,13 +221,27 @@ class CryptoUtil {
             );
             return rtrim($sDecr, "\0");*/
             //$sValue = CryptoUtil::hexToStr($sValue);
-	    $sDecr = mcrypt_decrypt(
+	    
+            //--------------//
+            
+            /*$sDecr = mcrypt_decrypt(
                 MCRYPT_RIJNDAEL_128,
                 $sSecretKey, $sValue, 
                 MCRYPT_MODE_NOFB,
                 $iv
             );
-            return rtrim($sDecr, "\0");
+            return rtrim($sDecr, "\0");*/
+            
+            //--------------//
+            
+            require_once(APP . 'php/libs/seclib/Crypt/AES.php');
+
+            $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
+            $key = hash('sha256', $sSecretKey);
+            $iv = hash('md5', $iv);
+            $cipher->setKey($key);
+            $cipher->setIV($iv);
+            return $cipher->decrypt($sValue);
 	}
 	
 	/**
