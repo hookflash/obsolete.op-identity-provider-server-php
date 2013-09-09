@@ -505,9 +505,9 @@ class RequestUtil {
 	 */
 	public function validateLockboxHalfKeyStoreRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
-		if ( !( key_exists( 'clientNonce', $req ) && $req['clientNonce'] != null ) ) {
+		if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 			throw new RestServerException('002', array(
-												 'parameter' => 'clientNonce'
+												 'parameter' => 'nonce'
 												 ));
 		}
 		if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
@@ -915,7 +915,7 @@ class RequestUtil {
 		'keyEncrypted'							=> DatabaseUtil::protectFromSqlInjection( $req['lockbox']['keyEncrypted'] )
 		);
 		return array(
-		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
+		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'identity' 								=> $aIdentity,
 		'lockbox'								=> $aLockbox
 		);
