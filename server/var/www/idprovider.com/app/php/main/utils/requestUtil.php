@@ -561,9 +561,9 @@ class RequestUtil {
 	 */
 	public function validateIdentityAccessValidateRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
-		if ( !( key_exists( 'clientNonce', $req ) && $req['clientNonce'] != null ) ) {
+		if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 			throw new RestServerException('002', array(
-												 'parameter' => 'clientNonce'
+												 'parameter' => 'nonce'
 												 ));
 		}
 		if ( !( key_exists( 'purpose', $req ) && $req['purpose'] != null ) ) {
@@ -936,7 +936,7 @@ class RequestUtil {
 		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
 		);
 		return array(
-		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
+		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'purpose'								=> DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
 		'identity' 								=> $aIdentity
 		);
