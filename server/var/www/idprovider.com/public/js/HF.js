@@ -927,12 +927,14 @@ var HF_LoginAPI = function() {
      * @param identifier
      */
     var generateIdentityURI = function(type, identifier){
-        
+        var uri = null;
         if (type === 'facebook'){
-            return "identity://facebook.com/" + identifier;
+            uri = "identity://facebook.com/" + identifier;
         } else if (type == 'federated'){
-            return "identity://" + $identityProviderDomain + '/' + identifier;
+            uri = "identity://" + $identityProviderDomain + '/' + identifier;
         }
+        uri.toLowerCase();
+        return uri;
     };
     
     /**
@@ -1012,7 +1014,7 @@ var HF_LoginAPI = function() {
                     "$id": responseJSON.result.$id,
                     "$handler": "identity",
                     "$method": "identity-access-lockbox-update",
-                    "$timestamp": date.getTime()
+                    "$timestamp": Math.floor(date.getTime()/1000)
                   }
                 };
         window.parent.postMessage(JSON.stringify(message), "*");
