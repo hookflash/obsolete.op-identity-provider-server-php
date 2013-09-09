@@ -50,7 +50,6 @@ class LoginUtil {
 	 * @return array Returns nonce, hostingProof, hostingProofExpires
 	 */
 	public function generateHostingData ( $sMethodName ) {
-	
 		// Generate the nonce
 		$sNonce = CryptoUtil::generateNonce();
 		

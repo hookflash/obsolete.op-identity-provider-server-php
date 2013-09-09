@@ -877,11 +877,15 @@ class User {
 	}
 	
 	private function generateServerTokenCredentials( $aIdentity ) {
-		$sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
-		switch($aIdentity['provider_type']) {
-			case 'facebook':
-				$sServerToken .= '"token":"' . $aIdentity['token'] . '"';
-				break;
+                $sServerToken = '';
+                if ($aIdentity['provider_type'] === 'federated') {
+                    $sServerToken = '{"warning":"Rolodex not supported for type federated!"}';
+                } else {
+                    $sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
+                    switch($aIdentity['provider_type']) {
+                        case 'facebook':
+                            	$sServerToken .= '"token":"' . $aIdentity['token'] . '"';
+                            	break;
 			case 'linkedin':
 				$sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
 				$sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
@@ -897,8 +901,9 @@ class User {
 			case 'github':
 				// TODO implement
 				break;
-		}
-		$sServerToken .= '}';
+                    }
+                    $sServerToken .= '}';
+                }
 		return $sServerToken;		
 	}
 

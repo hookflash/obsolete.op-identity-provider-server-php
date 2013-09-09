@@ -1,0 +1,10 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity-provider",
+		"$method": "hosting-data-get",
+	
+		"purpose": ""
+	}
+}
