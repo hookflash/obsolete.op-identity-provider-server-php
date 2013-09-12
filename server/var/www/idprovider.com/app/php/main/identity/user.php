@@ -679,10 +679,12 @@ class User {
                                                             'parameterValue' 	=> $aRequestData['identity']['accessSecretProof']
                                                             ));
 		}
+                
+                $sDBTable = $this->getAppropriateDatabaseTable($aIdentity['type']);
 		
 		// Get the identity
-		$aIdentityFromDB = $DB->select_single_to_array('legacy_oauth', '*',
-				'where provider_type="' . $aIdentity['type'] . '" and identifier="' . $aIdentity['identifier'] . '"');
+		$aIdentityFromDB = $DB->select_single_to_array($sDBTable, '*',
+				'where identifier="' . $aIdentity['identifier'] . '"');
 		if (!$aIdentityFromDB || empty($aIdentityFromDB)) {
 			throw new RestServerException('003', array(
 												 'type' 		=> $aIdentity['type'],
@@ -876,34 +878,40 @@ class User {
 	}
 	
 	private function generateServerTokenCredentials( $aIdentity ) {
-                $sServerToken = '';
-                if ($aIdentity['provider_type'] === 'federated') {
-                    $sServerToken = '{"warning":"Rolodex not supported for type federated!"}';
-                } else {
-                    $sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
-                    switch($aIdentity['provider_type']) {
-                        case 'facebook':
-                            	$sServerToken .= '"token":"' . $aIdentity['token'] . '"';
-                            	break;
-			case 'linkedin':
-				$sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
-				$sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
-				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-				$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
-				break;
-			case 'twitter':
-				$sServerToken .= '"consumer_key":"' . TWITTER_APP_ID . '",';
-				$sServerToken .= '"consumer_secret":"' . TWITTER_APP_SECRET . '",';
-				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-				$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
-				break;
-			case 'github':
-				// TODO implement
-				break;
-                    }
-                    $sServerToken .= '}';
+            $aRolodexSupportedIdentityTypes = array(
+                'facebook',
+            );    
+            
+            $sServerToken = '';
+            if (! key_exists('provider_type', $aIdentity) ) {
+                throw new RestServerException('011', array());
+            } elseif (! in_array( $aIdentity['provider_type'], $aRolodexSupportedIdentityTypes ) ) {
+                throw new RestServerException('011', array());
+            } else {
+                $sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
+                switch($aIdentity['provider_type']) {
+                    case 'facebook':
+                        $sServerToken .= '"token":"' . $aIdentity['token'] . '"';
+                        break;
+                    case 'linkedin':
+			$sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
+			$sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
+			$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
+			$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
+			break;
+                    case 'twitter':
+			$sServerToken .= '"consumer_key":"' . TWITTER_APP_ID . '",';
+			$sServerToken .= '"consumer_secret":"' . TWITTER_APP_SECRET . '",';
+			$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
+			$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
+			break;
+                    case 'github':
+			// TODO implement
+			break;
                 }
-		return $sServerToken;		
+                $sServerToken .= '}';
+            }
+            return $sServerToken;		
 	}
 
 }
