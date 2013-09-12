@@ -708,7 +708,6 @@ class User {
 	 * @return array Returns array of data that will be added into the header URL after a final redirect
 	 */
 	public function signInAfterOAuthProviderLogin( $sProviderType, $sIdentifier, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sToken, $sSecret ) {
-			
 		// Try getting a user and an identity from the database for the given providerType and identifier
 		$aOAuthIdentity = $this->DB->select_single_to_array('legacy_oauth', '*', 'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"');
 		$aUser = $this->DB->select_single_to_array('user', '*', 'where user_id="' . $aOAuthIdentity['user_id'] . '"');
@@ -727,16 +726,16 @@ class User {
 			$sUpdated = time();
 			$sUser = $this->DB->insert('user', array( 'updated' => $sUpdated ) );
 			$this->DB->insert('legacy_oauth', array( 'user_id' => $sUser,
-													 'provider_type' => $sProviderType,
-													 'identifier' => $sIdentifier,
-													 'provider_username' => $sProviderUsername,
-													 'full_name' => $sProfileFullname,
-													 'profile_url' => $sProfileUrl,
-													 'avatar_url' => $sProfileAvatarUrl,
-													 'token' => $sToken,
-													 'secret' => $sSecret,
-													 'updated' => $sUpdated,
-													 )
+								'provider_type' => $sProviderType,
+								'identifier' => $sIdentifier,
+								'provider_username' => $sProviderUsername,
+								'full_name' => $sProfileFullname,
+								'profile_url' => $sProfileUrl,
+								'avatar_url' => $sProfileAvatarUrl,
+								'token' => $sToken,
+								'secret' => $sSecret,
+								'updated' => $sUpdated,
+								)
 							  );
 		}
 		
