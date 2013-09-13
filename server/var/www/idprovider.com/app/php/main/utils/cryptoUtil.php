@@ -431,7 +431,7 @@ class CryptoUtil {
 	public function generateIdentityAccess ( $sIdentityType, $sIdentifier ) {
 		// Generate token and secret
                 $sAccessSecretExpires = time() + 60*1440*60; // 60secs * 1440mins/day * 60days = 2months
-		$sAccessToken = $sIdentityType . '-' . $sIdentifier . '-' . $sAccessSecretExpires . CryptoUtil::generateNonce();
+		$sAccessToken = $sIdentityType . '-' . $sIdentifier . '-' . $sAccessSecretExpires . '-' . CryptoUtil::generateNonce();
 		$sAccessSecret = CryptoUtil::calculateAccessSecret($sAccessToken);
 		
 		// return the identity access data
@@ -449,7 +449,7 @@ class CryptoUtil {
 	 * @return string Returns calculated accessSecret
 	 */
 	public function calculateAccessSecret ( $sAccessToken ) {
-		$sAccessSecretBase = "identity-access-secret:" . $sAccessToken . PROVIDER_MAGIC_VALUE;
+		$sAccessSecretBase = "identity-access-secret:" . $sAccessToken . '-' . PROVIDER_MAGIC_VALUE;
 		return CryptoUtil::gimmeHash($sAccessSecretBase); 
 	}
 	
@@ -471,7 +471,9 @@ class CryptoUtil {
 					'clientNonce=' . $sClientNonce . ' accessToken=' . $sAccessToken . ' accessSecretProof=' . $sAccessSecretProof . ' accessSecretExpires=' . $sAccessSecretExpires . ' uri=' . $sUri . ' purpose=' . $sPurpose);
 		// Challange the token first
                 $aAccessToken = explode('-', $sAccessToken);
-                if ($aAccessToken[0] != $sIdentityType || $aAccessToken[1] != $sIdentifier) {
+                if ($aAccessToken[0] != $sIdentityType ||           // type must match
+                        $aAccessToken[1] != $sIdentifier ||         // identifier must match
+                        $aAccessToken[2] < time() ) {               // token must not be expired
                     return false;
                 }
 
