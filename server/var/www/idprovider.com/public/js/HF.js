@@ -114,6 +114,12 @@ var HF_LoginAPI = function() {
                 if (dataJSON.request.$method === "identity-access-lockbox-update"){
                     identityAccessLockboxUpdate(dataJSON);
                 }
+                // TODO uncomment after testing
+                /*
+                if (dataJSON.request.$method === "identity-access-rolodex-credentials-get"){
+                    identityAccessRolodexCredentialsGet(dataJSON);
+                }
+                */
             }
         } catch (e) {
             // TODO: handle exception
@@ -1004,6 +1010,65 @@ var HF_LoginAPI = function() {
         
     };
     
+    /**
+     * Identity-access-rolodex-credentials-get request.
+     * 
+     * @param data
+     */
+    var identityAccessRolodexCredentialsGet = function(data){
+        var requestData = {
+                "request": {
+                    "$domain": $identityProviderDomain,
+                    "$id": data.request.$id,
+                    "$handler": data.request.$handler,
+                    "$method": "identity-access-rolodex-credentials-get",
+                
+                    "nonce": data.request.nonce,
+                    "identity": {
+                        "accessToken": data.request.identity.accessToken,
+                        "accessSecretProof": data.request.identity.accessSecretProof,
+                        "accessSecretProofExpires": data.request.identity.accessSecretProofExpires,
+                        
+                        "uri": data.request.identity.uri,
+                        "provider": data.request.identity.provider
+                    }
+                }
+        };
+        
+        var requestDataString = JSON.stringify(requestData);
+        $.ajax({
+            url : "/api.php",
+            type : "post",
+            data : requestDataString,
+            // callback handler that will be called on success
+            success : function(response, textStatus, jqXHR) {
+                if (validateIdentityAccessRolodexCredentialsGet(response)) {
+                    identityAccessRolodexCredentialsGetResult(response);
+                } else {
+                    logIt("ERROR", "SubmitSignup");
+                }
+            },
+            // callback handler that will be called on error
+            error : function(jqXHR, textStatus, errorThrown) {
+                logIt("ERROR", "identityAccessRolodexCredentialsGet-> The following error occured: "
+                        + textStatus + errorThrown);
+            }
+        });
+        
+        function validateIdentityAccessRolodexCredentialsGet(response){
+            try {
+                var responseJSON = JSON.parse(response);
+                if (responseJSON.result.error !== undefined){
+                    return true;
+                }
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+    };
+    
     var identityAccessLockboxUpdateResult = function(response){
         var responseJSON = JSON.parse(response);
         var date = new Date();
@@ -1013,8 +1078,28 @@ var HF_LoginAPI = function() {
                     "$appid": $appid,
                     "$id": responseJSON.result.$id,
                     "$handler": "identity",
-                    "$method": "identity-access-lockbox-update",
+                    "$method": "identity-access-rolodex-credentials-get",
                     "$timestamp": Math.floor(date.getTime()/1000)
+                  }
+                };
+        window.parent.postMessage(JSON.stringify(message), "*");
+    };
+    
+    var identityAccessRolodexCredentialsGetResult = function(response){
+        var responseJSON = JSON.parse(response);
+        var date = new Date();
+        var message = {
+                "result": {
+                    "$domain": responseJSON.result.$domain,
+                    "$appid": $appid,
+                    "$id": responseJSON.result.$id,
+                    "$handler": "identity",
+                    "$method": "identity-access-lockbox-update",
+                    "$timestamp": Math.floor(date.getTime()/1000),
+                    
+                    "rolodex": {
+                        "serverToken": responseJSON.result.rolodex.serverToken
+                    }
                   }
                 };
         window.parent.postMessage(JSON.stringify(message), "*");
