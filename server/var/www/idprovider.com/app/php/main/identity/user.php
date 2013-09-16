@@ -635,13 +635,13 @@ class User {
 		$aIdentity = $this->parseIdentityUri($aRequestData['identity']['uri']);
 		
 		$bAccessSecretProofValidity = CryptoUtil::validateIdentityAccessSecretProof($aRequestData['clientNonce'],
-																					$aRequestData['identity']['accessToken'],
-																					$aRequestData['identity']['accessSecretProof'],
-																					$aRequestData['identity']['accessSecretProofExpires'],
-																					$aIdentity['type'],
-																					$aIdentity['identifier'],
-																					$aRequestData['identity']['uri'],
-																					$aRequestData['purpose'] );
+                                                                                            $aRequestData['identity']['accessToken'],
+                                                                                            $aRequestData['identity']['accessSecretProof'],
+                                                                                            $aRequestData['identity']['accessSecretProofExpires'],
+                                                                                            $aIdentity['type'],
+                                                                                            $aIdentity['identifier'],
+                                                                                            $aRequestData['identity']['uri'],
+                                                                                            $aRequestData['purpose'] );
 		if ( !$bAccessSecretProofValidity ) {
 			throw new RestServerException('007', array(
 												 'parameter' 		=> 'accessSecretProof',
