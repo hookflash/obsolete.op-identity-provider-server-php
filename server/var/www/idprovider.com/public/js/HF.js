@@ -1132,7 +1132,6 @@ either expressed or implied, of the FreeBSD Project.
                         var secretPart2 = generateSecretPart(generateId(), responseJSON.identity.accessSecret);
                         hostedIdentitySecretSet(response, secretPart1, passwordServer1);
                         hostedIdentitySecretSet(response, secretPart2, passwordServer2);
-                        identity.passwordStretched = composePasswordFromParts(secretPart1, secretPart2);
                     } else {
                         hostedIdentitySecretGet(response, passwordServer1);
                         hostedIdentitySecretGet(response, passwordServer2);
