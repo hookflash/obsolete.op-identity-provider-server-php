@@ -72,8 +72,8 @@ either expressed or implied, of the FreeBSD Project.
         var secretSetResults = 0;               // 
         
         //  passwordServers
-        var passwordServer1 = 'hcs-javascript.hookflash.me/';
-        var passwordServer2 = '';
+        var passwordServer1 = 'https://hcs-javascript.hookflash.me/password1';
+        var passwordServer2 = 'https://hcs-javascript.hookflash.me/password2';
         
         /**
          * Gets the current version
@@ -887,10 +887,10 @@ either expressed or implied, of the FreeBSD Project.
                     ) {
                         if (!responseJSON.result.lockbox.key) {
                             // if first time seen identity
-                            hostedIdentitySecretSet(responseJSON);
+                            getHostingData(responseJSON, true);
                         } else {
                             // if seen this before
-                            hostedIdentitySecretGet(responseJSON);
+                            getHostingData(responseJSON, false);
                         }
                     } else {
                         // all other scenarios
@@ -1102,28 +1102,78 @@ either expressed or implied, of the FreeBSD Project.
     //        hostedIdentitySecretSet(responseJSON, part1, passwordServer2);
         };
         
+        var getHostingData = function(responseJSON, setSecretScenario) {
+            log("getHostingData", responseJSON, setSecretScenario);
+            var purpose = setSecretScenario === true ? 
+                    "hosted-identity-secret-part-set" : "hosted-identity-secet-part-get";
+            
+            var reqString = JSON.stringify({
+                "request": {
+                    "$domain": responseJSON.result.$domain,
+                    "$id": generateId(),
+                    "$handler": "identity",
+                    "$method": "hosting-data-get",
+                    
+                    "purpose": purpose
+                }
+            });
+            log("ajax", "/api.php", reqString);
+            $.ajax({
+                url : "/api.php",
+                type : "post",
+                data : reqString,
+                // callback handler that will be called on success
+                success : function(response, textStatus, jqXHR) {
+                    log("getHostingData - Result", response, responsoJSON);
+                    // handle response
+                    response.identity = responseJSON.result.identity;
+                    if (setSecretScenario) {
+                        var secretPart1 = generateSecretPart(generateId(), responseJSON.identity.accessToken);
+                        var secretPart2 = generateSecretPart(generateId(), responseJSON.identity.accessSecret);
+                        hostedIdentitySecretSet(response, secretPart1, passwordServer1);
+                        hostedIdentitySecretSet(response, secretPart2, passwordServer2);
+                    } else {
+                        hostedIdentitySecretGet(response, passwordServer1);
+                        hostedIdentitySecretGet(response, passwordServer2);
+                    }
+                },
+                // callback handler that will be called on error
+                error : function(jqXHR, textStatus, errorThrown) {
+                    log("ERROR", "getHostingData", textStatus);
+                }
+            });
+        };
+        
         var hostedIdentitySecretSet = function(responseJSON, secretPart, server) {
             log("hostedIdentitySecretSet", responseJSON, secretPart, server);
-            var nonce = generateNonce();
-            var hostingProof = generateHostingProof();
-            var hostingProofExpires = generateHostingProofExpires();
+            var nonce = responseJSON.result.hostingData.nonce;
+            var hostingProof = responseJSON.result.hostingData.hostingProof;
+            var hostingProofExpires = responseJSON.result.hostingData.hostingProofExpires;
             var clientNonce = generateClientNonce();
-            var accessSecretProof = generateAccessSecretProof();
-            var accessSecretProofExpires = generateAccessSecretProofExpires();
             var uri = generateIdentityURI();
+            var accessSecretProof = generateAccessSecretProof(
+                    uri,
+                    clientNonce,
+                    responseJSON.identity.accessSecretExpires,
+                    responseJSON.identity.accessToken,
+                    "hosted-identity-secret-part-set",
+                    responseJSON.identity.accessSecret
+                );
+            var accessSecretProofExpires = responseJSON.identity.accessSecretExpires;
 
             var reqString = JSON.stringify({
                 "request": {
                     "$domain": responseJSON.result.$domain,
                     "$id": generateId(),
+                    "$handler": "identity",
                     "$method": "hosted-identity-secret-part-set",
                     
                     "nonce": nonce,
                     "hostingProof": hostingProof,
                     "hostingProofExpires": hostingProofExpires,
-                    "nonce": clientNonce,
+                    "clientNonce": clientNonce,
                     "identity": {
-                        "accessToken": data.identity.accessToken,
+                        "accessToken": responseJSON.identity.accessToken,
                         "accessSecretProof": accessSecretProof,
                         "accessSecretProofExpires": accessSecretProofExpires,
                         
@@ -1225,7 +1275,30 @@ either expressed or implied, of the FreeBSD Project.
         sha1.update(p1);
         sha1.update(p2);
         secret = sha1.finalize();
+        log("generateSecretPart", p1, p2, secret);
         return secret.toString();
+    }
+    
+    
+    // Generates secretAccessSecretProof
+    // 
+    // @param uri 
+    // @param clientNonce 
+    // @param accessSecretExpires 
+    // @param accessToken 
+    // @param purpose 
+    // @param accessSecret 
+    // 
+    // @return accessSecretProof
+    function generateAccessSecretProof(
+            uri,
+            clientNonce,
+            accessSecretExpires,
+            accessToken,
+            purpose,
+            accessSecret) {
+        var message = 'identity-access-validate:' + uri + ':' + clientNonce + ':' + accessSecretExpires + ':' + accessToken + ':' + purpose;
+        return hmac(message, accessSecret);
     }
 
     String.prototype.toHex = function() {
