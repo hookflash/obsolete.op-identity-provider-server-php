@@ -68,7 +68,6 @@ either expressed or implied, of the FreeBSD Project.
         var imageBundle = {};                   // imageBundle (used for avatar upload)
         var $identityProviderDomain;            // used for every request
         var serverMagicValue;                   // serverMagicValue
-        var loginResponse;                      // response from login
         var waitForNotifyResponseId;            // id of "identity-access-window" request
         var secretSetResults = 0;               // 
         
@@ -131,12 +130,12 @@ either expressed or implied, of the FreeBSD Project.
                 } else
                 if (data.result) {
                     if (data.result.$method == 'identity-access-window') {
-                        // TODO: Do we need to do something here?
-/*                        
-                        if (data.result.$id === waitForNotifyResponseId) {
+                        if (
+                            data.result.$id === waitForNotifyResponseId &&
+                            identity.redirectURL
+                        ) {
                             return redirectToURL(identity.redirectURL);
                         }
-*/
                     }
                 } else
                 if (data.request) {
@@ -187,7 +186,7 @@ either expressed or implied, of the FreeBSD Project.
         };
 
         var identityAccessWindowNotify = function(ready, visibility) {
-            log("identityAccessWindowNotify");
+            log("identityAccessWindowNotify", ready, visibility);
             var id = generateId();
             var readyMessage = {
                 "request" : {
@@ -589,9 +588,12 @@ either expressed or implied, of the FreeBSD Project.
                 data : loginDataString,
                 // callback handler that will be called on success
                 success : function(response, textStatus, jqXHR) {
-                    // handle response
-                    loginResponse = response;
-                    afterLogin();
+                    log("ajax", "/api.php", "response", response);
+                    try {
+                        return afterLogin(JSON.parse(response));
+                    } catch(err) {
+                        log("ERROR", err.stack);
+                    }
                 },
                 // callback handler that will be called on error
                 error : function(jqXHR, textStatus, errorThrown) {
@@ -663,25 +665,25 @@ either expressed or implied, of the FreeBSD Project.
 
         var startLoginOauth = function(){
             log("startLoginOauth");
-            identity.clientAuthenticationToken = generateClientAuthenticationToken(generateId(), 
-                   generateId(),
-                   generateId());
-            
-            var requestData = {
+            identity.clientAuthenticationToken = generateClientAuthenticationToken(
+                generateId(), 
+                generateId(),
+                generateId()
+            );
+            var requestDataString = JSON.stringify({
                 "request": {
                     "$domain": $identityProviderDomain,
                     "$id": generateId(),
                     "$handler": "identity-provider",
                     "$method": "oauth-provider-authentication",
-
                     "clientAuthenticationToken": identity.clientAuthenticationToken,
                     "callbackURL": identityAccessStart.browser.outerFrameURL,
                     "identity": {
-                                    "type": identity.type
-                                }
+                        "type": identity.type
+                    }
                 }
-            }
-            var requestDataString = JSON.stringify(requestData);
+            });
+            log("ajax", "/api.php", requestDataString);
             $.ajax({
                 url : "/api.php",
                 type : "post",
@@ -691,7 +693,8 @@ either expressed or implied, of the FreeBSD Project.
                     // log a message to the console
                     log("DEBUG", "loginOAuth - on success");
                     // handle response
-                    if (validateOauthProviderAuthentication(response)){
+                    if (validateOauthProviderAuthentication(response)) {
+                        log("identity", identity);
                         redirectParentOnIdentityAccessWindowResponse();
                     } else {
                         log("ERROR", "loginOAuth - validation error");
@@ -722,7 +725,6 @@ either expressed or implied, of the FreeBSD Project.
         
         var redirectParentOnIdentityAccessWindowResponse = function() {
             log("redirectParentOnIdentityAccessWindowResponse");
-            redirectReady = true;
             identityAccessWindowNotify(true, true);
         }
         
@@ -733,19 +735,17 @@ either expressed or implied, of the FreeBSD Project.
             
             // create reloginKey (only first time)
             var reloginKey;
-            if (identityAccessStart.identity.reloginKey !== undefined){
+            if (identityAccessStart.identity.reloginKey){
                 reloginKey = identityAccessStart.identity.reloginKey;
             } else {
-                var message = identity.passwordStretched + "--" + data.identity.reloginKeyServerPart;
-                reloginKey = encrypt(message, identity.reloginEncryptionKey);
+                reloginKey = encrypt(identity.passwordStretched + "--" + data.identity.reloginKeyServerPart, identity.reloginEncryptionKey);
             }
 
-            if (lockboxkey !== undefined){
+            var message = null;
+            if (lockboxkey) {
                 var iv = hash(identity.secretSalt);
                 var key = decryptLockbox(lockboxkey, identity.passwordStretched, identity.identifier, iv);
-                
-                
-                var message = {
+                message = {
                     "notify": {
                         "$domain": $identityProviderDomain,
                         "$appid" : $appid,
@@ -770,7 +770,7 @@ either expressed or implied, of the FreeBSD Project.
                     }
                 };
             } else {
-                var message = {
+                message = {
                     "notify": {
                         "$domain": $identityProviderDomain,
                         "$appid" : $appid,
@@ -804,7 +804,10 @@ either expressed or implied, of the FreeBSD Project.
             params = params.split("#")[0];
             params = decodeURIComponent(params);
             var paramsJSON = JSON.parse(params);
-            
+
+            log("get localStorage", {
+                clientAuthenticationToken: localStorage.clientAuthenticationToken
+            });
             var clientAuthenticationToken = localStorage.clientAuthenticationToken;
             identity.type = paramsJSON.result.identity.type;
             identity.identifier = paramsJSON.result.identity.identifier;
@@ -815,17 +818,15 @@ either expressed or implied, of the FreeBSD Project.
                     "$appid" : $appid,
                     "$id": generateId(),
                     "$handler": "identity",
-                    "$method": "login",
-                    
+                    "$method": "login",                    
                     "proof" : {
-                                  "clientAuthenticationToken" : clientAuthenticationToken,
-                                  "serverAuthenticationToken" : paramsJSON.result.serverAuthenticationToken
-
-                              },
+                        "clientAuthenticationToken": clientAuthenticationToken,
+                        "serverAuthenticationToken": paramsJSON.result.serverAuthenticationToken
+                    },
                     "identity": {
-                                    "type": paramsJSON.result.identity.type,
-                                    "identifier": paramsJSON.result.identity.identifier
-                                }
+                        "type": paramsJSON.result.identity.type,
+                        "identifier": paramsJSON.result.identity.identifier
+                    }
                 }
             });
         };
@@ -838,17 +839,18 @@ either expressed or implied, of the FreeBSD Project.
         var login = function(loginData) {
             log("login", loginData);
             var loginDataString = JSON.stringify(loginData);
+            log("ajax", "/api.php", loginDataString);
             $.ajax({
                 url : "/api.php",
                 type : "post",
                 data : loginDataString,
                 // callback handler that will be called on success
                 success : function(response, textStatus, jqXHR) {
-                    // log a message to the console
-                    log("DEBUG", "login - on success");
-                    loginResponse = response;
-                    if (validateLogin){
-                        afterLogin();
+                    log("ajax", "/api.php", "response", response);
+                    try {
+                        return afterLogin(JSON.parse(response));
+                    } catch(err) {
+                        log("ERROR", err.stack);
                     }
                 },
                 // callback handler that will be called on error
@@ -857,40 +859,39 @@ either expressed or implied, of the FreeBSD Project.
                     log("ERROR", "login - on error" + textStatus);
                 }
             });
-            function validateLogin(data){
-                var resJSON = JSON.parse(data);
-                if (resJSON.result.error == undefined){
-                    return true;
-                } else {
-                    return false;
-                }
-            }
         };
 
         // AfterLogin callback.
-        var afterLogin = function() {
-            log("afterLogin");
+        var afterLogin = function(responseJSON) {
+            log("afterLogin", responseJSON);
             try {
-                var responseJSON = JSON.parse(loginResponse);
-                // pin validation scenario
-                if (responseJSON.result 
-                        && responseJSON.result.loginState == "PinValidationRequired"){
-                    pinValidateStart();
+                if (!responseJSON.result) {
+                    log("no 'result' property in response");
+                    return;
                 }
-                if (responseJSON.result 
-                        && responseJSON.result.loginState == "Succeeded"){
+                if (responseJSON.result.error) {
+                    log("login error!", responseJSON.result.error);
+                    return;
+                }
+                // pin validation scenario
+                if (responseJSON.result.loginState === "PinValidationRequired") {
+                    pinValidateStart();
+                } else
+                if (responseJSON.result.loginState === "Succeeded") {
                     // login is valid
                     // OAuth
-                    if (identity.type == "facebook" || identity.type == "twitter" || identity.type == "linkedin"){
-                        if (responseJSON.result.lockbox.key == undefined)
-                        {
+                    if (
+                        identity.type == "facebook" ||
+                        identity.type == "twitter" ||
+                        identity.type == "linkedin"
+                    ) {
+                        if (!responseJSON.result.lockbox.key) {
                             // if first time seen identity
-                            hostedIdentitySecretSet12(responseJSON);
+                            hostedIdentitySecretSet(responseJSON);
                         } else {
                             // if seen this before
                             hostedIdentitySecretGet(responseJSON);
                         }
-                        
                     } else {
                         // all other scenarios
                         identityAccessCompleteNotify(responseJSON.result);
@@ -1110,31 +1111,29 @@ either expressed or implied, of the FreeBSD Project.
             var accessSecretProof = generateAccessSecretProof();
             var accessSecretProofExpires = generateAccessSecretProofExpires();
             var uri = generateIdentityURI();
-            
-            // hosted-identity-secret-set scenario
-            var req = {
-                    "request": {
-                        "$domain": responseJSON.result.$domain,
-                        "$id": generateId(),
-                        "$method": "hosted-identity-secret-part-set",
-                        
-                        "nonce": nonce,
-                        "hostingProof": hostingProof,
-                        "hostingProofExpires": hostingProofExpires,
-                        "nonce": clientNonce,
-                        "identity": {
-                            "accessToken": data.identity.accessToken,
-                            "accessSecretProof": accessSecretProof,
-                            "accessSecretProofExpires": accessSecretProofExpires,
-                            
-                            "uri": uri,
-                            "secretSalt": identity.salt,
-                            "secretPart": secretPart
-                        }
-                    }
-            };
 
-            var reqString = JSON.stringify(req);
+            var reqString = JSON.stringify({
+                "request": {
+                    "$domain": responseJSON.result.$domain,
+                    "$id": generateId(),
+                    "$method": "hosted-identity-secret-part-set",
+                    
+                    "nonce": nonce,
+                    "hostingProof": hostingProof,
+                    "hostingProofExpires": hostingProofExpires,
+                    "nonce": clientNonce,
+                    "identity": {
+                        "accessToken": data.identity.accessToken,
+                        "accessSecretProof": accessSecretProof,
+                        "accessSecretProofExpires": accessSecretProofExpires,
+                        
+                        "uri": uri,
+                        "secretSalt": identity.salt,
+                        "secretPart": secretPart
+                    }
+                }
+            });
+            log("ajax", "/api.php", reqString);
             $.ajax({
                 url : server,
                 type : "post",
@@ -1157,7 +1156,7 @@ either expressed or implied, of the FreeBSD Project.
             if (dataJSON.result.error == undefined){
                 secretSetResults++;
             }
-            if (secretSetResults == 2){
+            if (secretSetResults === 2) {
                 identityAccessCompleteNotify();
             }
         };
@@ -1166,6 +1165,7 @@ either expressed or implied, of the FreeBSD Project.
             log("hostedIdentitySecretGet", data);
             // hosted-identity-secret-get scenario
             var loginDataString = JSON.stringify(loginData);
+            log("ajax", "/api.php", loginDataString);
             $.ajax({
                 url : "/api.php",
                 type : "post",
@@ -1175,7 +1175,6 @@ either expressed or implied, of the FreeBSD Project.
                     // log a message to the console
                     log("DEBUG", "hostedIdentitySecretGet - on success");
                     // handle response
-                    //loginResponse = response;
                     afterSecretGet(response);
                 },
                 // callback handler that will be called on error
