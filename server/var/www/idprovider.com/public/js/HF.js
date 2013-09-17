@@ -1132,6 +1132,7 @@ either expressed or implied, of the FreeBSD Project.
                         var secretPart2 = generateSecretPart(generateId(), responseJSON.identity.accessSecret);
                         hostedIdentitySecretSet(response, secretPart1, passwordServer1);
                         hostedIdentitySecretSet(response, secretPart2, passwordServer2);
+                        identity.passwordStretched = composePasswordFromParts(secretPart1, secretPart2);
                     } else {
                         hostedIdentitySecretGet(response, passwordServer1);
                         hostedIdentitySecretGet(response, passwordServer2);
@@ -1211,13 +1212,13 @@ either expressed or implied, of the FreeBSD Project.
             }
         };
         
-        var hostedIdentitySecretGet = function(data) {
+        var hostedIdentitySecretGet = function(data, server) {
             log("hostedIdentitySecretGet", data);
             // hosted-identity-secret-get scenario
             var loginDataString = JSON.stringify(loginData);
             log("ajax", "/api.php", loginDataString);
             $.ajax({
-                url : "/api.php",
+                url : server,
                 type : "post",
                 data : loginDataString,
                 // callback handler that will be called on success
@@ -1235,9 +1236,9 @@ either expressed or implied, of the FreeBSD Project.
             });
             var afterSecretGet = function(response){
                 if (identity.secretPart == undefined){
-                    identity.secretPart = responseJSON.identity.secretPart;
+                    identity.secretPart = data.identity.secretPart;
                 } else {
-                    identity.secretPart = xorEncode(identity.secretPart, responseJSON.identity.secretPart);
+                    identity.passwordStretched = xorEncode(identity.secretPart, data.identity.secretPart);
                     identityAccessCompleteNotify();
                 }
             }
