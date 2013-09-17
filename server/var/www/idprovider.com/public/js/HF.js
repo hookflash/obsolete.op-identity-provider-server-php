@@ -115,11 +115,11 @@ var HF_LoginAPI = function() {
                     identityAccessLockboxUpdate(dataJSON);
                 }
                 // TODO uncomment after testing
-                /*
+                
                 if (dataJSON.request.$method === "identity-access-rolodex-credentials-get"){
                     identityAccessRolodexCredentialsGet(dataJSON);
                 }
-                */
+                
             }
         } catch (e) {
             // TODO: handle exception
@@ -1078,7 +1078,7 @@ var HF_LoginAPI = function() {
                     "$appid": $appid,
                     "$id": responseJSON.result.$id,
                     "$handler": "identity",
-                    "$method": "identity-access-rolodex-credentials-get",
+                    "$method": "identity-access-lockbox-update",
                     "$timestamp": Math.floor(date.getTime()/1000)
                   }
                 };
@@ -1094,7 +1094,7 @@ var HF_LoginAPI = function() {
                     "$appid": $appid,
                     "$id": responseJSON.result.$id,
                     "$handler": "identity",
-                    "$method": "identity-access-lockbox-update",
+                    "$method": "identity-access-rolodex-credentials-get",
                     "$timestamp": Math.floor(date.getTime()/1000),
                     
                     "rolodex": {
