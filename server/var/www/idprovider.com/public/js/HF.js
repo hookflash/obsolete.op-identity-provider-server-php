@@ -1112,6 +1112,13 @@ either expressed or implied, of the FreeBSD Project.
             log("hostedIdentitySecretSet", "accessSecretProof", accessSecretProof);
             var accessSecretProofExpires = responseJSON.identity.accessSecretExpires;
             log("hostedIdentitySecretSet", "accessSecretProofExpires", accessSecretProofExpires);
+            // generate secretSalt
+            var identitySecretSalt = generateSecretSaltForArgs([
+                identity.identifier,
+                accessSecretProofExpires,
+                clientNonce
+            ]);
+            log("hostedIdentitySecretSet", "identitySecretSalt", identitySecretSalt);
             var reqString = JSON.stringify({
                 "request": {
                     "$domain": responseJSON.result.$domain,
@@ -1127,7 +1134,7 @@ either expressed or implied, of the FreeBSD Project.
                         "accessSecretProof": accessSecretProof,
                         "accessSecretProofExpires": accessSecretProofExpires,                        
                         "uri": uri,
-                        "secretSalt": identity.salt,
+                        "secretSalt": identitySecretSalt,
                         "secretPart": secretPart
                     }
                 }
@@ -1137,6 +1144,8 @@ either expressed or implied, of the FreeBSD Project.
                 url : server,
                 type : "post",
                 data : reqString,
+                dataType: "json",
+                contentType: "application/json",
                 // callback handler that will be called on success
                 success: function(response, textStatus, jqXHR) {
                     log("ajax", server, "response", response);
@@ -1327,6 +1336,14 @@ either expressed or implied, of the FreeBSD Project.
         secretSalt = sha1.finalize();
 
         return secretSalt.toString();
+    }
+
+    function generateSecretSaltForArgs(args) {
+        var sha1 = CryptoJS.algo.SHA1.create();
+        args.forEach(function(arg) {
+            sha1.update(arg);
+        });
+        return sha1.finalize().toString();
     }
 
     // Generates serverLoginProof.
