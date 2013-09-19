@@ -899,7 +899,7 @@ either expressed or implied, of the FreeBSD Project.
                         "$handler": "identity-provider",
                         "$method": "lockbox-half-key-store",
                     
-                        "nonce": data.request.clientNonce,
+                        "nonce": data.request.nonce,
                         "identity": {
                             "accessToken": data.request.identity.accessToken,
                             "accessSecretProof": data.request.identity.accessSecretProof,
