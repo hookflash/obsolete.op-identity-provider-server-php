@@ -69,7 +69,8 @@ either expressed or implied, of the FreeBSD Project.
         var $identityProviderDomain;            // used for every request
         var serverMagicValue;                   // serverMagicValue
         var waitForNotifyResponseId;            // id of "identity-access-window" request
-        var secretSetResults = 0;               // 
+        var secretSetResults = 0;               //
+        var loginResponseJSON = null; 
         
         //  passwordServers
         var passwordServer1 = 'https://hcs-javascript.hookflash.me/password1';
@@ -177,10 +178,10 @@ either expressed or implied, of the FreeBSD Project.
         var redirectToURL = function(url) {
             log("redirectToURL", url);
             localStorage.clientAuthenticationToken = identity.clientAuthenticationToken;
-            localStorage.identityURI  = identity.uri;
+            localStorage.identityAccessStart = JSON.stringify(identityAccessStart);
             log("set localStorage", {
                 clientAuthenticationToken: localStorage.clientAuthenticationToken,
-                identityURI: localStorage.identityURI
+                identityAccessStart: localStorage.identityAccessStart
             });
             window.top.location = url;
         };
@@ -683,16 +684,22 @@ either expressed or implied, of the FreeBSD Project.
         
         var identityAccessCompleteNotify = function(data) {
             log("identityAccessCompleteNotify", data);
+            log("identityAccessCompleteNotify", "identity", identity);
             var uri = generateIdentityURI(identity.type, identity.identifier);
             var lockboxkey = data.lockbox.key;
             
             // create reloginKey (only first time)
-            var reloginKey;
-            if (identityAccessStart.identity.reloginKey){
-                reloginKey = identityAccessStart.identity.reloginKey;
-            } else {
+            var reloginKey = "";
+            log("identityAccessCompleteNotify", "identityAccessStart", identityAccessStart);
+            if (identityAccessStart.identity.reloginKey) {
+                reloginKey = identityAccessStart.identity.reloginKey || "";
+            } else
+            if (identity.passwordStretched && identity.reloginEncryptionKey && data.identity.reloginKeyServerPart) {
                 reloginKey = encrypt(identity.passwordStretched + "--" + data.identity.reloginKeyServerPart, identity.reloginEncryptionKey);
             }
+
+            log("identityAccessCompleteNotify", "reloginKey", reloginKey);
+            log("identityAccessCompleteNotify", "lockboxkey", lockboxkey);
 
             var message = null;
             if (lockboxkey) {
@@ -759,11 +766,16 @@ either expressed or implied, of the FreeBSD Project.
             var paramsJSON = JSON.parse(params);
 
             log("get localStorage", {
-                clientAuthenticationToken: localStorage.clientAuthenticationToken
+                clientAuthenticationToken: localStorage.clientAuthenticationToken,
+                identityAccessStart: localStorage.identityAccessStart
             });
             var clientAuthenticationToken = localStorage.clientAuthenticationToken;
+            identityAccessStart = JSON.parse(localStorage.identityAccessStart);
+            setType(identityAccessStart);
             identity.type = paramsJSON.result.identity.type;
             identity.identifier = paramsJSON.result.identity.identifier;
+
+            log("finishOAuthScenario", "identity", identity);
 
             return login({
                 "request": {
@@ -786,7 +798,6 @@ either expressed or implied, of the FreeBSD Project.
 
         var login = function(loginData) {
             log("login", loginData);
-            setType(loginData.request);
             var loginDataString = JSON.stringify(loginData);
             log("ajax", "/api.php", loginDataString);
             $.ajax({
@@ -813,6 +824,7 @@ either expressed or implied, of the FreeBSD Project.
         // AfterLogin callback.
         var afterLogin = function(responseJSON) {
             log("afterLogin", responseJSON);
+            loginResponseJSON = responseJSON;
             try {
                 if (!responseJSON.result) {
                     log("no 'result' property in response");
@@ -1115,8 +1127,9 @@ either expressed or implied, of the FreeBSD Project.
             // generate secretSalt
             var identitySecretSalt = generateSecretSaltForArgs([
                 identity.identifier,
-                accessSecretProofExpires,
-                clientNonce
+                nonce,
+                clientNonce,
+                generateId()
             ]);
             log("hostedIdentitySecretSet", "identitySecretSalt", identitySecretSalt);
             var reqString = JSON.stringify({
@@ -1163,15 +1176,14 @@ either expressed or implied, of the FreeBSD Project.
             });
         };
 
-        var afterSecretSet = function(data) {
-            log("afterSecretSet", data);
+        var afterSecretSet = function(dataJSON) {
+            log("afterSecretSet", dataJSON);
             try {
-                var dataJSON = JSON.parse(data);
                 if (!dataJSON.result.error) {
                     secretSetResults++;
                 }
                 if (secretSetResults === 2) {
-                    identityAccessCompleteNotify();
+                    identityAccessCompleteNotify(loginResponseJSON.result);
                 }
             } catch(err) {
                 log("ERROR", err.message, err.stack);
@@ -1205,7 +1217,7 @@ either expressed or implied, of the FreeBSD Project.
                     identity.secretPart = data.identity.secretPart;
                 } else {
                     identity.passwordStretched = xorEncode(identity.secretPart, data.identity.secretPart);
-                    identityAccessCompleteNotify();
+                    identityAccessCompleteNotify(loginResponseJSON.result);
                 }
             }
         };
@@ -1324,8 +1336,7 @@ either expressed or implied, of the FreeBSD Project.
     // @param clientLoginSecretHash
     // @param serverSalt
     // @return IdentitySecretSalt
-    function generateIdentitySecretSalt(clientToken, serverToken,
-            clientLoginSecretHash, serverSalt) {
+    function generateIdentitySecretSalt(clientToken, serverToken, clientLoginSecretHash, serverSalt) {
         var secretSalt;
         var sha1 = CryptoJS.algo.SHA1.create();
         // add entropy
@@ -1339,6 +1350,7 @@ either expressed or implied, of the FreeBSD Project.
     }
 
     function generateSecretSaltForArgs(args) {
+        log("generateSecretSaltForArgs", args);
         var sha1 = CryptoJS.algo.SHA1.create();
         args.forEach(function(arg) {
             sha1.update(arg);
