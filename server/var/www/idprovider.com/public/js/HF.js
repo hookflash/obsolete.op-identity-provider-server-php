@@ -1091,76 +1091,80 @@ either expressed or implied, of the FreeBSD Project.
         };
 
         var hostedIdentitySecretSet = function(responseJSON, secretPart, server) {
-            log("hostedIdentitySecretSet", responseJSON, secretPart, server);
-            var nonce = responseJSON.result.hostingData.nonce;
-            log("hostedIdentitySecretSet", "nonce", nonce);
-            var hostingProof = responseJSON.result.hostingData.hostingProof;
-            log("hostedIdentitySecretSet", "hostingProof", hostingProof);
-            var hostingProofExpires = responseJSON.result.hostingData.hostingProofExpires;
-            var clientNonce = generateId();
-            log("hostedIdentitySecretSet", "identity", identity);
-            var uri = generateIdentityURI(identity.type, identity.identifier);
-            log("hostedIdentitySecretSet", "uri", uri);
-            var accessSecretProof = generateAccessSecretProof(
-                uri,
-                clientNonce,
-                responseJSON.identity.accessSecretExpires,
-                responseJSON.identity.accessToken,
-                "hosted-identity-secret-part-set",
-                responseJSON.identity.accessSecret
-            );
-            log("hostedIdentitySecretSet", "accessSecretProof", accessSecretProof);
-            var accessSecretProofExpires = responseJSON.identity.accessSecretExpires;
-            log("hostedIdentitySecretSet", "accessSecretProofExpires", accessSecretProofExpires);
-            // generate secretSalt
-            var identitySecretSalt = generateSecretSaltForArgs([
-                identity.identifier,
-                accessSecretProofExpires,
-                clientNonce
-            ]);
-            log("hostedIdentitySecretSet", "identitySecretSalt", identitySecretSalt);
-            var reqString = JSON.stringify({
-                "request": {
-                    "$domain": responseJSON.result.$domain,
-                    "$id": generateId(),
-                    "$handler": "identity",
-                    "$method": "hosted-identity-secret-part-set",
-                    "nonce": nonce,
-                    "hostingProof": hostingProof,
-                    "hostingProofExpires": hostingProofExpires,
-                    "clientNonce": clientNonce,
-                    "identity": {
-                        "accessToken": responseJSON.identity.accessToken,
-                        "accessSecretProof": accessSecretProof,
-                        "accessSecretProofExpires": accessSecretProofExpires,                        
-                        "uri": uri,
-                        "secretSalt": identitySecretSalt,
-                        "secretPart": secretPart
+            try {
+                log("hostedIdentitySecretSet", responseJSON, secretPart, server);
+                var nonce = responseJSON.result.hostingData.nonce;
+                log("hostedIdentitySecretSet", "nonce", nonce);
+                var hostingProof = responseJSON.result.hostingData.hostingProof;
+                log("hostedIdentitySecretSet", "hostingProof", hostingProof);
+                var hostingProofExpires = responseJSON.result.hostingData.hostingProofExpires;
+                var clientNonce = generateId();
+                log("hostedIdentitySecretSet", "identity", identity);
+                var uri = generateIdentityURI(identity.type, identity.identifier);
+                log("hostedIdentitySecretSet", "uri", uri);
+                var accessSecretProof = generateAccessSecretProof(
+                    uri,
+                    clientNonce,
+                    responseJSON.identity.accessSecretExpires,
+                    responseJSON.identity.accessToken,
+                    "hosted-identity-secret-part-set",
+                    responseJSON.identity.accessSecret
+                );
+                log("hostedIdentitySecretSet", "accessSecretProof", accessSecretProof);
+                var accessSecretProofExpires = responseJSON.identity.accessSecretExpires;
+                log("hostedIdentitySecretSet", "accessSecretProofExpires", accessSecretProofExpires);
+                // generate secretSalt
+                var identitySecretSalt = generateSecretSaltForArgs([
+                    identity.identifier,
+                    accessSecretProofExpires,
+                    clientNonce
+                ]);
+                log("hostedIdentitySecretSet", "identitySecretSalt", identitySecretSalt);
+                var reqString = JSON.stringify({
+                    "request": {
+                        "$domain": responseJSON.result.$domain,
+                        "$id": generateId(),
+                        "$handler": "identity",
+                        "$method": "hosted-identity-secret-part-set",
+                        "nonce": nonce,
+                        "hostingProof": hostingProof,
+                        "hostingProofExpires": hostingProofExpires,
+                        "clientNonce": clientNonce,
+                        "identity": {
+                            "accessToken": responseJSON.identity.accessToken,
+                            "accessSecretProof": accessSecretProof,
+                            "accessSecretProofExpires": accessSecretProofExpires,                        
+                            "uri": uri,
+                            "secretSalt": identitySecretSalt,
+                            "secretPart": secretPart
+                        }
                     }
-                }
-            });
-            log("ajax", server, reqString);
-            $.ajax({
-                url : server,
-                type : "post",
-                data : reqString,
-                dataType: "json",
-                contentType: "application/json",
-                // callback handler that will be called on success
-                success: function(response, textStatus, jqXHR) {
-                    log("ajax", server, "response", response);
-                    return afterSecretSet(response);
-                },
-                // callback handler that will be called on error
-                error: function(jqXHR, textStatus, errorThrown) {
-                    log("ERROR", "hostedIdentitySecretSet", textStatus, errorThrown, {
-                        readyState: jqXHR.readyState,
-                        status: jqXHR.status,
-                        statusText: jqXHR.statusText,
-                        responseText: jqXHR.responseText
-                    });
-                }
-            });
+                });
+                log("ajax", server, reqString);
+                $.ajax({
+                    url : server,
+                    type : "post",
+                    data : reqString,
+                    dataType: "json",
+                    contentType: "application/json",
+                    // callback handler that will be called on success
+                    success: function(response, textStatus, jqXHR) {
+                        log("ajax", server, "response", response);
+                        return afterSecretSet(response);
+                    },
+                    // callback handler that will be called on error
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        log("ERROR", "hostedIdentitySecretSet", textStatus, errorThrown, {
+                            readyState: jqXHR.readyState,
+                            status: jqXHR.status,
+                            statusText: jqXHR.statusText,
+                            responseText: jqXHR.responseText
+                        });
+                    }
+                });
+            } catch(err) {
+                log("ERROR", err.message, err.stack);
+            }
         };
 
         var afterSecretSet = function(data) {
