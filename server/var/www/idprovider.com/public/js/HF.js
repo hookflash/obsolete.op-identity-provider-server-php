@@ -1326,6 +1326,7 @@ either expressed or implied, of the FreeBSD Project.
         var passwordStretched = "password-hash:" + identifier + password
                 + serverPasswordSalt;
         // key stretching
+        // @see http://en.wikipedia.org/wiki/Key_stretching
         for ( var i = 0; i < 128; i++) {
             passwordStretched = hash(passwordStretched);
         }
