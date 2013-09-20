@@ -1193,7 +1193,7 @@ either expressed or implied, of the FreeBSD Project.
         var hostedIdentitySecretGet = function(data, server) {
             log("hostedIdentitySecretGet", data);
             // hosted-identity-secret-get scenario
-            var loginDataString = JSON.stringify(loginData);
+            var loginDataString = JSON.stringify(data);
             log("ajax", "/api.php", loginDataString);
             $.ajax({
                 url : server,
@@ -1201,10 +1201,9 @@ either expressed or implied, of the FreeBSD Project.
                 data : loginDataString,
                 // callback handler that will be called on success
                 success : function(response, textStatus, jqXHR) {
-                    // log a message to the console
-                    log("DEBUG", "hostedIdentitySecretGet - on success");
+                    log("ajax", "/api.php", "response", response);
                     // handle response
-                    afterSecretGet(response);
+                    afterSecretGet(JSON.parse(response));
                 },
                 // callback handler that will be called on error
                 error : function(jqXHR, textStatus, errorThrown) {
@@ -1212,13 +1211,17 @@ either expressed or implied, of the FreeBSD Project.
                     log("ERROR", "login - on error" + textStatus);
                 }
             });
-            var afterSecretGet = function(response){
-                if (identity.secretPart == undefined){
+            var afterSecretGet = function(response) {
+                log("afterSecretGet", response);
+                log("afterSecretGet", "identity", identity);
+                log("afterSecretGet", "loginResponseJSON", loginResponseJSON);
+                log("afterSecretGet", "data", data);
+                if (!identity.secretPart) {
                     identity.secretPart = data.identity.secretPart;
                 } else {
                     identity.passwordStretched = xorEncode(identity.secretPart, data.identity.secretPart);
-                    identityAccessCompleteNotify(loginResponseJSON.result);
                 }
+                identityAccessCompleteNotify(loginResponseJSON.result);
             }
         };
         
