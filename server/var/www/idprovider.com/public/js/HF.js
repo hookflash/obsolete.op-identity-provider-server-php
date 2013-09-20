@@ -1162,7 +1162,7 @@ either expressed or implied, of the FreeBSD Project.
                 // callback handler that will be called on success
                 success: function(response, textStatus, jqXHR) {
                     log("ajax", server, "response", response);
-                    return afterSecretSet(response);
+                    return afterSecretSet(response, secretPart);
                 },
                 // callback handler that will be called on error
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -1176,9 +1176,15 @@ either expressed or implied, of the FreeBSD Project.
             });
         };
 
-        var afterSecretSet = function(dataJSON) {
+        var afterSecretSet = function(dataJSON, secretPart) {
             log("afterSecretSet", dataJSON);
             try {
+                if (!identity.secretPartSet) {
+                    identity.secretPartSet = secretPart;
+                } else {
+                    identity.passwordStretched = xorEncode(identity.secretPartSet, dataJSON.identity.secretPart);
+                }
+                
                 if (!dataJSON.result.error) {
                     secretSetResults++;
                 }
@@ -1191,14 +1197,51 @@ either expressed or implied, of the FreeBSD Project.
         };
 
         var hostedIdentitySecretGet = function(data, server) {
-            log("hostedIdentitySecretGet", data);
+            log("hostedIdentitySecretSet", data, server);
+            var nonce = data.result.hostingData.nonce;
+            log("hostedIdentitySecretSet", "nonce", nonce);
+            var hostingProof = data.result.hostingData.hostingProof;
+            log("hostedIdentitySecretSet", "hostingProof", hostingProof);
+            var hostingProofExpires = data.result.hostingData.hostingProofExpires;
+            var clientNonce = generateId();
+            log("hostedIdentitySecretSet", "identity", identity);
+            var uri = generateIdentityURI(identity.type, identity.identifier);
+            log("hostedIdentitySecretSet", "uri", uri);
+            var accessSecretProof = generateAccessSecretProof(
+                uri,
+                clientNonce,
+                data.identity.accessSecretExpires,
+                data.identity.accessToken,
+                "hosted-identity-secret-part-get",
+                data.identity.accessSecret
+            );
+            log("hostedIdentitySecretSet", "accessSecretProof", accessSecretProof);
+            var accessSecretProofExpires = data.identity.accessSecretExpires;
+            log("hostedIdentitySecretSet", "accessSecretProofExpires", accessSecretProofExpires);
             // hosted-identity-secret-get scenario
-            var loginDataString = JSON.stringify(data);
-            log("ajax", "/api.php", loginDataString);
+            var reqString = JSON.stringify({
+                "request": {
+                    "$domain": data.result.$domain,
+                    "$id": generateId(),
+                    "$handler": "identity",
+                    "$method": "hosted-identity-secret-part-get",
+                    "nonce": nonce,
+                    "hostingProof": hostingProof,
+                    "hostingProofExpires": hostingProofExpires,
+                    "clientNonce": clientNonce,
+                    "identity": {
+                        "accessToken": data.identity.accessToken,
+                        "accessSecretProof": accessSecretProof,
+                        "accessSecretProofExpires": accessSecretProofExpires,                        
+                        "uri": uri
+                    }
+                }
+            });
+            log("ajax", server, reqString);
             $.ajax({
                 url : server,
                 type : "post",
-                data : loginDataString,
+                data : reqString,
                 // callback handler that will be called on success
                 success : function(response, textStatus, jqXHR) {
                     log("ajax", "/api.php", "response", response);
