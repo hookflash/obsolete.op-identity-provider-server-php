@@ -1208,7 +1208,7 @@ either expressed or implied, of the FreeBSD Project.
                 // callback handler that will be called on error
                 error : function(jqXHR, textStatus, errorThrown) {
                     // log the error to the console
-                    log("ERROR", "login - on error" + textStatus);
+                    log("ERROR", "hostedIdentitySecretGet - on error" + textStatus);
                 }
             });
             var afterSecretGet = function(response) {
