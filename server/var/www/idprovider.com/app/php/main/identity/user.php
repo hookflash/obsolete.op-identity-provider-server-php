@@ -35,6 +35,25 @@
 // Set time
 date_default_timezone_set('UTC');
 
+
+function OUR_hex2bin($h)
+  {
+  if (!is_string($h)) return null;
+  $r='';
+  for ($a=0; $a<strlen($h); $a+=2) { $r.=chr(hexdec($h{$a}.$h{($a+1)})); }
+  return $r;
+}
+
+function OUR_bin2hex($str) {
+    $hex = "";
+    $i = 0;
+    do {
+        $hex .= sprintf("%02x", ord($str{$i}));
+        $i++;
+    } while ($i < strlen($str));
+    return $hex;
+}
+
 /**
  * Class User is responsible for storage and management of the users and their identities
  * using common database techniques.
@@ -694,9 +713,23 @@ class User {
 		
 		
 		$sServerTokenCredentials = $this->generateServerTokenCredentials($aIdentityFromDB);
+
+		// NOTE: This is the implementation compatible with [cifre](https://github.com/openpeer/cifre) used in
+		//       [opjs](https://github.com/openpeer/opjs) and [rolodex](https://github.com/openpeer/rolodex).
+
+		require_once(APP . 'php/libs/seclib/Crypt/AES.php');
+		$key = hash('sha256', DOMAIN_HOSTING_SECRET);
+		$iv = hash('md5', CryptoUtil::generateIv());
+		$cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
+		$cipher->setKey(OUR_hex2bin($key));
+		$cipher->setIV(OUR_hex2bin($iv));
+		$sServerToken = $iv . '-' . OUR_bin2hex($cipher->encrypt($sServerTokenCredentials));
+
+		/*
 		$sIV = CryptoUtil::generateIv();
 		$sServerToken = bin2hex($sIV) . '-' . 
                         bin2hex(CryptoUtil::encrypt($sServerTokenCredentials, $sIV, DOMAIN_HOSTING_SECRET));
+        */
 		return $sServerToken;
 	}
 
