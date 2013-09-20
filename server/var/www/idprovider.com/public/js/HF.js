@@ -70,6 +70,7 @@ either expressed or implied, of the FreeBSD Project.
         var serverMagicValue;                   // serverMagicValue
         var waitForNotifyResponseId;            // id of "identity-access-window" request
         var secretSetResults = 0;               //
+        var secretGetResults = 0;               //
         var loginResponseJSON = null; 
         
         //  passwordServers
@@ -1177,7 +1178,7 @@ either expressed or implied, of the FreeBSD Project.
         };
 
         var afterSecretSet = function(dataJSON, secretPart) {
-            log("afterSecretSet", dataJSON);
+            log("afterSecretSet", dataJSON, secretPart);
             try {
                 if (!identity.secretPartSet) {
                     identity.secretPartSet = secretPart;
@@ -1242,16 +1243,22 @@ either expressed or implied, of the FreeBSD Project.
                 url : server,
                 type : "post",
                 data : reqString,
+                dataType: "json",
+                contentType: "application/json",
                 // callback handler that will be called on success
                 success : function(response, textStatus, jqXHR) {
                     log("ajax", "/api.php", "response", response);
                     // handle response
-                    afterSecretGet(JSON.parse(response));
+                    afterSecretGet(response);
                 },
                 // callback handler that will be called on error
                 error : function(jqXHR, textStatus, errorThrown) {
-                    // log the error to the console
-                    log("ERROR", "hostedIdentitySecretGet - on error" + textStatus);
+                    log("ERROR", "hostedIdentitySecretGet", textStatus, errorThrown, {
+                        readyState: jqXHR.readyState,
+                        status: jqXHR.status,
+                        statusText: jqXHR.statusText,
+                        responseText: jqXHR.responseText
+                    });
                 }
             });
             var afterSecretGet = function(response) {
@@ -1264,7 +1271,12 @@ either expressed or implied, of the FreeBSD Project.
                 } else {
                     identity.passwordStretched = xorEncode(identity.secretPart, data.identity.secretPart);
                 }
-                identityAccessCompleteNotify(loginResponseJSON.result);
+                if (!response.result.error) {
+                    secretGetResults++;
+                }
+                if (secretGetResults === 2) {
+                    identityAccessCompleteNotify(loginResponseJSON.result);
+                }
             }
         };
         
