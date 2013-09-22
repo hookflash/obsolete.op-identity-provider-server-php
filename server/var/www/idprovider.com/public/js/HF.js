@@ -1180,16 +1180,21 @@ either expressed or implied, of the FreeBSD Project.
         var afterSecretSet = function(dataJSON, secretPart) {
             log("afterSecretSet", dataJSON, secretPart);
             try {
-                if (!identity.secretPartSet) {
+                log("afterSecretSet", identity);
+                if (identity.secretPartSet === undefined) {
+                    log("afterSecretSet", "if branch", secretSetResults);
                     identity.secretPartSet = secretPart;
                 } else {
-                    identity.passwordStretched = xorEncode(identity.secretPartSet, dataJSON.identity.secretPart);
+                    log("afterSecretSet", "else branch", secretSetResults);
+                    identity.passwordStretched = xorEncode(identity.secretPartSet, secretPart);
                 }
+                log("afterSecretSet", secretSetResults, identity);
                 
                 if (!dataJSON.result.error) {
                     secretSetResults++;
                 }
                 if (secretSetResults === 2) {
+                    log("afterSecreySet", "Will enter identityAccessCompleteNotify with loginResponseJSON:", loginResponseJSON);
                     identityAccessCompleteNotify(loginResponseJSON.result);
                 }
             } catch(err) {
