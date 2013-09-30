@@ -334,6 +334,16 @@ either expressed or implied, of the FreeBSD Project.
             // sign up
             $("#" + initData.signup.click).click(function() {
                 log("user signup clicked");
+
+                function showError(message) {
+                    var elm = $("#signupDiv DIV.error");
+                    elm.html(message);
+                    elm.removeClass("hidden");
+                    setTimeout(function() {
+                        elm.addClass("hidden");
+                    }, 5000);
+                }
+
                 // read data from input fields
                 identity.identifier = $("#" + initData.signup.id).val().toLowerCase();
                 identity.password = $("#" + initData.signup.password).val();
@@ -373,44 +383,37 @@ either expressed or implied, of the FreeBSD Project.
                             }
                         }
                     };
-                    var requestDataString = JSON.stringify(requestData);
+
                     log("ajax", "/api.php", requestData);
                     $.ajax({
                         url : "/api.php",
                         type : "post",
-                        data : requestDataString,
+                        data : JSON.stringify(requestData),
                         // callback handler that will be called on success
                         success : function(response, textStatus, jqXHR) {
-                            if (signupSuccess(response)) {
-                                getServerNonce(loginFederated);
-                            } else {
-                                log("ERROR", "SubmitSignup");
+                            log("ajax", "/api.php", "response", response);
+                            try {
+                                var result = JSON.parse(response).result;
+                                if (result.error) {
+                                    if (result.error.reason.$id == "403") {
+                                        showError("Username already exists!");
+                                    } else {
+                                        showError(result.error.reason.message);
+                                    }
+                                } else {
+                                    getServerNonce(loginFederated);
+                                }
+                            } catch(err) {
+                                log("ERROR", "signup", err.message, err.stack);
+                                showError("Server response not valid. Please try again in a moment.");
                             }
                         },
                         // callback handler that will be called on error
                         error : function(jqXHR, textStatus, errorThrown) {
                             log("ERROR", "signup", "ajax", textStatus, errorThrown);
+                            showError("Error while contacting server. Please try again in a moment.");
                         }
                     });
-
-                    // Validates response of Sign up action call.
-                    //
-                    // @param response from server
-                    // @param afterSignUp callback
-                    function signupSuccess(response, afterSignUp) {
-                        log("signupSuccess", response);
-                        try {
-                            var result = JSON.parse(response);
-                            // validate response
-                            if (result.error) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        } catch (err) {
-                            return false;
-                        }
-                    }
                 });
             });
             // signup upload avatar image handler
