@@ -169,7 +169,7 @@ class LoginUtil {
 		
 		// Send cURL request
 		$sResult = CurlUtil::sendPostRequest($url, $requestData);
-		die($sResult);
+                
 		// Convert the result to an array
 		$aResultObject = JsonUtil::jsonToArray($sResult, false);
 		
