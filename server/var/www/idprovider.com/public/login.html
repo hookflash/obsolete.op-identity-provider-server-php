@@ -54,6 +54,20 @@ either expressed or implied, of the FreeBSD Project.
 
 <link rel="stylesheet" href="js/lib/jquery/jquery.mobile-1.3.0.min.css" />
 
+<style>
+DIV.error {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid #FF0000;
+    color: #FF0000;
+    font-weight: bold;
+    white-space: nowrap;
+}
+DIV.hidden {
+    display: none;
+}
+</style>
+
 <script type="text/javascript">
 
     window.__LOGGER.setUrl("http://legacy.instances.system.hookflash.com/tools/logger/record");
@@ -66,28 +80,28 @@ either expressed or implied, of the FreeBSD Project.
         federatedId: "federated",
         pinvalidationId: "pinvalidation",
         login: {
-                   click: "loginClick",
-                   id: "loginId",
-                   password: "loginPassword"
-               },
+            click: "loginClick",
+            id: "loginId",
+            password: "loginPassword"
+        },
         signup: {   
-                    click: "signupClick",
-                    id: "signUpId",
-                    password: "signUpPassword",
-                    displayName: "signUpDisplayName",
-                    uploadClick: "uploadClick"
-                },
+            click: "signupClick",
+            id: "signUpId",
+            password: "signUpPassword",
+            displayName: "signUpDisplayName",
+            uploadClick: "uploadClick"
+        },
         pinClick: "pinClick"
     };
-    
+
     // Show sign up div / hide login div
-    function showSignUp(){
+    function showSignUp() {
         $("#signupDiv").css("display", "block");
         $("#loginDiv").css("display", "none");
     }
 
     // Hide sign up div / show login div
-    function showLogin(){
+    function showLogin() {
         $("#signupDiv").css("display", "none");
         $("#loginDiv").css("display", "block");
     }
@@ -101,6 +115,7 @@ either expressed or implied, of the FreeBSD Project.
             <div data-role="header">
                 <h1>Enter credentials</h1>
             </div>
+            <div class="error hidden"></div>
             Username <input type="text" size="40" id="loginId" />
             Password <input type="password" size="20" id="loginPassword" />
             <button id="loginClick">

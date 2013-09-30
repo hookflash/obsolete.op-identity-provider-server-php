@@ -337,7 +337,35 @@ either expressed or implied, of the FreeBSD Project.
             });
             // login
             $("#" + initData.login.click).click(function() {
-                loginOnClick();
+                log("user login clicked");
+                // read data from input fields
+                identity.identifier = $("#" + initData.login.id).val();
+                identity.password = $("#" + initData.login.password).val();
+                log("identity.identifier", identity.identifier);
+                log("identity.password.length", identity.password.length);
+                getIdentitySalts(function() {
+                    getServerNonce(function() {
+                        loginFederated(function(err) {
+                            log("loginFederated", "callback", err);
+                            if (err) {
+                                function showError(message) {
+                                    var elm = $("#loginDiv DIV.error");
+                                    elm.html(message);
+                                    elm.removeClass("hidden");
+                                    setTimeout(function() {
+                                        elm.addClass("hidden");
+                                    }, 5000);
+                                }
+                                if (err.code === 403) {
+                                    showError("Incorrect login!");
+                                } else {
+                                    showError(err.message);
+                                }
+                                return;
+                            }
+                        });
+                    });
+                });
             });
             identityAccessWindowNotify(true, true);
         };
@@ -573,22 +601,9 @@ either expressed or implied, of the FreeBSD Project.
                 }
             }
         };
-
-        var loginOnClick = function() {
-            log("loginOnClick");
-            // read data from input fields
-            identity.identifier = $("#" + initData.login.id).val();
-            identity.password = $("#" + initData.login.password).val();
-
-            getIdentitySalts(getIdentitySaltsCallbackFederated);
-        };
-        var getIdentitySaltsCallbackFederated = function(){
-            log("getIdentitySaltsCallbackFederated");
-            getServerNonce(loginFederated);
-        }
         
-        var loginFederated = function() {
-            log("loginFederated");
+        var loginFederated = function(loginResponseCallback) {
+            log("loginFederated", loginResponseCallback);
             identity.passwordStretched = generatePasswordStretched(identity.identifier, 
                     identity.password, 
                     identity.serverPasswordSalt);
@@ -615,7 +630,7 @@ either expressed or implied, of the FreeBSD Project.
                         "identifier": identity.identifier,
                     }
                 }
-            });
+            }, loginResponseCallback);
         };
 
         var startLoginOauth = function(){
@@ -797,7 +812,7 @@ either expressed or implied, of the FreeBSD Project.
             });
         };
 
-        var login = function(loginData) {
+        var login = function(loginData, loginResponseCallback) {
             log("login", loginData);
             var loginDataString = JSON.stringify(loginData);
             log("ajax", "/api.php", loginDataString);
@@ -809,7 +824,44 @@ either expressed or implied, of the FreeBSD Project.
                 success : function(response, textStatus, jqXHR) {
                     log("ajax", "/api.php", "response", response);
                     try {
-                        return afterLogin(JSON.parse(response));
+                        loginResponseJSON = JSON.parse(response);
+                        log("login", "loginResponseJSON", loginResponseJSON);
+                        if (!loginResponseJSON.result) {
+                            throw new Error("No 'result' property in response");
+                        }
+                        if (loginResponseJSON.result.error) {
+                            var err = new Error(loginResponseJSON.result.error.reason.message);
+                            err.code = parseInt(loginResponseJSON.result.error.reason.$id);
+                            if (loginResponseCallback) {
+                                loginResponseCallback(err);
+                            }
+                            throw err;
+                        }
+                        // pin validation scenario
+                        if (loginResponseJSON.result.loginState === "PinValidationRequired") {
+                            pinValidateStart();
+                        } else
+                        if (loginResponseJSON.result.loginState === "Succeeded") {
+                            // login is valid
+                            // OAuth
+                            if (
+                                identity.type == "facebook" ||
+                                identity.type == "twitter" ||
+                                identity.type == "linkedin"
+                            ) {
+                                if (!loginResponseJSON.result.lockbox.key) {
+                                    // if first time seen identity
+                                    getHostingData(loginResponseJSON, true);
+                                } else {
+                                    // if seen this before
+                                    getHostingData(loginResponseJSON, false);
+                                }
+                            } else {
+                                // all other scenarios
+                                identityAccessCompleteNotify(loginResponseJSON.result);
+                            }
+                        }
+                        return afterLogin(JSON.parse(response), loginResponseCallback);
                     } catch(err) {
                         log("ERROR", err.stack);
                     }
@@ -822,48 +874,6 @@ either expressed or implied, of the FreeBSD Project.
             });
         };
 
-        // AfterLogin callback.
-        var afterLogin = function(responseJSON) {
-            log("afterLogin", responseJSON);
-            loginResponseJSON = responseJSON;
-            try {
-                if (!responseJSON.result) {
-                    log("no 'result' property in response");
-                    return;
-                }
-                if (responseJSON.result.error) {
-                    log("login error!", responseJSON.result.error);
-                    return;
-                }
-                // pin validation scenario
-                if (responseJSON.result.loginState === "PinValidationRequired") {
-                    pinValidateStart();
-                } else
-                if (responseJSON.result.loginState === "Succeeded") {
-                    // login is valid
-                    // OAuth
-                    if (
-                        identity.type == "facebook" ||
-                        identity.type == "twitter" ||
-                        identity.type == "linkedin"
-                    ) {
-                        if (!responseJSON.result.lockbox.key) {
-                            // if first time seen identity
-                            getHostingData(responseJSON, true);
-                        } else {
-                            // if seen this before
-                            getHostingData(responseJSON, false);
-                        }
-                    } else {
-                        // all other scenarios
-                        identityAccessCompleteNotify(responseJSON.result);
-                    }
-                }
-            } catch (err) {
-                log("ERROR", err.stack);
-            }
-        };
-        
         /**
          * Generates identity URI.
          * 
