@@ -365,20 +365,19 @@ either expressed or implied, of the FreeBSD Project.
                             "$id" : generateId(),
                             "$handler" : "identity-provider",
                             "$method" : "sign-up",
-
                             "identity" : {
                                 "type" : identity.type,
                                 "identifier" : identity.identifier,
                                 "passwordHash" : identity.passwordStretched,
                                 "secretSalt" : identity.secretSalt,
                                 "serverPasswordSalt" : identity.serverPasswordSalt,
-                                "uri" : identity.uri + identity.identifier
-                            },
-                            "displayName" : identity.displayName,
-                            "avatars" : {
-                                "avatar" : {
-                                    "name" : imageBundle.filename,
-                                    "url" : imageBundle.fileURL
+                                "uri" : identity.uri + identity.identifier,
+                                "displayName" : identity.displayName,
+                                "avatars" : {
+                                    "avatar" : {
+                                        "name" : imageBundle.filename,
+                                        "url" : imageBundle.fileURL
+                                    }
                                 }
                             }
                         }
