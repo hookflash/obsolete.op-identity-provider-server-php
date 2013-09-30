@@ -236,33 +236,37 @@ either expressed or implied, of the FreeBSD Project.
         };
 
         var startLogin = function() {
-            log("startLogin");
-            setType(identityAccessStart);
-            if (
-                identity.type === "email" ||
-                identity.type === "phone"
-            ) {
-                startLoginLegacy();
-            } else
-            if (
-                identity.type === "facebook" ||
-                identity.type === "linkedin" ||
-                identity.type === "twitter"
-            ) {
-                startLoginOauth();
-            } else
-            if (identity.type === "federated") {
-                startLoginFederated();
+            try {
+                log("startLogin");
+                setType(identityAccessStart);
+                if (
+                    identity.type === "email" ||
+                    identity.type === "phone"
+                ) {
+                    throw new Error("Login for identity type '" + identity.type + "' not yet supported!");
+                } else
+                if (
+                    identity.type === "facebook" ||
+                    identity.type === "linkedin" ||
+                    identity.type === "twitter"
+                ) {
+                    startLoginOauth();
+                } else
+                if (identity.type === "federated") {
+                    startLoginFederated();
+                }
+            } catch(err) {
+                log("ERROR", err.message, err.stack);
             }
         };
-        
+
         var startRelogin = function() {
             log("startRelogin");
             setType(identityAccessStart);
             //getSalts (and then call relogin)
             getIdentitySalts(relogin);
         };
-        
+
         var relogin = function() {
             log("relogin");
             var reloginKeyDecrypted = decrypt(identityAccessStart.identity.reloginKey, identity.reloginEncryptionKey);
@@ -329,17 +333,131 @@ either expressed or implied, of the FreeBSD Project.
             // add onclick listeners
             // sign up
             $("#" + initData.signup.click).click(function() {
-                signUpOnClick();
+                log("user signup clicked");
+                // read data from input fields
+                identity.identifier = $("#" + initData.signup.id).val().toLowerCase();
+                identity.password = $("#" + initData.signup.password).val();
+                identity.displayName = $("#" + initData.signup.displayName).val();
+                getIdentitySalts(function() {
+
+                    // stretch password
+                    identity.passwordStretched = generatePasswordStretched(
+                            identity.identifier, identity.password,
+                            identity.serverPasswordSalt);
+                    // generate secretSalt
+                    identity.secretSalt = generateIdentitySecretSalt(identity.identifier,
+                            identity.password, identity.passwordStretched,
+                            identity.serverPasswordSalt);
+
+                    var requestData = {
+                        "request" : {
+                            "$domain" : $identityProviderDomain,
+                            "$id" : generateId(),
+                            "$handler" : "identity-provider",
+                            "$method" : "sign-up",
+
+                            "identity" : {
+                                "type" : identity.type,
+                                "identifier" : identity.identifier,
+                                "passwordHash" : identity.passwordStretched,
+                                "secretSalt" : identity.secretSalt,
+                                "serverPasswordSalt" : identity.serverPasswordSalt,
+                                "uri" : identity.uri + identity.identifier
+                            },
+                            "displayName" : identity.displayName,
+                            "avatars" : {
+                                "avatar" : {
+                                    "name" : imageBundle.filename,
+                                    "url" : imageBundle.fileURL
+                                }
+                            }
+                        }
+                    };
+                    var requestDataString = JSON.stringify(requestData);
+                    log("ajax", "/api.php", requestData);
+                    $.ajax({
+                        url : "/api.php",
+                        type : "post",
+                        data : requestDataString,
+                        // callback handler that will be called on success
+                        success : function(response, textStatus, jqXHR) {
+                            if (signupSuccess(response)) {
+                                getServerNonce(loginFederated);
+                            } else {
+                                log("ERROR", "SubmitSignup");
+                            }
+                        },
+                        // callback handler that will be called on error
+                        error : function(jqXHR, textStatus, errorThrown) {
+                            log("ERROR", "signup", "ajax", textStatus, errorThrown);
+                        }
+                    });
+
+                    // Validates response of Sign up action call.
+                    //
+                    // @param response from server
+                    // @param afterSignUp callback
+                    function signupSuccess(response, afterSignUp) {
+                        log("signupSuccess", response);
+                        try {
+                            var result = JSON.parse(response);
+                            // validate response
+                            if (result.error) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        } catch (err) {
+                            return false;
+                        }
+                    }
+                });
             });
-            // sign up -upload image handler
+            // signup upload avatar image handler
             $("#" + initData.signup.uploadClick).click(function() {
-                uploadOnClick();
+                log("user uploading avatar");
+                // validate response from avatar upload request.
+                function validateResponseUploadSuccess(data) {
+                    try {
+                        return !!(data.result.file.name && data.result.file.url);
+                    } catch (err) {
+                        return false;
+                    }
+                }
+                log("ajax", "/php/service/upload_avatar.php", "request");
+                $.ajaxFileUpload({
+                    url : '/php/service/upload_avatar.php',
+                    secureuri : true,
+                    fileElementId : 'file',
+                    dataType : 'json',
+                    success : function(data, status) {
+                        log("ajax", "/php/service/upload_avatar.php", "response", status, data);
+                        if (
+                            data &&
+                            data.result &&
+                            data.result.file &&
+                            data.result.file.name &&
+                            data.result.file.url
+                        ) {
+                            imageBundle.filename = data.result.file.name;
+                            imageBundle.fileURL = data.result.file.url;
+                            // TODO: implement image width and height.
+                        } else {
+                            log("ERROR", 'fileupload', 'response not valid', status, data);
+                            // TODO: Display message to user.
+                        }
+                    },
+                    error: function(data, status, err) {
+                        log("ERROR", 'fileupload', status, data, err);
+                        // TODO: Display message to user.
+                    }
+                });
             });
             // login
             $("#" + initData.login.click).click(function() {
                 log("user login clicked");
                 // read data from input fields
-                identity.identifier = $("#" + initData.login.id).val();
+                identity.identifier = $("#" + initData.login.id).val().toLowerCase();
                 identity.password = $("#" + initData.login.password).val();
                 log("identity.identifier", identity.identifier);
                 log("identity.password.length", identity.password.length);
@@ -368,136 +486,6 @@ either expressed or implied, of the FreeBSD Project.
                 });
             });
             identityAccessWindowNotify(true, true);
-        };
-
-        var signUpOnClick = function() {
-            log("signUpOnClick");
-            // read data from input fields
-            identity.identifier = $("#" + initData.signup.id).val();
-            identity.password = $("#" + initData.signup.password).val();
-            identity.displayName = $("#" + initData.signup.displayName).val();
-
-            getIdentitySalts(signUp);
-        };
-
-        var signUp = function() {
-            log("signUp");
-
-            // stretch password
-            identity.passwordStretched = generatePasswordStretched(
-                    identity.identifier, identity.password,
-                    identity.serverPasswordSalt);
-            // generate secretSalt
-            identity.secretSalt = generateIdentitySecretSalt(identity.identifier,
-                    identity.password, identity.passwordStretched,
-                    identity.serverPasswordSalt);
-
-            var requestData = {
-                "request" : {
-                    "$domain" : $identityProviderDomain,
-                    "$id" : generateId(),
-                    "$handler" : "identity-provider",
-                    "$method" : "sign-up",
-
-                    "identity" : {
-                        "type" : identity.type,
-                        "identifier" : identity.identifier,
-                        "passwordHash" : identity.passwordStretched,
-                        "secretSalt" : identity.secretSalt,
-                        "serverPasswordSalt" : identity.serverPasswordSalt,
-                        "uri" : identity.uri + identity.identifier
-                    },
-                    "displayName" : identity.displayName,
-                    "avatars" : {
-                        "avatar" : {
-                            "name" : imageBundle.filename,
-                            "url" : imageBundle.fileURL
-                        }
-                    }
-                }
-            };
-            var requestDataString = JSON.stringify(requestData);
-            log("ajax", "/api.php", requestData);
-            $.ajax({
-                url : "/api.php",
-                type : "post",
-                data : requestDataString,
-                // callback handler that will be called on success
-                success : function(response, textStatus, jqXHR) {
-                    if (signupSuccess(response)) {
-                        getServerNonce(loginFederated);
-                    } else {
-                        log("ERROR", "SubmitSignup");
-                    }
-                },
-                // callback handler that will be called on error
-                error : function(jqXHR, textStatus, errorThrown) {
-                    log("ERROR", "SubmitSignup-> The following error occured: "
-                            + textStatus + errorThrown);
-                }
-            });
-            
-            // Validates response of Sign up action call.
-            //
-            // @param response from server
-            // @param afterSignUp callback
-            function signupSuccess(response, afterSignUp) {
-                log("signupSuccess", response);
-                try {
-                    var result = JSON.parse(response);
-                    // validate response
-                    if (result.error) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                } catch (e) {
-                    return false;
-                }
-            }
-        };
-
-        /**
-         * Upload avatar handler.
-         */
-        var uploadOnClick = function() {
-            log("uploadOnClick");
-            $.ajaxFileUpload({
-                url : '/php/service/upload_avatar.php',
-                secureuri : true,
-                fileElementId : 'file',
-                dataType : 'json',
-                success : function(data, status) {
-                    if (validateResponseUploadSuccess(data)) {
-                        setImageBundle(data);
-                    } else {
-                        log("ERROR", 'fileupload');
-                    }
-                },
-                error : function(data, status, e) {
-                    log("ERROR", 'fileupload' + e);
-                }
-            });
-
-            // validate response from avatar upload request.
-            function validateResponseUploadSuccess(data) {
-                try {
-                    if (data.result.file.name && data.result.file.url) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } catch (e) {
-                    return false;
-                }
-            }
-
-            // set imageBundle data.
-            function setImageBundle(data) {
-                imageBundle.filename = data.result.file.name;
-                imageBundle.fileURL = data.result.file.url;
-                // TODO: implement image width and height
-            }
         };
         
         var getIdentitySalts = function(callback) {
