@@ -863,7 +863,7 @@ either expressed or implied, of the FreeBSD Project.
                         }
                         return afterLogin(JSON.parse(response), loginResponseCallback);
                     } catch(err) {
-                        log("ERROR", err.stack);
+                        log("ERROR", err.message, err.stack);
                     }
                 },
                 // callback handler that will be called on error
