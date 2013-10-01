@@ -851,7 +851,6 @@ either expressed or implied, of the FreeBSD Project.
                                 identityAccessCompleteNotify(loginResponseJSON.result);
                             }
                         }
-                        return afterLogin(JSON.parse(response), loginResponseCallback);
                     } catch(err) {
                         log("ERROR", err.message, err.stack);
                     }
