@@ -66,6 +66,7 @@ either expressed or implied, of the FreeBSD Project.
         var identityAccessStart;                // identityAccessStart notify
         var initData;                           // init data
         var imageBundle = {};                   // imageBundle (used for avatar upload)
+        var $appid = null;
         var $identityProviderDomain;            // used for every request
         var serverMagicValue;                   // serverMagicValue
         var waitForNotifyResponseId;            // id of "identity-access-window" request
@@ -89,7 +90,6 @@ either expressed or implied, of the FreeBSD Project.
         var init = function(bundle) {
             try {
                 initData = bundle;
-                $appid = initData.$appid;
                 $identityProviderDomain = initData.$identityProvider;
                 
                 // reload scenario
@@ -119,6 +119,10 @@ either expressed or implied, of the FreeBSD Project.
                 log("window.onmessage", "waitForNotifyResponseId", waitForNotifyResponseId);
 
                 if (data.notify) {
+
+                    $appid = data.notify.$appid;
+                    window.__LOGGER.setChannel("identity-js-" + $appid);
+
                     if (data.notify.$method == "identity-access-start") {
                         // start login/sign up procedure
                         identityAccessStart = data.notify;
@@ -131,6 +135,10 @@ either expressed or implied, of the FreeBSD Project.
                     }
                 } else
                 if (data.result) {
+
+                    $appid = data.result.$appid;
+                    window.__LOGGER.setChannel("identity-js-" + $appid);
+
                     if (data.result.$method == 'identity-access-window') {
                         if (
                             data.result.$id === waitForNotifyResponseId &&
@@ -141,6 +149,10 @@ either expressed or implied, of the FreeBSD Project.
                     }
                 } else
                 if (data.request) {
+
+                    $appid = data.request.$appid;
+                    window.__LOGGER.setChannel("identity-js-" + $appid);
+
                     if (data.request.$method === "identity-access-lockbox-update") {
                         identityAccessLockboxUpdate(data);
                     } else
@@ -180,9 +192,11 @@ either expressed or implied, of the FreeBSD Project.
             log("redirectToURL", url);
             localStorage.clientAuthenticationToken = identity.clientAuthenticationToken;
             localStorage.identityAccessStart = JSON.stringify(identityAccessStart);
+            localStorage.$appid = $appid;
             log("set localStorage", {
                 clientAuthenticationToken: localStorage.clientAuthenticationToken,
-                identityAccessStart: localStorage.identityAccessStart
+                identityAccessStart: localStorage.identityAccessStart,
+                $appid: $appid
             });
             window.top.location = url;
         };
@@ -193,11 +207,11 @@ either expressed or implied, of the FreeBSD Project.
             var readyMessage = {
                 "request" : {
                     "$domain" : $identityProviderDomain,
-                    "$appid" : $appid,
+                    // TODO: Document the fact that the `$appid` is set to `""` here because it is not yet known.
+                    "$appid" : "",
                     "$id" : id,
                     "$handler" : "identity",
                     "$method" : "identity-access-window",
-
                     "browser" : {
                         "ready" : ready,
                         "visibility" : visibility
@@ -773,13 +787,15 @@ either expressed or implied, of the FreeBSD Project.
 
             log("get localStorage", {
                 clientAuthenticationToken: localStorage.clientAuthenticationToken,
-                identityAccessStart: localStorage.identityAccessStart
+                identityAccessStart: localStorage.identityAccessStart,
+                $appid: $appid
             });
             var clientAuthenticationToken = localStorage.clientAuthenticationToken;
             identityAccessStart = JSON.parse(localStorage.identityAccessStart);
             setType(identityAccessStart);
             identity.type = paramsJSON.result.identity.type;
             identity.identifier = paramsJSON.result.identity.identifier;
+            $appid = localStorage.$appid;
 
             log("finishOAuthScenario", "identity", identity);
 
