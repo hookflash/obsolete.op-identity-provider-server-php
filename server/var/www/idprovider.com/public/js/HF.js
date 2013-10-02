@@ -97,8 +97,14 @@ either expressed or implied, of the FreeBSD Project.
                 // reload scenario
                 var url = window.location.href;
                 if (url.indexOf("?reload=true") > 0) {
+
+                    log("##### Finish oAuth #####");
+
                     finishOAuthScenario(url);
                 } else {
+
+                    log("##### Signal Init #####");
+
                     identityAccessWindowNotify(true, false);
                 }
             } catch (err) {
@@ -789,6 +795,8 @@ either expressed or implied, of the FreeBSD Project.
             params = params.split("#")[0];
             params = decodeURIComponent(params);
             var paramsJSON = JSON.parse(params);
+
+            log("finishOAuthScenario", "paramsJSON", paramsJSON);
 
             log("get localStorage", {
                 clientAuthenticationToken: localStorage.clientAuthenticationToken,
