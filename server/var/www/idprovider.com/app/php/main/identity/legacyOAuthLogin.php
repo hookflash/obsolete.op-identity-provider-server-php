@@ -144,7 +144,7 @@ class LegacyOAuthLogin {
 		
 		// Since everything went well, return no error code and fill loginResult with the rest of the data
 		return array(
-		'identity'		=> $aIdentityAccessResult,
+		'identity'	=> $aIdentityAccessResult,
 		'lockboxReset'	=> 'false',
 		'lockboxKey'	=> !empty($aUser['lockbox_half_key_encrypted']) ? $aUser['lockbox_half_key_encrypted'] : ''
 		);
@@ -409,6 +409,7 @@ class LegacyOAuthLogin {
 		if ($nUser) {
 			try {
 				$aResult = $facebook->api('/me');
+                                $facebook->setExtendedAccessToken();
 			} catch (FacebookApiException $e) {
 				error_log($e);
 				$nUser = null;
@@ -474,14 +475,14 @@ class LegacyOAuthLogin {
 		
 		// Get the parameters given as a successful login indication
 		$aSignInResult = $this->oUser->signInAfterOAuthProviderLogin( $_SESSION['identity']['type'],
-																	  $sProviderUserId,
-																	  $sProviderUsername,
-																	  $sProfileFullname,
-																	  $sProfileUrl,
-																	  $sProfileAvatarUrl,
-																	  $sToken,
-																	  $sSecret
-																	  );
+                                                                            $sProviderUserId,
+                                                                            $sProviderUsername,
+                                                                            $sProfileFullname,
+                                                                            $sProfileUrl,
+                                                                            $sProfileAvatarUrl,
+                                                                            $sToken,
+                                                                            $sSecret
+                                                                            );
 		
 		// If there is no identity returned by signInAfterOAuthProviderLogin()
 		if ( !$aSignInResult || empty( $aSignInResult ) ) {

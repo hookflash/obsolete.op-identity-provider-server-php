@@ -42,6 +42,7 @@
 		<option value="identity-salts-get">identity-salts-get</option>
 		<option value="identity-salts-set">identity-salts-set</option>
 		<option value="oauth-provider-authentication">oauth-provider-authentication</option>
+                <option value="hosting-data-get">hosting-data-get</option>
 		<option value="linkedin-token-exchange">linkedin-token-exchange</option>
 		<option value="sign-up">sign-up</option>
 		<option value="profile-get">profile-get</option>

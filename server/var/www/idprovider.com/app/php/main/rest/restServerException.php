@@ -48,6 +48,7 @@ class RestServerException extends Exception {
 	'400' => 'Bad Request',
 	'401' => 'Unauthorized',
 	'403' => 'Forbidden',
+        '404' => 'Not Found',    
 	'406' => 'Not Acceptable',
 	'409' => 'Conflict',
 	'420' => 'Enhance You Calm',
@@ -137,6 +138,10 @@ class RestServerException extends Exception {
 				$this->sErrorMessage = 'Wrong parameter format: \'' . $this->aErrorMessageParameters['parameter'] .
 										'\' has to be ' . $this->aErrorMessageParameters['format'] . '.';
 				break;
+                        case '011':
+                                $this->sHttpErrorCode = '404';
+                                $this->sErrorMessage = 'Not Found';
+                                break;
 			// PIN-dedicated error
 			case '020':
 				$this->sHttpErrorCode = '403';

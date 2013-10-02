@@ -48,8 +48,11 @@ if ( !defined('APP') ) {
 
 //-- IMPORTANT --//
 
+// Here you set your application's standard protocol
+define('PROTOCOL', 'https://');
+
 // Here you set your domain
-define('MY_DOMAIN', 'https://example-unstable.hookflash.me/');
+define('MY_DOMAIN', PROTOCOL . 'example-unstable.hookflash.me/');
 
 // Here you set your database
 define('APP_DB_NAME', 'provider_db');
@@ -59,7 +62,7 @@ define('APP_DB_PASS', '*************');
 
 // Here you set your Hookflash service domain
 define('DOMAIN', 'unstable.hookflash.me');
-define('HF_SERVICE_DOMAIN', 'https://unstable.hookflash.me/');
+define('HF_SERVICE_DOMAIN', PROTOCOL . 'unstable.hookflash.me/');
 
 // Here you set your OAuth keys and secrets
 define('LINKEDIN_CONSUMER_KEY', '***********');

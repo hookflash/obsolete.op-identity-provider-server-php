@@ -1,0 +1,82 @@
+<html>
+	<title>Easy grid sample</title>
+	<style>
+
+	body { font-family: Arial; }
+	TABLE.grid_table { width: 400px; padding: 0px;  }
+	TABLE.grid_table TH { border: 1px solid silver; background-color: #EEEEEE; padding: 0px 5px 0px 5px; }
+	TABLE.grid_table TABLE TD { border: 0px; font-weight: bold; }
+	TABLE.grid_table TABLE TD A { cursor: pointer;  }
+	TABLE.grid_table TD { border-left: 1px solid silver; border-bottom: 1px solid silver; border-right: 1px solid silver; padding: 0px 5px 0px 5px; }
+	.grid_indication { background: silver; }
+	.grid_nav INPUT.cond { width: 30px; }
+	.grid_nav INPUT.filter { width: 130px; }
+	.grid_nav FORM { padding: 2px 0px 2px 0px; margin: 2px; }
+	.grid_nav FORM A { padding: 2px 5px 2px 5px;  border: 1px silver solid; cursor: pointer; }
+	
+	/* Grid Context Menu */
+	.context_menu { border: 1px solid black; background-color: #F9F8F7; visibility: hidden; position: absolute; width: 282px;}
+	.context_menu a { width: 258px; padding: 4px 0px 4px 4px; color: black; text-decoration: none; cursor: default}
+	.context_menu a:hover {color: #ffffff; background: #B6BDD2; border: 1px solid black; }
+	.context_menu TABLE { width: 282px; }
+	.context_menu TD { background-color: #F9F8F7; font-size: 12px; font-family: Arial; }
+	.context_menu TD.leftc { width: 24px; background: url(contextm_lbg.gif) repeat-y; }
+	
+	</style>
+	
+<body>
+<script src = "easygrid.js" ></script>
+<script src = "easygrid_contextmenu.js" ></script>
+
+<h1>HookFlash API LOG</h1>
+
+
+<!-- Tool panel -->
+<div class="grid_nav">
+	<form id="FilterForm">
+		Message <input class="filter" type="text" name="filter" value="" onkeypress="refreshByClick('message', this.value, event)" />
+		<input type="button" name="sfilter" onclick="makeRequest('filter_field=message&filter_value='+this.form.filter.value);" value="Filter" /> 
+	</form>
+	<form id="RangeForm">
+		Since <input class="cond" type="text" name="offset" value="0" />
+		 to <input class="cond" type="text" name="limit" value="20" /> from <span id="TblLength">0</span>
+		 <input type="button" name="show" onclick="makeRequest('offset='+this.form.offset.value+'&limit='+this.form.limit.value);" value="Show" /> 
+	</form>
+	<form id="PaginationForm">
+	</form>	
+	</div>
+<div id="TblBody">Data is loading...</div>
+
+<script>
+	/**
+	 *	GRID configuration
+	 **/
+	EGConfig.sUrl = "db_controller.php";
+	EGConfig.ContextMenu = "on";
+	EGConfig.LeightIndicatorDivID = "TblLength";
+	EGConfig.WorkplaceDivID = "TblBody"; 
+	EGConfig.RangeFormID = "RangeForm"; 
+	EGConfig.PaginationFormID = "PaginationForm";
+	EGConfig.PaginationFrameHalfLength = 2;
+	EGConfig.ArrowToUp = '<img src="arr_top.gif" width="13" height="8" border="0" alt="Ascent Sorting">';
+	EGConfig.ArrowToDown = '<img src="arr_bottom.gif" width="13" height="8" border="0" alt="Descent Sorting">';
+
+	
+settings(columns, '{"field":"id","title":"id", "width":"30px"}');
+settings(columns, '{"field":"created","title":"created", "width":"15%"}');
+settings(columns, '{"field":"ip_address","title":"ip_address", "width":"15%"}');
+settings(columns, '{"field":"http_client","title":"http_client", "width":"15%"}');
+settings(columns, '{"field":"error_code","title":"error_code", "width":"15%"}');
+settings(columns, '{"field":"message","title":"message", "width":"500px"}');
+//settings(columns, '{"field":"session_id","title":"session_id", "width":"15%"}');
+//settings(columns, '{"field":"session_dump","title":"session_dump", "width":"15%"}');
+
+
+	
+	
+	makeRequest('');
+</script>
+
+
+</body>
+</html>

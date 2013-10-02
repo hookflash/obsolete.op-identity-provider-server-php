@@ -113,19 +113,19 @@ class Response {
 	 * To throw a custom missing parameters error one should call:
 	 * $oResponse->errorResponse('002', 'Some custom error message');
 	 */
-	public function errorResponse( $sErrCode = '', $sErrCustomMessage = '' ) {
+	public function errorResponse( $sErrCode = '', $sErrCustomMessage = '', $sErrMessageFormat = 'message' ) {
 		
 		if ( key_exists($sErrCode, $this->aErrorCodes) ) {
 			
 			if ( $sErrCustomMessage == '' ) {
 				if ( $this->bIsJson ) {
-					$reason = '{"reason":{"$id":"' . $this->aErrorCodes[$sErrCode]['errorcode'] . '","message":"' . $this->aErrorCodes[$sErrCode]['error'] . '"}}';
+					$reason = '{"reason":{"$id":"' . $this->aErrorCodes[$sErrCode]['errorcode'] . '","' . $sErrMessageFormat . '":"' . $this->aErrorCodes[$sErrCode]['error'] . '"}}';
 				} else {
 					$reason = '<reason id="' . $this->aErrorCodes[$sErrCode]['errorcode'] . '">' . $this->aErrorCodes[$sErrCode]['error'] . '</reason>';
 				}
 			} else {
 				if ( $this->bIsJson ) {
-					$reason = '{"reason":{"$id":"' . $this->aErrorCodes[$sErrCode]['errorcode'] . '","message":"' . $sErrCustomMessage . '"}}';
+					$reason = '{"reason":{"$id":"' . $this->aErrorCodes[$sErrCode]['errorcode'] . '","' . $sErrMessageFormat . '":"' . $sErrCustomMessage . '"}}';
 				} else {
 					$reason = '<reason id="' . $this->aErrorCodes[$sErrCode]['errorcode'] . '">' . $sErrCustomMessage . '</reason>';
 				}
@@ -143,9 +143,13 @@ class Response {
 
 	}
 	
-	public function errorResult ( $sErrorCode = '', $sErrorMessage = '' ) {
+	public function errorResult ( $sErrorCode = '', $sErrorMessage = '', $sErrorMessageFormat = '' ) {
 		if ( $this->bIsJson ) {
-			$reason = '{"reason":{"$id":"' . $sErrorCode . '","message":"' . $sErrorMessage . '"}}';
+                    if ($sErrorMessageFormat === 'message') {
+			$reason = '{"reason":{"$id":"' . $sErrorCode . '","' . $sErrorMessageFormat . '":"' . $sErrorMessage . '"}}';
+                    } elseif ($sErrorMessageFormat === '#text') {
+                        $reason = '{"$id":"' . $sErrorCode . '","' . $sErrorMessageFormat . '":"' . $sErrorMessage . '"}';
+                    }
 		} else {
 			$reason = '<reason id="' . $sErrorCode . '">' . $sErrorMessage . '</reason>';
 		}
@@ -166,7 +170,8 @@ class Response {
 		
 		// Error check
 		if ($oException != null){
-			$this->errorResult($oException->sHttpErrorCode, $oException->sErrorMessage);
+                        $messageFormat = $oException->sErrorMessage === 'Not Found' ? '#text' : 'message';
+			$this->errorResult($oException->sHttpErrorCode, $oException->sErrorMessage, $messageFormat);
 		}
 		
 		// Generate result string
