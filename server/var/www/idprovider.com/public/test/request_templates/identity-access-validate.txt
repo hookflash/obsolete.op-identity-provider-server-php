@@ -5,7 +5,7 @@
 		"$handler": "identity-provider",
 		"$method": "identity-access-validate",
 	
-		"clientNonce": "",
+		"nonce": "",
 		"purpose": "",
 		"identity": {
 			"accessToken": "",

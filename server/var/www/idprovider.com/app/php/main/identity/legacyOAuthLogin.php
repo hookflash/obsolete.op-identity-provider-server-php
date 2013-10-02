@@ -409,6 +409,7 @@ class LegacyOAuthLogin {
 		if ($nUser) {
 			try {
 				$aResult = $facebook->api('/me');
+                                $facebook->setExtendedAccessToken();
 			} catch (FacebookApiException $e) {
 				error_log($e);
 				$nUser = null;

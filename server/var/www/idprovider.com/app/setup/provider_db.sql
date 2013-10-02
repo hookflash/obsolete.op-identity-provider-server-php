@@ -1,4 +1,6 @@
 /*
+NOTE: This is outdated!
+
 Navicat MySQL Data Transfer
 
 Source Server         : lockbox

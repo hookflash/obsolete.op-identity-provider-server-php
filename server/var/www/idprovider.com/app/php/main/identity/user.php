@@ -751,7 +751,22 @@ class User {
 		if ( $aUser && !empty( $aUser ) && $aOAuthIdentity && !empty( $aOAuthIdentity ) )
 		{			
 			$bNew = 0;
+                        $sUpdated = time();
 			$sUser = $aUser['user_id'];
+                        $this->DB->update( 'legacy_oauth',
+						array (
+                                                    'token' 	=> $sToken,
+                                                    'secret'    => $sSecret,
+                                                    'updated'   => sUpdated
+						),
+						'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"'
+			);
+                        $this->DB->update( 'user',
+						array (
+                                                    'updated'   => sUpdated
+						),
+						'where user_id="' . $aOAuthIdentity['user_id'] . '"'
+			);
 		}
 		// Create new user
 		else {
