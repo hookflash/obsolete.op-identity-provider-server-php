@@ -98,12 +98,12 @@ either expressed or implied, of the FreeBSD Project.
                 var url = window.location.href;
                 if (url.indexOf("?reload=true") > 0) {
 
-                    log("##### Finish oAuth #####", window.location.href);
+                    log("##### Finish oAuth #####", url);
 
                     finishOAuthScenario(url);
                 } else {
 
-                    log("##### Signal Init #####", window.location.href);
+                    log("##### Signal Init #####", url);
 
                     identityAccessWindowNotify(true, false);
                 }
