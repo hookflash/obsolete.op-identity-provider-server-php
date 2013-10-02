@@ -57,8 +57,7 @@ either expressed or implied, of the FreeBSD Project.
 
     var HF_LoginAPI = window.HF_LoginAPI = function() {
 
-        log("########################################");
-        log("Init", window.location.href);
+        log("##### INIT #####", window.location.href);
 
         var _version = '0.1';                   // The current version
 
@@ -91,7 +90,10 @@ either expressed or implied, of the FreeBSD Project.
             try {
                 initData = bundle;
                 $identityProviderDomain = initData.$identityProvider;
-                
+
+                // Buffer logging calls until we have an `$appid` available.
+                window.__LOGGER.setChannel(false);
+
                 // reload scenario
                 var url = window.location.href;
                 if (url.indexOf("?reload=true") > 0) {
@@ -109,14 +111,10 @@ either expressed or implied, of the FreeBSD Project.
             if (!message.data) return;
             if (message.data === lastPostedMessage) return;
 
-            log("window.onmessage", message.data);
-
             try {
                 var data = JSON.parse(message.data);
 
                 log("window.onmessage", "data", data);
-                log("window.onmessage", "identity", identity);
-                log("window.onmessage", "waitForNotifyResponseId", waitForNotifyResponseId);
 
                 if (data.notify) {
 
@@ -126,6 +124,9 @@ either expressed or implied, of the FreeBSD Project.
                     if (data.notify.$method == "identity-access-start") {
                         // start login/sign up procedure
                         identityAccessStart = data.notify;
+
+                        log("window.onmessage", "identityAccessStart", identityAccessStart);
+
                         if (identityAccessStart.identity.reloginKey !== undefined) {
                             //relogin
                             startRelogin();
@@ -140,6 +141,9 @@ either expressed or implied, of the FreeBSD Project.
                     window.__LOGGER.setChannel("identity-js-" + $appid);
 
                     if (data.result.$method == 'identity-access-window') {
+
+                        log("window.onmessage", "identity", identity);
+
                         if (
                             data.result.$id === waitForNotifyResponseId &&
                             identity.redirectURL
@@ -161,6 +165,7 @@ either expressed or implied, of the FreeBSD Project.
                     }
                 }
             } catch (err) {
+                log("window.onmessage", message.data);
                 log("ERROR", "window.onmessage", err.stack);
             }
         };
