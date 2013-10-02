@@ -1,2 +1,3 @@
-/.rt/
-/node_modules/
+nbproject/
+.rt/
+node_modules/

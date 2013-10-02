@@ -50,7 +50,6 @@ class LoginUtil {
 	 * @return array Returns nonce, hostingProof, hostingProofExpires
 	 */
 	public function generateHostingData ( $sMethodName ) {
-	
 		// Generate the nonce
 		$sNonce = CryptoUtil::generateNonce();
 		
@@ -63,68 +62,35 @@ class LoginUtil {
 		'hostingProofExpires'=>$aHostingProofData['hostingProofExpires']
 		);
 	}
-	
-	/**
-	 * Try sending a hosted-login-confirm request using cURL, for given data
-	 * 
-	 * @param number $nRequestId Id of the request to be sent (and of the result to be received, too)
-	 * @param array $aRequestData Array of data being previously given to the server through the login request
-	 * (such as: type, identityReloginAccessKeyEncr, clientToken, serverToken, identifier, password, identitySecretSalt, identitySecretEncr, identitySecretDecryptionKeyEncr)
-	 * @param array $aHostingData Array of data that server generated upon receiving the login request
-	 * (such as: nonce, hostingProof, hostingProofExpires)
-	 * @param array $aUser Array of data taken from the user table upon successful sign in (such as updated)
-	 * @return array $aResultObject An array created from JSON result
-	 */
-	public function sendHostedLoginConfirm ( $nRequestId, $aRequestData, $aHostingData, $aUser, $bPeerFileRegenerate = false ) {
-		// import necessary files
-		require_once(APP . 'php/main/utils/curlUtil.php');
-		require_once(APP . 'php/main/utils/jsonUtil.php');
-		
-		// URL of identityService server
-		$url = HF_SERVICE_DOMAIN . 'hostedidentity';
-		
-		// Request data
-		$requestData = '' .
-		'{' .
-			'"request": {' .
-				'"$domain": "' . DOMAIN . '",' .
-				'"$id": "' . $nRequestId . '",' .
-				'"$handler": "identity-service",' .
-				'"$method": "hosted-identity-login-confirm",' .
-			
-				'"nonce": "' . $aHostingData['nonce'] . '",' .
-				'"hostingProof": "' . $aHostingData['hostingProof'] . '",' .
-				'"hostingProofExpires": "' . $aHostingData['hostingProofExpires'] . '",' .
-				'"clientToken": "' . $aRequestData['clientToken'] . '",' .
-				'"serverToken": "' . $aRequestData['serverToken'] . '",' .
-				'"identity": {' .
-					'"uri": "' . $aRequestData['identity']['uri'] . '",' .
-					'"uriEncrypted": "' . $aRequestData['identity']['uriEncrypted'] . '",' .
-					'"reloginAccessKeyEncrypted": "' . $aRequestData['identity']['reloginAccessKeyEncrypted'] . '",' .
-					'"updated": "' . $aUser['updated'] . '",' .
-					'"secretSalt": "' . $aRequestData['identity']['secretSalt'] . '",' .
-					'"secretEncrypted": "' . $aRequestData['identity']['secretEncrypted'] . '",' .
-					'"secretDecryptionKeyEncrypted": "' . $aRequestData['identity']['secretDecryptionKeyEncrypted'] . '"' .
-				'}';
-		if ( $bPeerFileRegenerate ) {
-			$requestData .= ',"action": { "type": "regenerate-peer-files" }';
-		}
-			$requestData .= '}' .
-		'}';
-		
-		// Send cURL request
-		$sResult = CurlUtil::sendPostRequest($url, $requestData);
-		
-		// Convert the result to an array
-		$aResultObject = JsonUtil::jsonToArray($sResult, false);
-		
-		// If the id of the request matches with the id of the result, return the marshalled result, otherwise return null
-		if ( ( $aResultObject != null ) && ( key_exists ( 'id', $aResultObject['request_attr'] ) ) && ( $aResultObject['request_attr']['id'] == $nRequestId ) ) {
-			return $aResultObject['request'];
-		} else {
-			return null;
-		}
-	}
+        
+        /**
+         * TODO document
+         */
+        public function calculateIdentityUri ( $aRequestData ) {
+            $sUri = '';
+            $sMyDomain = str_replace('https://','',MY_DOMAIN);
+            switch ($aRequestData['identity']['type']) {
+                case 'federated':
+                    $sUri = 'identity://' . $sMyDomain . $aRequestData['identity']['identifier'];
+                    break;
+                case 'email':
+                    // TODO
+                    break;
+                case 'phone':
+                    // TODO
+                    break;
+                case 'facebook':
+                    // TODO
+                    break;
+                case 'twitter':
+                    // TODO
+                    break;
+                case 'linkedin':
+                    // TODO
+                    break;
+            }
+            return $sUri;
+        }
 	
 	/**
 	 * Try sending a hosted-identity-update request using cURL, for given data
@@ -186,6 +152,9 @@ class LoginUtil {
 		if ( isset($aRequestData['identity']['vprofile']) ) {
 			$requestData .= ',"vprofile": "' . LoginUtil::setOptional($aRequestData['identity']['vprofile']) . '"';
 		}
+		if ( isset($aRequestData['identity']['feed']) ) {
+			$requestData .= ',"feed": "' . LoginUtil::setOptional($aRequestData['identity']['feed']) . '"';
+		}
 		$requestData .=		',' .
 							'"avatars": {' .
 								'"avatar": [' .
@@ -200,7 +169,7 @@ class LoginUtil {
 		
 		// Send cURL request
 		$sResult = CurlUtil::sendPostRequest($url, $requestData);
-		
+                
 		// Convert the result to an array
 		$aResultObject = JsonUtil::jsonToArray($sResult, false);
 		

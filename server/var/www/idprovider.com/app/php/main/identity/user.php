@@ -35,6 +35,25 @@
 // Set time
 date_default_timezone_set('UTC');
 
+
+function OUR_hex2bin($h)
+  {
+  if (!is_string($h)) return null;
+  $r='';
+  for ($a=0; $a<strlen($h); $a+=2) { $r.=chr(hexdec($h{$a}.$h{($a+1)})); }
+  return $r;
+}
+
+function OUR_bin2hex($str) {
+    $hex = "";
+    $i = 0;
+    do {
+        $hex .= sprintf("%02x", ord($str{$i}));
+        $i++;
+    } while ($i < strlen($str));
+    return $hex;
+}
+
 /**
  * Class User is responsible for storage and management of the users and their identities
  * using common database techniques.
@@ -635,13 +654,13 @@ class User {
 		$aIdentity = $this->parseIdentityUri($aRequestData['identity']['uri']);
 		
 		$bAccessSecretProofValidity = CryptoUtil::validateIdentityAccessSecretProof($aRequestData['clientNonce'],
-																					$aRequestData['identity']['accessToken'],
-																					$aRequestData['identity']['accessSecretProof'],
-																					$aRequestData['identity']['accessSecretProofExpires'],
-																					$aIdentity['type'],
-																					$aIdentity['identifier'],
-																					$aRequestData['identity']['uri'],
-																					$aRequestData['purpose'] );
+                                                                                            $aRequestData['identity']['accessToken'],
+                                                                                            $aRequestData['identity']['accessSecretProof'],
+                                                                                            $aRequestData['identity']['accessSecretProofExpires'],
+                                                                                            $aIdentity['type'],
+                                                                                            $aIdentity['identifier'],
+                                                                                            $aRequestData['identity']['uri'],
+                                                                                            $aRequestData['purpose'] );
 		if ( !$bAccessSecretProofValidity ) {
 			throw new RestServerException('007', array(
 												 'parameter' 		=> 'accessSecretProof',
@@ -679,10 +698,12 @@ class User {
                                                             'parameterValue' 	=> $aRequestData['identity']['accessSecretProof']
                                                             ));
 		}
+                
+                $sDBTable = $this->getAppropriateDatabaseTable($aIdentity['type']);
 		
 		// Get the identity
-		$aIdentityFromDB = $DB->select_single_to_array('legacy_oauth', '*',
-				'where provider_type="' . $aIdentity['type'] . '" and identifier="' . $aIdentity['identifier'] . '"');
+		$aIdentityFromDB = $DB->select_single_to_array($sDBTable, '*',
+				'where identifier="' . $aIdentity['identifier'] . '"');
 		if (!$aIdentityFromDB || empty($aIdentityFromDB)) {
 			throw new RestServerException('003', array(
 												 'type' 		=> $aIdentity['type'],
@@ -692,9 +713,23 @@ class User {
 		
 		
 		$sServerTokenCredentials = $this->generateServerTokenCredentials($aIdentityFromDB);
+
+		// NOTE: This is the implementation compatible with [cifre](https://github.com/openpeer/cifre) used in
+		//       [opjs](https://github.com/openpeer/opjs) and [rolodex](https://github.com/openpeer/rolodex).
+
+		require_once(APP . 'php/libs/seclib/Crypt/AES.php');
+		$key = hash('sha256', DOMAIN_HOSTING_SECRET);
+		$iv = hash('md5', CryptoUtil::generateIv());
+		$cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
+		$cipher->setKey(OUR_hex2bin($key));
+		$cipher->setIV(OUR_hex2bin($iv));
+		$sServerToken = $iv . '-' . OUR_bin2hex($cipher->encrypt($sServerTokenCredentials));
+
+		/*
 		$sIV = CryptoUtil::generateIv();
 		$sServerToken = bin2hex($sIV) . '-' . 
                         bin2hex(CryptoUtil::encrypt($sServerTokenCredentials, $sIV, DOMAIN_HOSTING_SECRET));
+        */
 		return $sServerToken;
 	}
 
@@ -708,7 +743,6 @@ class User {
 	 * @return array Returns array of data that will be added into the header URL after a final redirect
 	 */
 	public function signInAfterOAuthProviderLogin( $sProviderType, $sIdentifier, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sToken, $sSecret ) {
-			
 		// Try getting a user and an identity from the database for the given providerType and identifier
 		$aOAuthIdentity = $this->DB->select_single_to_array('legacy_oauth', '*', 'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"');
 		$aUser = $this->DB->select_single_to_array('user', '*', 'where user_id="' . $aOAuthIdentity['user_id'] . '"');
@@ -717,7 +751,22 @@ class User {
 		if ( $aUser && !empty( $aUser ) && $aOAuthIdentity && !empty( $aOAuthIdentity ) )
 		{			
 			$bNew = 0;
+                        $sUpdated = time();
 			$sUser = $aUser['user_id'];
+                        $this->DB->update( 'legacy_oauth',
+						array (
+                                                    'token' 	=> $sToken,
+                                                    'secret'    => $sSecret,
+                                                    'updated'   => sUpdated
+						),
+						'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"'
+			);
+                        $this->DB->update( 'user',
+						array (
+                                                    'updated'   => sUpdated
+						),
+						'where user_id="' . $aOAuthIdentity['user_id'] . '"'
+			);
 		}
 		// Create new user
 		else {
@@ -727,16 +776,16 @@ class User {
 			$sUpdated = time();
 			$sUser = $this->DB->insert('user', array( 'updated' => $sUpdated ) );
 			$this->DB->insert('legacy_oauth', array( 'user_id' => $sUser,
-													 'provider_type' => $sProviderType,
-													 'identifier' => $sIdentifier,
-													 'provider_username' => $sProviderUsername,
-													 'full_name' => $sProfileFullname,
-													 'profile_url' => $sProfileUrl,
-													 'avatar_url' => $sProfileAvatarUrl,
-													 'token' => $sToken,
-													 'secret' => $sSecret,
-													 'updated' => $sUpdated,
-													 )
+								'provider_type' => $sProviderType,
+								'identifier' => $sIdentifier,
+								'provider_username' => $sProviderUsername,
+								'full_name' => $sProfileFullname,
+								'profile_url' => $sProfileUrl,
+								'avatar_url' => $sProfileAvatarUrl,
+								'token' => $sToken,
+								'secret' => $sSecret,
+								'updated' => $sUpdated,
+								)
 							  );
 		}
 		
@@ -877,29 +926,40 @@ class User {
 	}
 	
 	private function generateServerTokenCredentials( $aIdentity ) {
-		$sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
-		switch($aIdentity['provider_type']) {
-			case 'facebook':
-				$sServerToken .= '"token":"' . $aIdentity['token'] . '"';
-				break;
-			case 'linkedin':
-				$sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
-				$sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
-				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-				$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
-				break;
-			case 'twitter':
-				$sServerToken .= '"consumer_key":"' . TWITTER_APP_ID . '",';
-				$sServerToken .= '"consumer_secret":"' . TWITTER_APP_SECRET . '",';
-				$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-				$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
-				break;
-			case 'github':
-				// TODO implement
-				break;
-		}
-		$sServerToken .= '}';
-		return $sServerToken;		
+            $aRolodexSupportedIdentityTypes = array(
+                'facebook',
+            );    
+            
+            $sServerToken = '';
+            if (! key_exists('provider_type', $aIdentity) ) {
+                throw new RestServerException('011', array());
+            } elseif (! in_array( $aIdentity['provider_type'], $aRolodexSupportedIdentityTypes ) ) {
+                throw new RestServerException('011', array());
+            } else {
+                $sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
+                switch($aIdentity['provider_type']) {
+                    case 'facebook':
+                        $sServerToken .= '"token":"' . $aIdentity['token'] . '"';
+                        break;
+                    case 'linkedin':
+			$sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
+			$sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
+			$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
+			$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
+			break;
+                    case 'twitter':
+			$sServerToken .= '"consumer_key":"' . TWITTER_APP_ID . '",';
+			$sServerToken .= '"consumer_secret":"' . TWITTER_APP_SECRET . '",';
+			$sServerToken .= '"token":"' . $aIdentity['token'] . '",';
+			$sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
+			break;
+                    case 'github':
+			// TODO implement
+			break;
+                }
+                $sServerToken .= '}';
+            }
+            return $sServerToken;		
 	}
 
 }

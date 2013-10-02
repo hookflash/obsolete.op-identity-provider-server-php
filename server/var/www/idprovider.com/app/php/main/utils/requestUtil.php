@@ -505,9 +505,9 @@ class RequestUtil {
 	 */
 	public function validateLockboxHalfKeyStoreRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
-		if ( !( key_exists( 'clientNonce', $req ) && $req['clientNonce'] != null ) ) {
+		if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 			throw new RestServerException('002', array(
-												 'parameter' => 'clientNonce'
+												 'parameter' => 'nonce'
 												 ));
 		}
 		if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
@@ -561,9 +561,9 @@ class RequestUtil {
 	 */
 	public function validateIdentityAccessValidateRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
-		if ( !( key_exists( 'clientNonce', $req ) && $req['clientNonce'] != null ) ) {
+		if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 			throw new RestServerException('002', array(
-												 'parameter' => 'clientNonce'
+												 'parameter' => 'nonce'
 												 ));
 		}
 		if ( !( key_exists( 'purpose', $req ) && $req['purpose'] != null ) ) {
@@ -637,6 +637,21 @@ class RequestUtil {
 												 ));
 		}
 	}
+        
+        /**
+	 * Validates if the hostingDataGet has already set not empty identifier.
+	 * 
+	 * @param array $req Parameters of the request
+	 * @return boolean Returns true if the request is valid, otherwise returns false
+	 */
+	public function validateHostingDataGetRequest ( $oRequest ) {
+            $req = $oRequest->aPars['request']; 
+            if ( !( key_exists( 'purpose', $req ) && $req['purpose'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'purpose'
+                                                            ));
+            }
+        }
 	
 		
 	//----------------------------------------------------------------------------------------------------------------------------------------//
@@ -915,7 +930,7 @@ class RequestUtil {
 		'keyEncrypted'							=> DatabaseUtil::protectFromSqlInjection( $req['lockbox']['keyEncrypted'] )
 		);
 		return array(
-		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
+		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'identity' 								=> $aIdentity,
 		'lockbox'								=> $aLockbox
 		);
@@ -936,7 +951,7 @@ class RequestUtil {
 		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
 		);
 		return array(
-		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
+		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'purpose'								=> DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
 		'identity' 								=> $aIdentity
 		);
@@ -961,6 +976,19 @@ class RequestUtil {
 		'identity' 								=> $aIdentity
 		);
 	}
+        
+        /**
+	 * Take data from the request in a safe manner and return an array of it
+	 *
+	 * @param array $req The request to take data from
+	 * @return array of needed given-by-request data
+	 */
+	public function takeHostingDataGetRequestData ( $oRequest ) {
+            $req = $oRequest->aPars['request'];
+            return array(
+                'purpose' => DatabaseUtil::protectFromSqlInjection( $req['purpose'] )
+            );
+        }
 }
 
 ?>

@@ -86,6 +86,7 @@ $server->registerPostMethod('server-nonce-get', 'serverNonceGet');
 $server->registerPostMethod('identity-salts-get', 'identitySaltsGet');
 $server->registerPostMethod('identity-salts-set', 'identitySaltsSet');
 $server->registerPostMethod('oauth-provider-authentication', 'oAuthProviderAuthentication');
+$server->registerPostMethod('hosting-data-get', 'hostingDataGet');
 $server->registerPostMethod('pin-validation', 'pinValidation');
 $server->registerPostMethod('linkedin-token-exchange', 'linkedinTokenExchange');
 $server->registerPostMethod('profile-get', 'profileGet');
@@ -712,6 +713,33 @@ function identityAccessRolodexCredentialsGet ()
 	// Result
 	$oResponse->addPar('rolodex', $aRolodex);
 	$oResponse->run();
+}
+
+/**
+ * Implementation of hosting-data-get method
+ */
+function hostingDataGet ()
+{
+    global $oRequest;
+    global $oResponse;
+    
+    try {
+        // Check request validity
+	RequestUtil::validateHostingDataGetRequest( $oRequest );
+        
+        // Take data from request
+	$aRequestData = RequestUtil::takeHostingDataGetRequestData( $oRequest );
+        
+        // Try calculating hosting data
+        require_once(APP . 'php/main/utils/loginUtil.php');
+        $aHostingData = LoginUtil::generateHostingData($aRequestData['purpose']);
+    } catch (Exception $exception) {
+	$oResponse->run($exception);
+    }
+    
+    // Result
+    $oResponse->addPar('hostingData', $aHostingData);
+    $oResponse->run();
 }
 
 //------------------------------------------------------------------------------------------------------------------//

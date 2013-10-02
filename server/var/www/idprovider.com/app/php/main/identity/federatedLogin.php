@@ -185,13 +185,10 @@ class FederatedLogin {
 												 ));
 		}
 		
-		/**
-		 * Due to JS compatibility changes, this should be thrown away, but it is not yet done just in case...
-		 */
-		/*
 		// Inform the identity service about the identity registration
 		// Generate hosting data
 		$aHostingData = LoginUtil::generateHostingData('hosted-identity-update');
+                $aRequestData['identity']['uri'] = LoginUtil::calculateIdentityUri($aRequestData);
 		
 		// Send hookflash-login-confirm request to the IdentityService server
 		$aIdentityUpdateResult = LoginUtil::sendHostedIdentityUpdate( CryptoUtil::generateRequestId(), $aRequestData, $aHostingData, $aSignUpResult );
@@ -202,7 +199,6 @@ class FederatedLogin {
 												 'message' => $aIdentityUpdateResult['error']['reason']
 												 ));
 		}
-		*/
 		
 		return true;
 	}

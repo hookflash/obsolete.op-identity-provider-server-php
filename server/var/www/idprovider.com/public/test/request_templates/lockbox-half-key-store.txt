@@ -5,7 +5,7 @@
 		"$handler": "identity-provider",
 		"$method": "lockbox-half-key-store",
 	
-		"clientNonce": "",
+		"nonce": "",
 		"identity": {
 			"accessToken": "",
 			"accessSecretProof": "",
