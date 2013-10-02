@@ -98,16 +98,17 @@ either expressed or implied, of the FreeBSD Project.
                 var url = window.location.href;
                 if (url.indexOf("?reload=true") > 0) {
 
-                    log("##### Finish oAuth #####");
+                    log("##### Finish oAuth #####", window.location.href);
 
                     finishOAuthScenario(url);
                 } else {
 
-                    log("##### Signal Init #####");
+                    log("##### Signal Init #####", window.location.href);
 
                     identityAccessWindowNotify(true, false);
                 }
             } catch (err) {
+                window.__LOGGER.setChannel("identity-js-all");
                 log("ERROR", "init", err.stack);
             }
         };
@@ -171,7 +172,10 @@ either expressed or implied, of the FreeBSD Project.
                     }
                 }
             } catch (err) {
-                log("window.onmessage", message.data);
+                if (!$appid) {
+                    window.__LOGGER.setChannel("identity-js-all");                    
+                }
+                log("window.onmessage", "message.data", message.data);
                 log("ERROR", "window.onmessage", err.stack);
             }
         };
