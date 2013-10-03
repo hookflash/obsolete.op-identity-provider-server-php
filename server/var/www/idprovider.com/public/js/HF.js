@@ -108,8 +108,10 @@ either expressed or implied, of the FreeBSD Project.
                     identityAccessWindowNotify(true, false);
                 }
             } catch (err) {
-                window.__LOGGER.setChannel("identity-js-all");
-                log("ERROR", "init", err.stack);
+                if (!$appid) {
+                    window.__LOGGER.setChannel("identity-js-all");
+                }
+                log("ERROR", "init", err.message, err.stack);
             }
         };
         
@@ -177,7 +179,7 @@ either expressed or implied, of the FreeBSD Project.
                     window.__LOGGER.setChannel("identity-js-all");                    
                 }
                 log("window.onmessage", "message.data", message.data);
-                log("ERROR", "window.onmessage", err.stack);
+                log("ERROR", "window.onmessage", err.message, err.stack);
             }
         };
 
@@ -285,7 +287,7 @@ either expressed or implied, of the FreeBSD Project.
                     startLoginFederated();
                 }
             } catch(err) {
-                log("ERROR", err.message, err.stack);
+                log("ERROR", "startLogin", err.message, err.stack);
             }
         };
 
@@ -799,56 +801,62 @@ either expressed or implied, of the FreeBSD Project.
         };
                 
         var finishOAuthScenario = function(url) {
-            log("finishOAuthScenario", url);
+            try {
+                log("finishOAuthScenario", url);
+                // remove domain
+                var params = url.split("?").pop();
+                params = params.split("&").pop();
+                // facebook fix (remove #...)
+                params = params.split("#")[0];
+                params = decodeURIComponent(params);
+                var paramsJSON = JSON.parse(params);
 
-            // remove domain
-            var params = url.split("?").pop();
-            params = params.split("&").pop();
-            // facebook fix (remove #...)
-            params = params.split("#")[0];
-            params = decodeURIComponent(params);
-            var paramsJSON = JSON.parse(params);
+                log("finishOAuthScenario", "paramsJSON", paramsJSON);
 
-            log("finishOAuthScenario", "paramsJSON", paramsJSON);
-
-            log("get localStorage", {
-                clientAuthenticationToken: localStorage.clientAuthenticationToken,
-                identityAccessStart: localStorage.identityAccessStart,
-                $appid: localStorage.$appid
-            });
-            $appid = localStorage.$appid;
-            if (!$appid) {
-                window.__LOGGER.setChannel("identity-js-all");
-                log("finishOAuthScenario", "$appid", $appid);
-            } else {
-                window.__LOGGER.setChannel("identity-js-" + $appid);
-            }
-
-            var clientAuthenticationToken = localStorage.clientAuthenticationToken;
-            identityAccessStart = JSON.parse(localStorage.identityAccessStart);
-            setType(identityAccessStart);
-            identity.type = paramsJSON.result.identity.type;
-            identity.identifier = paramsJSON.result.identity.identifier;
-
-            log("finishOAuthScenario", "identity", identity);
-
-            return login({
-                "request": {
-                    "$domain": $identityProviderDomain,
-                    "$appid" : $appid,
-                    "$id": generateId(),
-                    "$handler": "identity",
-                    "$method": "login",                    
-                    "proof" : {
-                        "clientAuthenticationToken": clientAuthenticationToken,
-                        "serverAuthenticationToken": paramsJSON.result.serverAuthenticationToken
-                    },
-                    "identity": {
-                        "type": paramsJSON.result.identity.type,
-                        "identifier": paramsJSON.result.identity.identifier
-                    }
+                log("get localStorage", {
+                    clientAuthenticationToken: localStorage.clientAuthenticationToken,
+                    identityAccessStart: localStorage.identityAccessStart,
+                    $appid: localStorage.$appid
+                });
+                $appid = localStorage.$appid;
+                if (!$appid) {
+                    window.__LOGGER.setChannel("identity-js-all");
+                    log("finishOAuthScenario", "$appid", $appid);
+                } else {
+                    window.__LOGGER.setChannel("identity-js-" + $appid);
                 }
-            });
+
+                var clientAuthenticationToken = localStorage.clientAuthenticationToken;
+                identityAccessStart = JSON.parse(localStorage.identityAccessStart);
+                setType(identityAccessStart);
+                identity.type = paramsJSON.result.identity.type;
+                identity.identifier = paramsJSON.result.identity.identifier;
+
+                log("finishOAuthScenario", "identity", identity);
+
+                return login({
+                    "request": {
+                        "$domain": $identityProviderDomain,
+                        "$appid" : $appid,
+                        "$id": generateId(),
+                        "$handler": "identity",
+                        "$method": "login",                    
+                        "proof" : {
+                            "clientAuthenticationToken": clientAuthenticationToken,
+                            "serverAuthenticationToken": paramsJSON.result.serverAuthenticationToken
+                        },
+                        "identity": {
+                            "type": paramsJSON.result.identity.type,
+                            "identifier": paramsJSON.result.identity.identifier
+                        }
+                    }
+                });
+            } catch(err) {
+                if (!$appid) {
+                    window.__LOGGER.setChannel("identity-js-all");
+                }
+                log("ERROR", "finishOAuthScenario", err.message, err.stack);
+            }
         };
 
         var login = function(loginData, loginResponseCallback) {
