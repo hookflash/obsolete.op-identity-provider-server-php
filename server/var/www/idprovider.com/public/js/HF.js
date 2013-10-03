@@ -150,6 +150,7 @@ either expressed or implied, of the FreeBSD Project.
                     if (data.result.$method == 'identity-access-window') {
 
                         log("window.onmessage", "identity", identity);
+                        log("window.onmessage", "waitForNotifyResponseId", waitForNotifyResponseId);
 
                         if (
                             data.result.$id === waitForNotifyResponseId &&
@@ -189,7 +190,6 @@ either expressed or implied, of the FreeBSD Project.
                     "$id" : generateId(),
                     "$handler" : "lockbox",
                     "$method" : "lockbox-permission-grant-complete",
-
                     "grant" : {
                         "$id" : id,
                         "permissions" : {
@@ -721,6 +721,7 @@ either expressed or implied, of the FreeBSD Project.
             log("identityAccessCompleteNotify", data);
             log("identityAccessCompleteNotify", "identity", identity);
             var uri = generateIdentityURI(identity.type, identity.identifier);
+            log("identityAccessCompleteNotify", "uri", uri);
             var lockboxkey = data.lockbox.key;
             
             // create reloginKey (only first time)
@@ -736,57 +737,65 @@ either expressed or implied, of the FreeBSD Project.
             log("identityAccessCompleteNotify", "reloginKey", reloginKey);
             log("identityAccessCompleteNotify", "lockboxkey", lockboxkey);
 
-            var message = null;
-            if (lockboxkey) {
-                var iv = hash(identity.secretSalt);
-                var key = decryptLockbox(lockboxkey, identity.passwordStretched, identity.identifier, iv);
-                message = {
-                    "notify": {
-                        "$domain": $identityProviderDomain,
-                        "$appid" : $appid,
-                        "$id": generateId(),
-                        "$handler": "identity",
-                        "$method": "identity-access-complete",
-                        
-                        "identity": {
-                            "accessToken": data.identity.accessToken,
-                            "accessSecret": data.identity.accessSecret,
-                            "accessSecretExpires": data.identity.accessSecretExpires,
+            try {
+                var message = null;
+                if (lockboxkey) {
+                    var iv = hash(identity.secretSalt);
+                    log("identityAccessCompleteNotify", "iv", iv);
+                    var key = decryptLockbox(lockboxkey, identity.passwordStretched, identity.identifier, iv);
+                    log("identityAccessCompleteNotify", "key", key);
+                    message = {
+                        "notify": {
+                            "$domain": $identityProviderDomain,
+                            "$appid" : $appid,
+                            "$id": generateId(),
+                            "$handler": "identity",
+                            "$method": "identity-access-complete",
                             
-                            "uri": uri ,
-                            "provider": $identityProviderDomain,
-                            "reloginKey": reloginKey
-                        },
-                        "lockbox": {
-                            "domain": data.$domain,
-                            "key": key,
-                            "reset": data.lockbox.reset
+                            "identity": {
+                                "accessToken": data.identity.accessToken,
+                                "accessSecret": data.identity.accessSecret,
+                                "accessSecretExpires": data.identity.accessSecretExpires,
+                                
+                                "uri": uri ,
+                                "provider": $identityProviderDomain,
+                                "reloginKey": reloginKey
+                            },
+                            "lockbox": {
+                                "domain": data.$domain,
+                                "key": key,
+                                "reset": data.lockbox.reset
+                            }
                         }
-                    }
-                };
-            } else {
-                message = {
-                    "notify": {
-                        "$domain": $identityProviderDomain,
-                        "$appid" : $appid,
-                        "$id": generateId(),
-                        "$handler": "identity",
-                        "$method": "identity-access-complete",
-                        
-                        "identity": {
-                            "accessToken": data.identity.accessToken,
-                            "accessSecret": data.identity.accessSecret,
-                            "accessSecretExpires": data.identity.accessSecretExpires,
+                    };
+                } else {
+                    message = {
+                        "notify": {
+                            "$domain": $identityProviderDomain,
+                            "$appid" : $appid,
+                            "$id": generateId(),
+                            "$handler": "identity",
+                            "$method": "identity-access-complete",
                             
-                            "uri": uri,
-                            "provider": $identityProviderDomain,
-                            "reloginKey": reloginKey
+                            "identity": {
+                                "accessToken": data.identity.accessToken,
+                                "accessSecret": data.identity.accessSecret,
+                                "accessSecretExpires": data.identity.accessSecretExpires,
+                                
+                                "uri": uri,
+                                "provider": $identityProviderDomain,
+                                "reloginKey": reloginKey
+                            }
                         }
-                    }
-                };
+                    };
+                }
+
+                log("identityAccessCompleteNotify", "message", message);
+
+                return postMessage(JSON.stringify(message), "*");
+            } catch(err) {
+                log("ERROR", err.message, err.stack);
             }
-            
-            return postMessage(JSON.stringify(message), "*");
         };
                 
         var finishOAuthScenario = function(url) {
@@ -805,14 +814,21 @@ either expressed or implied, of the FreeBSD Project.
             log("get localStorage", {
                 clientAuthenticationToken: localStorage.clientAuthenticationToken,
                 identityAccessStart: localStorage.identityAccessStart,
-                $appid: $appid
+                $appid: localStorage.$appid
             });
+            $appid = localStorage.$appid;
+            if (!$appid) {
+                window.__LOGGER.setChannel("identity-js-all");
+                log("finishOAuthScenario", "$appid", $appid);
+            } else {
+                window.__LOGGER.setChannel("identity-js-" + $appid);
+            }
+
             var clientAuthenticationToken = localStorage.clientAuthenticationToken;
             identityAccessStart = JSON.parse(localStorage.identityAccessStart);
             setType(identityAccessStart);
             identity.type = paramsJSON.result.identity.type;
             identity.identifier = paramsJSON.result.identity.identifier;
-            $appid = localStorage.$appid;
 
             log("finishOAuthScenario", "identity", identity);
 
@@ -1299,20 +1315,28 @@ either expressed or implied, of the FreeBSD Project.
                 }
             });
             var afterSecretGet = function(response) {
-                log("afterSecretGet", response);
-                log("afterSecretGet", "identity", identity);
-                log("afterSecretGet", "loginResponseJSON", loginResponseJSON);
-                log("afterSecretGet", "data", data);
-                if (!identity.secretPart) {
-                    identity.secretPart = data.identity.secretPart;
-                } else {
-                    identity.passwordStretched = xorEncode(identity.secretPart, data.identity.secretPart);
-                }
-                if (!response.result.error) {
+                try {
+                    log("afterSecretGet", response);
+                    log("afterSecretGet", "identity", identity);
+                    log("afterSecretGet", "loginResponseJSON", loginResponseJSON);
+                    if (response.result.error) {
+                        log("ERROR", response.result.error);
+                        return;
+                    }
+                    if (!identity.secretPart) {
+                        identity.secretPart = response.result.identity.secretPart;
+                    } else {
+                        identity.passwordStretched = xorEncode(identity.secretPart, response.result.identity.secretPart);
+                        delete identity.secretPart;
+                        identity.secretSalt = response.result.identity.secretSalt;
+                    }
                     secretGetResults++;
-                }
-                if (secretGetResults === 2) {
-                    identityAccessCompleteNotify(loginResponseJSON.result);
+                    if (secretGetResults === 2) {
+                        log("afterSecretGet", "identity after", identity);
+                        identityAccessCompleteNotify(loginResponseJSON.result);
+                    }
+                } catch(err) {
+                    log("ERROR", err.message, err.stack);
                 }
             }
         };
