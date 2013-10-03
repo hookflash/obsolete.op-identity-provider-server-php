@@ -744,7 +744,7 @@ class User {
 	 */
 	public function signInAfterOAuthProviderLogin( $sProviderType, $sIdentifier, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sToken, $sSecret ) {
 		// Try getting a user and an identity from the database for the given providerType and identifier
-		$aOAuthIdentity = $this->DB->select_single_to_array('legacy_oauth', '*', 'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"');
+        $aOAuthIdentity = $this->DB->select_single_to_array('legacy_oauth', '*', 'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"');
 		$aUser = $this->DB->select_single_to_array('user', '*', 'where user_id="' . $aOAuthIdentity['user_id'] . '"');
 		
 		// Access existing user
