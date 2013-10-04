@@ -937,6 +937,7 @@ class User {
                 throw new RestServerException('011', array());
             } else {
                 $sServerToken = '{"service":"' . $aIdentity['provider_type'] . '",';
+                $sServerToken .= '"identifier":"' . $aIdentity['identifier'] . '",';
                 switch($aIdentity['provider_type']) {
                     case 'facebook':
                         $sServerToken .= '"token":"' . $aIdentity['token'] . '"';
