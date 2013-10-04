@@ -95,15 +95,14 @@ either expressed or implied, of the FreeBSD Project.
                 window.__LOGGER.setChannel(false);
 
                 // reload scenario
-                var url = window.location.href;
-                if (url.indexOf("?reload=true") > 0) {
+                if (initData.identityServiceAuthenticationURL) {
 
-                    log("##### Finish oAuth #####", url);
+                    log("##### Finish oAuth #####", window.location.href);
 
-                    finishOAuthScenario(url);
+                    finishOAuthScenario(initData.identityServiceAuthenticationURL);
                 } else {
 
-                    log("##### Signal Init #####", url);
+                    log("##### Signal Init #####", window.location.href);
 
                     identityAccessWindowNotify(true, false);
                 }

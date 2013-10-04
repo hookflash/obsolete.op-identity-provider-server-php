@@ -470,7 +470,8 @@ class LegacyOAuthLogin {
 			$aAuthenticationResult['errorMessage'] = 'Sign in failed due to missing parameter values';
 			
 			$sRedirectURL .= urlencode('{"reason":{"error":"' . $aAuthenticationResult['errorMessage'] . '"}}');
-			header ( 'Location: ' . $sRedirectURL );
+			$_SESSION['identityServiceAuthenticationURL'] = $sRedirectURL;
+			header ( 'Location: ' . $_SESSION['callbackURL'] );
 		}
 		
 		// Get the parameters given as a successful login indication
@@ -525,9 +526,10 @@ class LegacyOAuthLogin {
 			$sRedirectURL .= $sResult;
 					
 		}
-		
+
 		// Do the redirect
-		header ( 'Location: ' . $sRedirectURL );
+		$_SESSION['identityServiceAuthenticationURL'] = $sRedirectURL;
+		header ( 'Location: ' . $_SESSION['callbackURL'] );
 	}
 	
 	private function validateSignatureForTokenExchange ( $consumer_key, $consumer_secret, $credentials ) {

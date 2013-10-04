@@ -1,4 +1,22 @@
-<!-- 
+<?php
+
+
+// Set time
+date_default_timezone_set('UTC');
+
+// Set session_id
+if ( session_id() === '' ) {
+    session_start();
+}
+// Make sure session expires in 30 minutes
+if ( !isset( $_SESSION['created'] ) ) {
+    $_SESSION['created'] = time();
+} else if ( time() - $_SESSION['created'] > 1800 ) {
+    session_regenerate_id(true);
+    $_SESSION['created'] = time();
+}
+
+?><!-- 
 
 Copyright (c) 2012, SMB Phone Inc.
 All rights reserved.
@@ -75,7 +93,7 @@ DIV.hidden {
 
     var HF = new HF_LoginAPI();
     var initBundle = {
-        $appid: "com.hookflash.OpenPeerSampleApp",
+        identityServiceAuthenticationURL: "<?php echo $_SESSION['identityServiceAuthenticationURL']; unset($_SESSION['identityServiceAuthenticationURL']); ?>",
         $identityProvider: "idprovider-javascript.hookflash.me",
         federatedId: "federated",
         pinvalidationId: "pinvalidation",
