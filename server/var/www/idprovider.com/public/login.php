@@ -53,15 +53,6 @@ either expressed or implied, of the FreeBSD Project.
 
 <html>
 <head>
-<style>
-    BODY {
-        background-color: #B17903;
-        font-family: Helvetica;
-    }
-    DIV.label {
-        margin-bottom: 10px;
-    }
-</style>
 <title>Example Identity Provider - Login/Sign up</title>
 
 <script type="text/javascript" src="js/lib/cryptojs/rollups/sha1.js"></script>
@@ -82,6 +73,14 @@ either expressed or implied, of the FreeBSD Project.
 <link rel="stylesheet" href="js/lib/jquery/jquery.mobile-1.3.0.min.css" />
 
 <style>
+BODY,
+DIV.ui-page {
+    background: #B17903 !important;
+}
+DIV.label {
+    margin: 10px;
+    text-shadow: none;
+}
 DIV.error {
     margin: 10px;
     padding: 5px;
