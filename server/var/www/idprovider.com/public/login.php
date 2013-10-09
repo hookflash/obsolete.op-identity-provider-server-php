@@ -53,6 +53,15 @@ either expressed or implied, of the FreeBSD Project.
 
 <html>
 <head>
+<style>
+    BODY {
+        background-color: #B17903;
+        font-family: Helvetica;
+    }
+    DIV.label {
+        margin-bottom: 10px;
+    }
+</style>
 <title>Example Identity Provider - Login/Sign up</title>
 
 <script type="text/javascript" src="js/lib/cryptojs/rollups/sha1.js"></script>
@@ -128,6 +137,7 @@ DIV.hidden {
 </head>
 
 <body onload='HF.init(initBundle);'>
+<div class="label">login.php</div> 
     <div id="federated" style="display: none;">
         <div id="loginDiv" style="display: block;">
             <div data-role="header">
