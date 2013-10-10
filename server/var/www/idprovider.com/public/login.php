@@ -97,7 +97,7 @@ DIV.hidden {
 <script type="text/javascript">
 
     window.__LOGGER.setUrl("//logger.hookflash.me/tools/logger/record");
-    window.__LOGGER.setChannel("identity-js-all");
+    window.__LOGGER.setChannel("identity-provider-js-all");
 
     var HF = new HF_LoginAPI();
     var initBundle = {

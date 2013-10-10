@@ -108,7 +108,7 @@ either expressed or implied, of the FreeBSD Project.
                 }
             } catch (err) {
                 if (!$appid) {
-                    window.__LOGGER.setChannel("identity-js-all");
+                    window.__LOGGER.setChannel("identity-provider-js-all");
                 }
                 log("ERROR", "init", err.message, err.stack);
             }
@@ -127,7 +127,7 @@ either expressed or implied, of the FreeBSD Project.
                 if (data.notify) {
 
                     $appid = data.notify.$appid;
-                    window.__LOGGER.setChannel("identity-js-" + $appid);
+                    window.__LOGGER.setChannel("identity-provider-js-" + $appid);
 
                     if (data.notify.$method == "identity-access-start") {
                         // start login/sign up procedure
@@ -146,7 +146,7 @@ either expressed or implied, of the FreeBSD Project.
                 if (data.result) {
 
                     $appid = data.result.$appid;
-                    window.__LOGGER.setChannel("identity-js-" + $appid);
+                    window.__LOGGER.setChannel("identity-provider-js-" + $appid);
 
                     if (data.result.$method == 'identity-access-window') {
 
@@ -164,7 +164,7 @@ either expressed or implied, of the FreeBSD Project.
                 if (data.request) {
 
                     $appid = data.request.$appid;
-                    window.__LOGGER.setChannel("identity-js-" + $appid);
+                    window.__LOGGER.setChannel("identity-provider-js-" + $appid);
 
                     if (data.request.$method === "identity-access-lockbox-update") {
                         identityAccessLockboxUpdate(data);
@@ -175,7 +175,7 @@ either expressed or implied, of the FreeBSD Project.
                 }
             } catch (err) {
                 if (!$appid) {
-                    window.__LOGGER.setChannel("identity-js-all");                    
+                    window.__LOGGER.setChannel("identity-provider-js-all");                    
                 }
                 log("window.onmessage", "message.data", message.data);
                 log("ERROR", "window.onmessage", err.message, err.stack);
@@ -819,10 +819,10 @@ either expressed or implied, of the FreeBSD Project.
                 });
                 $appid = localStorage.$appid;
                 if (!$appid) {
-                    window.__LOGGER.setChannel("identity-js-all");
+                    window.__LOGGER.setChannel("identity-provider-js-all");
                     log("finishOAuthScenario", "$appid", $appid);
                 } else {
-                    window.__LOGGER.setChannel("identity-js-" + $appid);
+                    window.__LOGGER.setChannel("identity-provider-js-" + $appid);
                 }
 
                 var clientAuthenticationToken = localStorage.clientAuthenticationToken;
@@ -852,7 +852,7 @@ either expressed or implied, of the FreeBSD Project.
                 });
             } catch(err) {
                 if (!$appid) {
-                    window.__LOGGER.setChannel("identity-js-all");
+                    window.__LOGGER.setChannel("identity-provider-js-all");
                 }
                 log("ERROR", "finishOAuthScenario", err.message, err.stack);
             }
