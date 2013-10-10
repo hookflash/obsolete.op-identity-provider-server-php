@@ -390,6 +390,20 @@ either expressed or implied, of the FreeBSD Project.
                 identity.identifier = $("#" + initData.signup.id).val().toLowerCase();
                 identity.password = $("#" + initData.signup.password).val();
                 identity.displayName = $("#" + initData.signup.displayName).val();
+
+                if (!identity.displayName) {
+                    showSignupError("Please specify Display Name!");
+                    return;
+                }
+                if (!identity.identifier) {
+                    showSignupError("Please specify Username!");
+                    return;
+                }
+                if (!identity.password) {
+                    showSignupError("Please specify Password!");
+                    return;
+                }
+
                 getIdentitySalts(function() {
 
                     // stretch password
@@ -505,6 +519,16 @@ either expressed or implied, of the FreeBSD Project.
                 identity.password = $("#" + initData.login.password).val();
                 log("identity.identifier", identity.identifier);
                 log("identity.password.length", identity.password.length);
+
+                if (!identity.identifier) {
+                    showLoginError("Please specify Username!");
+                    return;
+                }
+                if (!identity.password) {
+                    showLoginError("Please specify Password!");
+                    return;
+                }
+
                 getIdentitySalts(function() {
                     getServerNonce(function() {
                         loginFederated(function(err) {
