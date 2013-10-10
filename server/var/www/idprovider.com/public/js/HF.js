@@ -357,6 +357,27 @@ either expressed or implied, of the FreeBSD Project.
 
         var startLoginFederated = function() {
             log("startLoginFederated");
+
+            function showLoginError(message) {
+                var elm = $("#loginDiv DIV.error");
+                elm.html(message);
+                elm.removeClass("hidden");                
+                setTimeout(function() {
+                    elm.addClass("hidden");
+                }, 5000);
+                window.scrollTo(0, 0);
+            }
+
+            function showSignupError(message) {
+                var elm = $("#signupDiv DIV.error");
+                elm.html(message);
+                elm.removeClass("hidden");
+                setTimeout(function() {
+                    elm.addClass("hidden");
+                }, 5000);
+                window.scrollTo(0, 0);
+            }
+
             // show login/sign up form
             // show federated div
             $("#" + initData.federatedId).css("display", "block");
@@ -364,15 +385,6 @@ either expressed or implied, of the FreeBSD Project.
             // sign up
             $("#" + initData.signup.click).click(function() {
                 log("user signup clicked");
-
-                function showError(message) {
-                    var elm = $("#signupDiv DIV.error");
-                    elm.html(message);
-                    elm.removeClass("hidden");
-                    setTimeout(function() {
-                        elm.addClass("hidden");
-                    }, 5000);
-                }
 
                 // read data from input fields
                 identity.identifier = $("#" + initData.signup.id).val().toLowerCase();
@@ -425,22 +437,22 @@ either expressed or implied, of the FreeBSD Project.
                                 var result = JSON.parse(response).result;
                                 if (result.error) {
                                     if (result.error.reason.$id == "403") {
-                                        showError("Username already exists!");
+                                        showSignupError("Username already exists!");
                                     } else {
-                                        showError(result.error.reason.message);
+                                        showSignupError(result.error.reason.message);
                                     }
                                 } else {
                                     getServerNonce(loginFederated);
                                 }
                             } catch(err) {
                                 log("ERROR", "signup", err.message, err.stack);
-                                showError("Server response not valid. Please try again in a moment.");
+                                showSignupError("Server response not valid. Please try again in a moment.");
                             }
                         },
                         // callback handler that will be called on error
                         error : function(jqXHR, textStatus, errorThrown) {
                             log("ERROR", "signup", "ajax", textStatus, errorThrown);
-                            showError("Error while contacting server. Please try again in a moment.");
+                            showSignupError("Error while contacting server. Please try again in a moment.");
                         }
                     });
                 });
@@ -498,18 +510,10 @@ either expressed or implied, of the FreeBSD Project.
                         loginFederated(function(err) {
                             log("loginFederated", "callback", err);
                             if (err) {
-                                function showError(message) {
-                                    var elm = $("#loginDiv DIV.error");
-                                    elm.html(message);
-                                    elm.removeClass("hidden");
-                                    setTimeout(function() {
-                                        elm.addClass("hidden");
-                                    }, 5000);
-                                }
                                 if (err.code === 403) {
-                                    showError("Incorrect login!");
+                                    showLoginError("Incorrect login!");
                                 } else {
-                                    showError(err.message);
+                                    showLoginError(err.message);
                                 }
                                 return;
                             }
@@ -518,8 +522,24 @@ either expressed or implied, of the FreeBSD Project.
                 });
             });
             identityAccessWindowNotify(true, true);
+
+            $(document).ready(function() {
+                if (window.location.search === "?dev=true") {
+                    var button = null;
+                    button = $('<button>Display Login Feedback</button>');
+                    button.click(function() {
+                        showLoginError("login error");
+                    });
+                    $("BODY > DIV.ui-page > DIV.label").append(button);
+                    button = $('<button>Display Signup Feedback</button>');
+                    button.click(function() {
+                        showSignupError("signup error");
+                    });
+                    $("BODY > DIV.ui-page > DIV.label").append(button);
+                }
+            });
         };
-        
+
         var getIdentitySalts = function(callback) {
             log("getIdentitySalts");
             var data = {

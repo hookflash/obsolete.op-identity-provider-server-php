@@ -75,7 +75,7 @@ either expressed or implied, of the FreeBSD Project.
 <style>
 BODY,
 DIV.ui-page {
-    background: #B17903 !important;
+    background: #C0C0C0 !important;
 }
 DIV.label {
     margin: 10px;
