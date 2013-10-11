@@ -143,8 +143,8 @@ DIV.hidden {
                 <h1>Enter credentials</h1>
             </div>
             <div class="error hidden"></div>
-            Username <input type="text" size="40" id="loginId" />
-            Password <input type="password" size="20" id="loginPassword" />
+            Username <input type="text" size="40" id="loginId" autocorrect="off" autocapitalize="off"/>
+            Password <input type="password" size="20" id="loginPassword" autocorrect="off" autocapitalize="off"/>
             <button id="loginClick">
                 ok
             </button>
@@ -158,9 +158,9 @@ DIV.hidden {
             <div class="error hidden"></div>
             Filename <input type="file" name="file" id="file" />
             <button id="uploadClick">Upload</button>
-            Display Name <input type="text" size="40" id="signUpDisplayName" />
-            Username <input type="text" size="40" id="signUpId" />
-            Password <input type="password" size="20" id="signUpPassword">
+            Display Name <input type="text" size="40" id="signUpDisplayName" autocorrect="off" autocapitalize="off"/>
+            Username <input type="text" size="40" id="signUpId" autocorrect="off" autocapitalize="off"/>
+            Password <input type="password" size="20" id="signUpPassword" autocorrect="off" autocapitalize="off"/>
             <button id="signupClick">
                 Sign up
             </button>
@@ -172,7 +172,7 @@ DIV.hidden {
         <div data-role="header">
             <h1>Enter PIN</h1>
         </div>
-        <input type="text" size="6" id="pin" />
+        <input type="text" size="6" id="pin" autocorrect="off" autocapitalize="off"/>
         <button onclick="pinClick" >
             Validate PIN
         </button>
