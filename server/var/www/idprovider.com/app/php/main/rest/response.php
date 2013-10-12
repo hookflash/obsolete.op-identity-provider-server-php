@@ -52,6 +52,7 @@ class Response {
 	public $resultMethod = '';
 	public $domain = '';
 	public $handler = '';
+        public $appid = '';
 	
 	
 	/**
@@ -65,6 +66,7 @@ class Response {
 		$this->responseID = isset($oRequest->aPars['request_attr']['id']) ? $oRequest->aPars['request_attr']['id'] : false;
 		$this->resultMethod = isset($oRequest->aPars['request_attr']['method']) ? $oRequest->aPars['request_attr']['method'] : '';
 		$this->handler = isset($oRequest->aPars['request_attr']['handler']) ? $oRequest->aPars['request_attr']['handler'] : '';
+                $this->appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 	}
 
 /*------------------
@@ -202,20 +204,22 @@ class Response {
 		if ( $this->bIsJson ) {
 			if ( $sEnveloplessResponse == '' ) {
 				$this->sResponse = '{"result":{"$domain":"' . $this->domain . '",' .
-											  '"$id":"' . $this->responseID . '",' .
-											  '"$handler":"' . $this->handler . '",' .
-											  '"$method":"' . $this->resultMethod . '",' .
-											  '"$epoch":"' . date('U') . '"' .
-											  $sEnveloplessResponse . '}' .
-								   '}';
+                                                                '"$appid":"' . $this->appid . '",' .
+                                                                '"$id":"' . $this->responseID . '",' .
+                                                                '"$handler":"' . $this->handler . '",' .
+                                                                '"$method":"' . $this->resultMethod . '",' .
+                                                                '"$epoch":"' . date('U') . '"' .
+                                                                $sEnveloplessResponse . '}' .
+                                                                '}';
 			} else {
 				$this->sResponse = '{"result":{"$domain":"' . $this->domain . '",' .
-											  '"$id":"' . $this->responseID . '",' .
-											  '"$handler":"' . $this->handler . '",' .
-											  '"$method":"' . $this->resultMethod . '",' .
-											  '"$epoch":"' . date('U') . '",' .
-											  $sEnveloplessResponse . '}' .
-								   '}';
+                                                                '"$appid":"' . $this->appid . '",' .
+                                                                '"$id":"' . $this->responseID . '",' .
+                                                                '"$handler":"' . $this->handler . '",' .
+                                                                '"$method":"' . $this->resultMethod . '",' .
+                                                                '"$epoch":"' . date('U') . '",' .
+                                                                $sEnveloplessResponse . '}' .
+                                                                '}';
 			}
 		} else {
 		$this->sResponse = "<result domain=\"{$this->domain}\" id=\"{$this->responseID}\" handler=\"{$this->handler}\" method=\"{$this->resultMethod}\" epoch=\"" . date('U') . "\">

@@ -94,11 +94,14 @@ class JsonUtil {
 		$sId 		= $aRawArrayFromJson[$sMessageType]['$id'];
 		$sHandler	= $aRawArrayFromJson[$sMessageType]['$handler'];
 		$sMethod 	= $aRawArrayFromJson[$sMessageType]['$method'];
-		if ( $sDomain == '' || $sId == '' || $sHandler == '' || $sMethod == '' ){
+                $sAppId 	= isset($aRawArrayFromJson[$sMessageType]['$appid']) ? 
+                        $aRawArrayFromJson[$sMessageType]['$appid'] : '';
+		if ( $sDomain == '' || $sId == '' || $sHandler == '' || $sMethod == ''){
 			return null;
 		}		
 		$aRequestAttr = array (
 			'domain' 	=> $sDomain,
+                        'appid' 	=> $sAppId,
 			'id' 		=> $sId,
 			'handler' 	=> $sHandler,
 			'method' 	=> $sMethod
@@ -108,7 +111,7 @@ class JsonUtil {
 		
 		// Create the resulting array and return it
 		$aFinalArray = array (
-		'request'		=> $aRequest,
+		'request'	=> $aRequest,
 		'request_attr' 	=> $aRequestAttr
 		);
 		$aFinalArray = ArrayUtil::replaceNullsWithEmptyStrings($aFinalArray);
