@@ -168,15 +168,16 @@ class FederatedLogin {
 		
 		// Try creating new user with given parameters
 		$aSignUpResult = $this->oUser->signUp( 'federated',
-  											   $aRequestData['identity']['identifier'], 
-											   $aRequestData['identity']['passwordHash'], 
-											   $aRequestData['identity']['secretSalt'], 
-											   $aRequestData['identity']['serverPasswordSalt'],
-											   $aRequestData['identity']['displayName'],
-											   $aRequestData['identity']['profile'],
-											   $aRequestData['identity']['vprofile'],
-											   $aRequestData['identity']['avatars']
-											   );									
+                                                        $aRequestData['identity']['identifier'], 
+                                                        $aRequestData['identity']['passwordHash'], 
+                                                        $aRequestData['identity']['secretSalt'], 
+                                                        $aRequestData['identity']['serverPasswordSalt'],
+                                                        $aRequestData['identity']['displayName'],
+                                                        $aRequestData['identity']['profile'],
+                                                        $aRequestData['identity']['vprofile'],
+                                                        $aRequestData['identity']['avatars'],
+                                                        $aRequestData['appid']
+                                                        );									
 		// Return 'Identity already exists' error
 		if ( !$aSignUpResult['signUpSucceeded']) {			
 			throw new RestServerException('004', array(

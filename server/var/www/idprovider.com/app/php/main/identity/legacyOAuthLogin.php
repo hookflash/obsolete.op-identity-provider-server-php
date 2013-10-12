@@ -91,6 +91,7 @@ class LegacyOAuthLogin {
 		$aRequestData = RequestUtil::takeOAuthProviderAuthenticationRequestData($this->aRequest);
 		
 		// Store data in session for later use
+                $_SESSION['appid'] = $aRequestData['appid'];
 		$_SESSION['clientAuthenticationToken'] = $aRequestData['clientAuthenticationToken'];
 		$_SESSION['callbackURL'] = $aRequestData['callbackURL'];
 		$_SESSION['identity'] = $aRequestData['identity'];

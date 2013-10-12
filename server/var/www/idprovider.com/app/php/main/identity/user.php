@@ -341,7 +341,7 @@ class User {
 	 * @return boolean Returns true if the identity is successfully created and stored, otherwise returns false
 	 */
 	public function signUp ( $sIdentityType, $sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt,
-							$sDisplayName = null, $sProfile = null, $sVProfile = null, $aAvatars = null ) {
+				$sDisplayName = null, $sProfile = null, $sVProfile = null, $aAvatars = null, $appid = '' ) {
 		global $DB;
 		$aUser = array (
 		'signUpSucceeded' => false,
@@ -359,7 +359,7 @@ class User {
 		// Distinguish federated and legacy identity type insertions
 		$sUpdated = time();
 		if ( $sDBTable == 'federated' ) {
-			$sUser = $DB->insert('user', array( 'updated' => $sUpdated ) );
+			$sUser = $DB->insert('user', array( 'appid' => $appid, 'updated' => $sUpdated ) );
 			$DB->insert($sDBTable, array(
 										 'identifier' => $sIdentifier,
 										 'user_id' => $sUser,
@@ -774,7 +774,9 @@ class User {
 			
 			// Insert new user and new identity
 			$sUpdated = time();
-			$sUser = $this->DB->insert('user', array( 'updated' => $sUpdated ) );
+			$sUser = $this->DB->insert('user', array( 
+                                                            'appid' => isset($_SESSION['appid']) ? $_SESSION['appid'] : '',
+                                                            'updated' => $sUpdated ) );
 			$this->DB->insert('legacy_oauth', array( 'user_id' => $sUser,
 								'provider_type' => $sProviderType,
 								'identifier' => $sIdentifier,

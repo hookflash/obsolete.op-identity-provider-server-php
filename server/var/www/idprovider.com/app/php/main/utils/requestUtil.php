@@ -668,8 +668,10 @@ class RequestUtil {
 	 */
 	public function takeLoginRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		if ( key_exists( 'afterPinValidation', $req ) ) {
 			return array (
+                        'appid'     => $appid,
 			'afterPinValidation'				=> DatabaseUtil::protectFromSqlInjection( $req['afterPinValidation'] )
 			);
 		} elseif ( key_exists( 'reloginKeyServerPart', $req['identity'] ) ) {
@@ -677,6 +679,7 @@ class RequestUtil {
 			'reloginKeyServerPart'				=> DatabaseUtil::protectFromSqlInjection( $req['identity']['reloginKeyServerPart'] )
 			);
 			return array (
+                        'appid'     => $appid,
 			'identity'							=> $aIdentity
 			);
 		} else {
@@ -696,6 +699,7 @@ class RequestUtil {
 				);
 			}
 			return array (
+                        'appid'     => $appid,
 			'proof'								=> $aProof,
 			'identity'							=> $aIdentity
 			);
@@ -710,6 +714,7 @@ class RequestUtil {
 	 */
 	public function takeSignUpRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aAvatars = array();
 		$nAvatar = 0;
 		while ( isset($req['identity']['avatars']['avatar'][$nAvatar]) ) {
@@ -737,6 +742,7 @@ class RequestUtil {
 		'avatars' 								=> $aAvatars
 		);
 		return array(
+                'appid'     => $appid,
 		'identity' => $aIdentity
 		);
 	}
@@ -749,11 +755,13 @@ class RequestUtil {
 	 */
 	public function takeIdentitySaltsGetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentiy = array(
 		'type'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
 		'identifier' 							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] ),
 		);
 		return array(
+                'appid'     => $appid,
 		'identity' => $aIdentiy
 		);
 	}
@@ -766,6 +774,7 @@ class RequestUtil {
 	 */
 	public function takeIdentitySaltsSetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
 		'type'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
 		'identifier' 							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] ),
@@ -773,6 +782,7 @@ class RequestUtil {
 		'serverPasswordSalt'					=> DatabaseUtil::protectFromSqlInjection( $req['identity']['serverPasswordSalt'] ),
 		);
 		return array(
+                'appid'     => $appid,
 		'clientAuthenticationToken'				=> DatabaseUtil::protectFromSqlInjection( $req['clientAuthenticationToken'] ),
 		'serverAuthenticationToken'				=> DatabaseUtil::protectFromSqlInjection( $req['serverAuthenticationToken'] ),
 		'identity' 								=> $aIdentity
@@ -787,7 +797,9 @@ class RequestUtil {
 	 */
 	public function takeLinkedinTokenExhangeRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		return array(
+                'appid'     => $appid,
 		'identifier'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
 		);
 	}
@@ -800,10 +812,12 @@ class RequestUtil {
 	 */
 	public function takeOAuthProviderAuthenticationRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
 		'type'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] )
 		);
 		return array(
+                'appid'     => $appid,
 		'clientAuthenticationToken'				=> DatabaseUtil::protectFromSqlInjection( $req['clientAuthenticationToken'] ),
 		'callbackURL'							=> DatabaseUtil::protectFromSqlInjection( $req['callbackURL'] ),
 		'identity' 								=> $aIdentity
@@ -818,7 +832,9 @@ class RequestUtil {
 	 */
 	public function takePinValidationRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		return array(
+                'appid'     => $appid,
 		'pin'									=> DatabaseUtil::protectFromSqlInjection( $req['pin'] )
 		);
 	}
@@ -831,10 +847,12 @@ class RequestUtil {
 	 */
 	public function takeProfileGetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
 		'identifier'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
 		);
 		return array(
+                'appid'     => $appid,
 		'identity' 								=> $aIdentity
 		);
 	}
@@ -847,6 +865,7 @@ class RequestUtil {
 	 */
 	public function takeProfileUpdateRequestData ( $oRequest ){ 
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aAvatars = array();
 		$nAvatar = 0;
 		while ( isset($req['identity']['avatars']['avatar'][$nAvatar]) ) {
@@ -882,6 +901,7 @@ class RequestUtil {
 		'removeAvatars'							=> $aRemoveAvatars
 		);
 		return array(
+                'appid'     => $appid,
 		'identity' 								=> $aIdentity
 		);
 	}
@@ -894,6 +914,7 @@ class RequestUtil {
 	 */
 	public function takePasswordChangeRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
 		'identifier'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] ),
 		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] ),		
@@ -904,6 +925,7 @@ class RequestUtil {
 		'newPasswordHash'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['newPasswordHash'] )
 		);
 		return array(
+                'appid'     => $appid,
 		'clientToken'							=> DatabaseUtil::protectFromSqlInjection( $req['clientToken'] ),
 		'serverToken'							=> DatabaseUtil::protectFromSqlInjection( $req['serverToken'] ),
 		'identity' 								=> $aIdentity
@@ -918,6 +940,7 @@ class RequestUtil {
 	 */
 	public function takeLockboxHalfKeyStoreRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
 		'accessToken'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessToken'] ),
 		'accessSecretProof'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessSecretProof'] ),
@@ -930,6 +953,7 @@ class RequestUtil {
 		'keyEncrypted'							=> DatabaseUtil::protectFromSqlInjection( $req['lockbox']['keyEncrypted'] )
 		);
 		return array(
+                'appid'     => $appid,
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'identity' 								=> $aIdentity,
 		'lockbox'								=> $aLockbox
@@ -944,6 +968,7 @@ class RequestUtil {
 	 */
 	public function takeIdentityAccessValidateRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
 		'accessToken'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessToken'] ),
 		'accessSecretProof'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessSecretProof'] ),
@@ -951,6 +976,7 @@ class RequestUtil {
 		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
 		);
 		return array(
+                'appid'     => $appid,
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'purpose'								=> DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
 		'identity' 								=> $aIdentity
@@ -965,6 +991,7 @@ class RequestUtil {
 	 */
 	public function takeIdentityAccessRolodexCredentialsGetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
+                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
 		'accessToken'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessToken'] ),
 		'accessSecretProof'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['accessSecretProof'] ),
@@ -972,6 +999,7 @@ class RequestUtil {
 		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
 		);
 		return array(
+                'appid'     => $appid,
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
 		'identity' 								=> $aIdentity
 		);
@@ -985,7 +1013,9 @@ class RequestUtil {
 	 */
 	public function takeHostingDataGetRequestData ( $oRequest ) {
             $req = $oRequest->aPars['request'];
+            $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
             return array(
+                'appid'     => $appid,
                 'purpose' => DatabaseUtil::protectFromSqlInjection( $req['purpose'] )
             );
         }
