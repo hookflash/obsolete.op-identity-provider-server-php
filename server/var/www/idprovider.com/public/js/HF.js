@@ -419,6 +419,7 @@ either expressed or implied, of the FreeBSD Project.
                         "request" : {
                             "$domain" : $identityProviderDomain,
                             "$id" : generateId(),
+                            "$appid": $appid!==undefined ? $appid : '',
                             "$handler" : "identity-provider",
                             "$method" : "sign-up",
                             "identity" : {
@@ -707,6 +708,7 @@ either expressed or implied, of the FreeBSD Project.
             var requestDataString = JSON.stringify({
                 "request": {
                     "$domain": $identityProviderDomain,
+                    "$appid": $appid!==undefined ? $appid : '',
                     "$id": generateId(),
                     "$handler": "identity-provider",
                     "$method": "oauth-provider-authentication",
