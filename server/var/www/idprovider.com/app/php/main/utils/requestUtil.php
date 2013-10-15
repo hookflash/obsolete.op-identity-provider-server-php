@@ -659,7 +659,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-        public function validateDevtoolsDBClean ( $oRequest ) {
+        public function validateDevtoolsDatabaseCleanProviderRequest ( $oRequest ) {
             $req = $oRequest->aPars['request'];
             if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 		throw new RestServerException('002', array(
@@ -1059,7 +1059,7 @@ class RequestUtil {
         /**
          * Take data 
          */
-        public function takeDevtoolsDBCleanRequestData ( $oRequest ) {
+        public function takeDevtoolsDatabaseCleanProviderRequestData ( $oRequest ) {
             $req = $oRequest->aPars['request'];
             $aAppids = array();
             $nAppid = 0;

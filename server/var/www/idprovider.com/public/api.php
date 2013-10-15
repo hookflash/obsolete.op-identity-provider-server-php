@@ -95,7 +95,7 @@ $server->registerPostMethod('password-change', 'passwordChange');
 $server->registerPostMethod('lockbox-half-key-store', 'lockboxHalfKeyStore');
 $server->registerPostMethod('identity-access-validate', 'identityAccessValidate');
 $server->registerPostMethod('identity-access-rolodex-credentials-get', 'identityAccessRolodexCredentialsGet');
-$server->registerPostMethod('devtools-db-clean', 'devtoolsDBClean');
+$server->registerPostMethod('devtools-database-clean-provider', 'devtoolsDatabaseCleanProvider');
 
 // Create Request and Response objects, and RequestUtils as well
 $oRequest = $server->oRequest;
@@ -744,9 +744,9 @@ function hostingDataGet ()
 }
 
 /**
- * Implementation of devtools-db-clean method
+ * Implementation of devtools-database-clean-provider method
  */
-function devtoolsDBClean ()
+function devtoolsDatabaseCleanProvider ()
 {
     global $oRequest;
     global $oResponse;
@@ -754,10 +754,10 @@ function devtoolsDBClean ()
     
     try {
         // Check request validity
-        RequestUtil::validateDevtoolsDBClean( $oRequest );
+        RequestUtil::validateDevtoolsDatabaseCleanProviderRequest( $oRequest );
         
         // Take data from request
-	$aRequestData = RequestUtil::takeDevtoolsDBCleanRequestData( $oRequest );
+	$aRequestData = RequestUtil::takeDevtoolsDatabaseCleanProviderRequestData( $oRequest );
         
         // Perform db clean
         require_once(APP . 'php/main/identity/user.php');
