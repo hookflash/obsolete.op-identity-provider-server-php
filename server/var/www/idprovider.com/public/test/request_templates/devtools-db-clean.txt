@@ -1,0 +1,19 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+                "$appid": "abc.com.appid",
+		"$handler": "identity-provider",
+		"$method": "devtools-db-clean",
+	
+		"nonce": "",
+		"hostingSecretProof": "",
+                "hostingSecretProofExpires": "",
+		"purpose": "",
+		"appids": [
+			"",
+			"",
+                        ""
+		]
+	}
+}

@@ -653,6 +653,42 @@ class RequestUtil {
             }
         }
 	
+        /**
+	 * Validates the devtoolsDBClean request
+	 *
+	 * @param array $req Parameters of the request
+	 * @return boolean Returns true if the request is valid, otherwise returns false
+	 */
+        public function validateDevtoolsDBClean ( $oRequest ) {
+            $req = $oRequest->aPars['request'];
+            if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'nonce'
+                                                            ));
+            }
+            if ( !( key_exists( 'hostingSecretProof', $req ) && $req['hostingSecretProof'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'hostingSecretProof'
+                                                            ));
+            }
+            if ( !( key_exists( 'hostingSecretProofExpires', $req ) && $req['hostingSecretProofExpires'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'hostingSecretProofExpires'
+                                                            ));
+            }
+            if ( !( key_exists( 'purpose', $req ) && $req['purpose'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'purpose'
+                                                            ));
+            }
+            if ( key_exists('appids', $req) ) {
+                if ( empty($req['appids']) ) {
+                    throw new RestServerException('002', array(
+                        'parameter' => 'appids'
+                        ));
+                }
+            } 
+        }
 		
 	//----------------------------------------------------------------------------------------------------------------------------------------//
 	
@@ -1017,6 +1053,27 @@ class RequestUtil {
             return array(
                 'appid'     => $appid,
                 'purpose' => DatabaseUtil::protectFromSqlInjection( $req['purpose'] )
+            );
+        }
+        
+        /**
+         * Take data 
+         */
+        public function takeDevtoolsDBCleanRequestData ( $oRequest ) {
+            $req = $oRequest->aPars['request'];
+            $aAppids = array();
+            $nAppid = 0;
+            while ( isset($req['appids'][$nAppid]) ) {
+                $sAppid = DatabaseUtil::protectFromSqlInjection( $req['appids'][$nAppid] );
+                array_push($aAppids, $sAppid);
+                $nAppid++;
+            }
+            return array(
+                'purpose'                   => DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
+                'nonce'                     => DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
+                'hostingSecretProof'        => DatabaseUtil::protectFromSqlInjection( $req['hostingSecretProof'] ),
+                'hostingSecretProofExpires' => DatabaseUtil::protectFromSqlInjection( $req['hostingSecretProofExpires'] ),
+                'appids'                    => $aAppids
             );
         }
 }

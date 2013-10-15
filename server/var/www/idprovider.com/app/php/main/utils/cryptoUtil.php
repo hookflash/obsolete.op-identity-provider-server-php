@@ -335,6 +335,7 @@ class CryptoUtil {
 	 *
 	 * @param string $nonce One time used nonce just to generate this proof (nonce will also be sent in the same request, so the request receiver will be able to check if the proof is real)
 	 * @param string $domainHostingSecret This parameter is known to both sides already
+         * @param string hosting secret
 	 * @return array Returnes hostingProof and hostingProofExpires
 	 */
 	public function generateHostingProof ( $sMethodName, $sNonce, $sDomainHostingSecret ) {
@@ -348,6 +349,32 @@ class CryptoUtil {
 		'hostingProof'        => $sHostingProof,
 		'hostingProofExpires' => $sHostingProofExpires,
 		);
+	}
+        
+        /**
+	 * Validates a hosting proof secret
+	 *
+         * @param string $sPurpose Purpose of validation
+	 * @param string $sNonce One time used nonce just to generate this proof (nonce will also be sent in the same request, so the request receiver will be able to check if the proof is real)
+	 * @param string $sExpires hosting secret proof expiry
+         * @param string $sDomainHostingSecret This parameter is known to both sides already
+         * @param string $sHostingProof hosting proof to be validated
+	 * @return array Returnes true if valid, otherwise returns false
+	 */
+	public function validateHostingProof ( $sPurpose, $sNonce, $sExpires, $sDomainHostingSecret, $sHostingProof ) {
+            // Check if timed out
+            if (time() > $sExpires) {
+                return false;
+            }
+            
+            // Check if is equal by calculating
+            $sHostingProofCalcRaw = $sPurpose . ':' . $sNonce . ':' . $sDomainHostingSecret . ":{$sExpires}";
+            $sHostingSecretProofCalculated = sha1($sHostingProofRaw);
+            if ($sHostingSecretProofCalculated != $sHostingProof) {
+                return false;
+            }
+            
+            return true;
 	}
 	
 	/**

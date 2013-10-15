@@ -361,16 +361,16 @@ class User {
 		if ( $sDBTable == 'federated' ) {
 			$sUser = $DB->insert('user', array( 'appid' => $appid, 'updated' => $sUpdated ) );
 			$DB->insert($sDBTable, array(
-										 'identifier' => $sIdentifier,
-										 'user_id' => $sUser,
-										 'password_hash' => $sPasswordHash,
-										 'secret_salt' => $sIdentitySecretSalt,
-										 'server_password_salt' => $sServerPasswordSalt,
-										 'updated' => $sUpdated,
-										 'display_name' => $sDisplayName,
-										 'profile_url' => $sProfile,
-										 'vprofile_url' => $sVProfile
-										 )
+                                                    'identifier' => $sIdentifier,
+                                                    'user_id' => $sUser,
+                                                    'password_hash' => $sPasswordHash,
+                                                    'secret_salt' => $sIdentitySecretSalt,
+                                                    'server_password_salt' => $sServerPasswordSalt,
+                                                    'updated' => $sUpdated,
+                                                    'display_name' => $sDisplayName,
+                                                    'profile_url' => $sProfile,
+                                                    'vprofile_url' => $sVProfile
+                                                    )
 						);
 			$aIdentity = $DB->select_single_to_array($sDBTable, '*', 'where identifier="' . $sIdentifier . '"');
 			$sIdentityTypeSpecificIdentityIdFieldName = $this->getAppropriateIdentityIdFieldName($sIdentityType);
@@ -801,6 +801,33 @@ class User {
 		'serverPasswordSalt' => ( !$bNew ) ? $aOAuthIdentity['server_password_salt'] : '',
 		);
 	}
+        
+        /**
+         * Clean the DB based on given parameters
+         * 
+         * @param array $aRequestData data parsed from request
+         */
+        public function cleanDB ( $aRequestData ) {
+            // Validate Hosting Secret Proof
+            require_once(APP . 'php/main/utils/cryptoUtil.php');
+            $bHostingProofValid = CryptoUtil::validateHostingProof(
+                                    $aRequestData['purpose'],
+                                    $aRequestData['nonce'],
+                                    $aRequestData['hostingSecretProofExpires'],
+                                    DOMAIN_HOSTING_SECRET,
+                                    $aRequestData['hostingSecretProof']);
+            if (! $bHostingProofValid) {
+                throw new RestServerException('007', array(
+                                                            'parameter'         => 'hostingSecretProof',
+                                                            'parameterValue' 	=> $aRequestData['hostingSecretProof']
+                                                            )); 
+            }
+            
+            // Perform clean
+            foreach ( $aRequestData['appids'] as $v ) {
+                $this->DB->delete('user', 'where appid like "' . $v . '-%"');
+            }
+        }
 	
 	/**
 	 * TODO
