@@ -101,7 +101,12 @@ DIV.hidden {
 
     var HF = new HF_LoginAPI();
     var initBundle = {
-        identityServiceAuthenticationURL: "<?php echo $_SESSION['identityServiceAuthenticationURL']; unset($_SESSION['identityServiceAuthenticationURL']); ?>",
+        identityServiceAuthenticationURL: "<?php
+          if (isset($_SESSION['identityServiceAuthenticationURL'])) {
+              echo $_SESSION['identityServiceAuthenticationURL'];
+              unset($_SESSION['identityServiceAuthenticationURL']);
+          }
+        ?>",
         $identityProvider: "idprovider-javascript.hookflash.me",
         federatedId: "federated",
         pinvalidationId: "pinvalidation",
