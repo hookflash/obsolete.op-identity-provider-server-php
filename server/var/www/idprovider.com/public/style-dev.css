@@ -1,0 +1,11 @@
+
+BODY,
+DIV.ui-page {
+    background-image: none;
+    background: #C0C0C0 !important;
+}
+
+DIV.label {
+    margin: 10px;
+    text-shadow: none;
+}

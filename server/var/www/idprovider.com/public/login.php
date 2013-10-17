@@ -72,27 +72,7 @@ either expressed or implied, of the FreeBSD Project.
 
 <link rel="stylesheet" href="js/lib/jquery/jquery.mobile-1.3.0.min.css" />
 
-<style>
-BODY,
-DIV.ui-page {
-    background: #C0C0C0 !important;
-}
-DIV.label {
-    margin: 10px;
-    text-shadow: none;
-}
-DIV.error {
-    margin: 10px;
-    padding: 5px;
-    border: 1px solid #FF0000;
-    color: #FF0000;
-    font-weight: bold;
-    white-space: nowrap;
-}
-DIV.hidden {
-    display: none;
-}
-</style>
+<link rel="stylesheet" href="style.css" />
 
 <script type="text/javascript">
 
@@ -137,11 +117,18 @@ DIV.hidden {
         $("#loginDiv").css("display", "block");
     }
 
+    $(document).ready(function() {
+        if (window.location.search === "?dev=true") {
+            $("HEAD").append('<link rel="stylesheet" href="style-dev.css"/>');
+            $("BODY DIV.ui-page").prepend('<div class="label">' + window.location.pathname + '</div>');
+        }
+    });
+
 </script>
 </head>
 
 <body onload='HF.init(initBundle);'>
-<div class="label">login.php</div> 
+    <div id="spinner"></div>
     <div id="federated" style="display: none;">
         <div id="loginDiv" style="display: block;">
             <div data-role="header">

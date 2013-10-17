@@ -1,0 +1,30 @@
+
+BODY,
+DIV.ui-page {
+    overflow: hidden;
+    background-image: url(images/iPhone_background.png);
+    background-size: cover;
+    background-color: rgb(65, 123, 134);
+    text-align: center;
+}
+
+#spinner {
+    background-image: url(images/spinner.gif);
+    background-size: cover;
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    margin-top: 100px;
+}
+
+DIV.error {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid #FF0000;
+    color: #FF0000;
+    font-weight: bold;
+    white-space: nowrap;
+}
+DIV.hidden {
+    display: none;
+}

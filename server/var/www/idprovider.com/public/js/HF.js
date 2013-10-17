@@ -283,6 +283,7 @@ either expressed or implied, of the FreeBSD Project.
                     startLoginOauth();
                 } else
                 if (identity.type === "federated") {
+                    $("#spinner").remove();
                     startLoginFederated();
                 }
             } catch(err) {
