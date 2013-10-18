@@ -1,0 +1,11 @@
+{
+	"boot": {
+		"package": "./package.json"
+	},
+	"config": {
+		"github.com/pinf-io/io.pinf.php": {
+			"enable": true,
+			"documentRoot": "$__DIRNAME/server/var/www/idprovider.com/public"
+		}
+	}
+}

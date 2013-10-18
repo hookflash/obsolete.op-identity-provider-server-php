@@ -1,10 +1,15 @@
 {
+	"uid": "github.com/openpeer/op-identity-provider-server-php",
 	"name": "op-identity-provider-server-php",
 	"version": "0.1.0",
+    "pm": "sm",
 	"private": true,
 	"config": {
 		"run": {
 			"packagePath": "server/var/www/idprovider.com/public"
 		}
-	}
+	},
+    "devMappings": {
+        "app-php": "github.com/freedom-platform/app-php/~0.1.0"
+    }
 }
