@@ -317,16 +317,33 @@ either expressed or implied, of the FreeBSD Project.
         function startLoginChoose() {
             log("startLoginChoose");
 
-            startLoginFederated();
+            log("startLoginChoose", "identity", identity);
+            log("startLoginChoose", "identityAccessStart", identityAccessStart);
 
-            $("#op-social-facebook-button").click(function() {
-                log("startLoginChoose clicked social-facebook button");
-                identity.type = "facebook";
-                identity.uri = "identity://facebook/";
-                identity.identifier = "";
+            if (
+                identity.type === "facebook" &&
+                identityAccessStart.identity.uri &&
+                /^identity:\/\/facebook\.com\/.+$/.test(identityAccessStart.identity.uri)
+            ) {
+                log("startLoginChoose", "found full '" + identity.type + "' identity. logging in right away.");
+
+                identity.uri = identityAccessStart.identity.uri;
+
                 showView("loading");
                 startLoginOauth();
-            });
+
+            } else {
+                startLoginFederated();
+
+                $("#op-social-facebook-button").click(function() {
+                    log("startLoginChoose clicked social-facebook button");
+                    identity.type = "facebook";
+                    identity.uri = "identity://facebook/";
+                    identity.identifier = "";
+                    showView("loading");
+                    startLoginOauth();
+                });
+            }
         }
 
 
