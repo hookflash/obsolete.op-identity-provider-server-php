@@ -727,6 +727,7 @@ either expressed or implied, of the FreeBSD Project.
             login({
                 "request": {
                     "$domain": $identityProviderDomain,
+                    "$appid": $appid!==undefined ? $appid : '',
                     "$id": generateId(),
                     "$handler": "identity-provider",
                     "$method": "login",
