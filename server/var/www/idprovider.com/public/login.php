@@ -55,24 +55,31 @@ either expressed or implied, of the FreeBSD Project.
 <head>
 <title>Example Identity Provider - Login/Sign up</title>
 
+<script type="text/javascript" src="//logger.hookflash.me/tools/logger/logger.js"></script>
+
 <script type="text/javascript" src="js/lib/cryptojs/rollups/sha1.js"></script>
 <script type="text/javascript" src="js/lib/cryptojs/rollups/sha256.js"></script>
 <script type="text/javascript" src="js/lib/cryptojs/rollups/hmac-sha1.js"></script>
 <script type="text/javascript" src="js/lib/cryptojs/rollups/aes.js"></script>
 <script type="text/javascript" src="js/lib/jquery/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="js/lib/jquery/jquery-mobile-1.3.0.js"></script>
 <script type="text/javascript" src="js/lib/ajaxfileupload.js"></script>
 <script type="text/javascript" src="js/lib/base64.js"></script>
-
+<script type="text/javascript" src="js/lib/cifre/aes.js"></script>
+<script type="text/javascript" src="js/lib/cifre/utils.js"></script>
 <script type="text/javascript" src="js/HF.js"></script>
-<script src="js/lib/cifre/aes.js"></script>
-<script src="js/lib/cifre/utils.js"></script>
 
-<script type="text/javascript" src="//logger.hookflash.me/tools/logger/logger.js"></script>
-
-<link rel="stylesheet" href="js/lib/jquery/jquery.mobile-1.3.0.min.css" />
-
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css"/>
+<?php
+if (isset($_SERVER['QUERY_STRING'])) {
+    parse_str($_SERVER['QUERY_STRING'], $query);
+    if (isset($query['skin'])) {
+        echo '<link rel="stylesheet" href="style-' . $query['skin'] . '.css" />';
+        if ($query['skin'] === 'xfinity') {
+            $IGNORE_BASE = true;
+        }
+    }
+}
+?>
 
 <script type="text/javascript">
 
@@ -88,8 +95,6 @@ either expressed or implied, of the FreeBSD Project.
           }
         ?>",
         $identityProvider: "idprovider-javascript.hookflash.me",
-        federatedId: "federated",
-        pinvalidationId: "pinvalidation",
         login: {
             click: "loginClick",
             id: "loginId",
@@ -99,28 +104,16 @@ either expressed or implied, of the FreeBSD Project.
             click: "signupClick",
             id: "signUpId",
             password: "signUpPassword",
-            displayName: "signUpDisplayName",
-            uploadClick: "uploadClick"
+            displayName: "signUpDisplayName"
         },
-        pinClick: "pinClick"
+        pinClick: "pinClick",
+        ignoreBase: <?php if (isset($IGNORE_BASE) && $IGNORE_BASE) echo 'true'; else echo 'false'; ?>
     };
 
-    // Show sign up div / hide login div
-    function showSignUp() {
-        $("#signupDiv").css("display", "block");
-        $("#loginDiv").css("display", "none");
-    }
-
-    // Hide sign up div / show login div
-    function showLogin() {
-        $("#signupDiv").css("display", "none");
-        $("#loginDiv").css("display", "block");
-    }
-
     $(document).ready(function() {
-        if (window.location.search === "?dev=true") {
+        if (/dev=true/.test(window.location.search)) {
             $("HEAD").append('<link rel="stylesheet" href="style-dev.css"/>');
-            $("BODY DIV.ui-page").prepend('<div class="label">' + window.location.pathname + '</div>');
+            $("BODY").prepend('<div class="op-view-label">' + window.location.pathname + '</div>');
         }
     });
 
@@ -128,47 +121,56 @@ either expressed or implied, of the FreeBSD Project.
 </head>
 
 <body onload='HF.init(initBundle);'>
-    <div id="spinner"></div>
-    <div id="federated" style="display: none;">
-        <div id="loginDiv" style="display: block;">
-            <div data-role="header">
-                <h1>Enter credentials</h1>
+    <div class="op-centered">
+        <div id="op-logo"></div>
+        <div id="op-spinner"></div>
+        <div id="op-federated-login-view" class="op-hidden">
+            <div class="op-view">
+                <h1>Login</h1>
+                <div class="op-error op-hidden"></div>
+                <div class="op-fieldset"><input type="text" id="loginId" placeholder="username" autocorrect="off" autocapitalize="off"/></div>
+                <div class="op-fieldset"><input type="password" id="loginPassword" placeholder="password" autocorrect="off" autocapitalize="off"/></div>
+                <div class="op-fieldset">
+                    <button id="op-federated-login-button">Login</button>
+                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('federated-signup');">Sign Up</a></div>
+                </div>
             </div>
-            <div class="error hidden"></div>
-            Username <input type="text" size="40" id="loginId" autocorrect="off" autocapitalize="off"/>
-            Password <input type="password" size="20" id="loginPassword" autocorrect="off" autocapitalize="off"/>
-            <button id="loginClick">
-                ok
-            </button>
-            <a href="#" onclick="showSignUp();">Sign Up</a>
         </div>
 
-        <div id="signupDiv" style="display: none;">
-            <div data-role="header">
-                <h1>Enter credentials</h1>
-            </div>
-            <div class="error hidden"></div>
-            Filename <input type="file" name="file" id="file" />
-            <button id="uploadClick">Upload</button>
-            Display Name <input type="text" size="40" id="signUpDisplayName" autocorrect="off" autocapitalize="off"/>
-            Username <input type="text" size="40" id="signUpId" autocorrect="off" autocapitalize="off"/>
-            Password <input type="password" size="20" id="signUpPassword" autocorrect="off" autocapitalize="off"/>
-            <button id="signupClick">
-                Sign up
-            </button>
-            <a href="#" onclick="showLogin();">Log In</a>
-        </div>
-    </div>
+        <div id="op-federated-signup-view" class="op-hidden">
+            <div class="op-view">
+                <h1>Create Account</h1>
 
-    <div id="pinvalidation" style="display: none;">
-        <div data-role="header">
-            <h1>Enter PIN</h1>
+                <div class="op-headerlink"><a class="op-headerlink" href="#" onclick="HF.showView('federated-login');">Back</a></div>
+
+                <div class="op-error op-hidden"></div>
+<!--                
+                <div class="op-fieldset"><label>Avatar</label><input type="file" name="file" id="file" /><button id="op-federated-signup-upload-button">Upload</button></div>
+-->
+                <div class="op-fieldset"><label>Display Name</label><input type="text" id="signUpDisplayName" autocorrect="off" autocapitalize="off"/></div>
+                <div class="op-fieldset"><label>Username</label><input type="text" id="signUpId" autocorrect="off" autocapitalize="off"/></div>
+                <div class="op-fieldset"><label>Password</label><input type="password" id="signUpPassword" autocorrect="off" autocapitalize="off"/></div>
+                <div class="op-fieldset">
+                    <button id="op-federated-signup-button">Sign up</button>
+                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('federated-login');">Log In</a></div>
+                </div>
+            </div>
         </div>
-        <input type="text" size="6" id="pin" autocorrect="off" autocapitalize="off"/>
-        <button onclick="pinClick" >
-            Validate PIN
-        </button>
-        <div id="pinexpired">&nbps;</div>
+
+        <div id="op-social-facebook-view" class="op-hidden">
+            <div class="op-view">
+                <button id="op-social-facebook-button"><img src="images/iPhone_signin_facebook@2x.png"></button>
+            </div>
+        </div>
+
+        <div id="op-pinvalidation-view" class="op-hidden">
+            <div class="op-view">
+                <h1>Enter PIN</h1>
+                <input type="text" size="6" id="pin" autocorrect="off" autocapitalize="off"/>
+                <button onclick="op-pinvalidation-button" >Validate PIN</button>
+                <div id="pinexpired">&nbps;</div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

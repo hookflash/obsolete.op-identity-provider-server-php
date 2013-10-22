@@ -269,6 +269,9 @@ either expressed or implied, of the FreeBSD Project.
             try {
                 log("startLogin");
                 setType(identityAccessStart);
+                if (initData.ignoreBase) {
+                    startLoginChoose();
+                } else
                 if (
                     identity.type === "email" ||
                     identity.type === "phone"
@@ -283,13 +286,49 @@ either expressed or implied, of the FreeBSD Project.
                     startLoginOauth();
                 } else
                 if (identity.type === "federated") {
-                    $("#spinner").remove();
                     startLoginFederated();
+                } else {
+                    throw new Error("Don't know how to proceed!");
                 }
             } catch(err) {
                 log("ERROR", "startLogin", err.message, err.stack);
             }
         };
+
+        var showView = function (name) {
+            $("#op-spinner").addClass("op-hidden");
+            $('DIV[id^="op-"][id$="-view"]').addClass("op-hidden");
+            if (!Array.isArray(name)) {
+                name = [ name ];
+            }
+            if (name.indexOf("federated-login") !== -1 && initData.ignoreBase) {
+                name.push("social-facebook");
+            }
+            name.forEach(function(name) {
+                if (name === "loading") {
+                    $("#op-spinner").removeClass("op-hidden");
+                } else {
+                    $('DIV[id^="op-"][id$="-view"]#op-' + name + '-view').removeClass("op-hidden");
+                }
+            });
+        }
+
+
+        function startLoginChoose() {
+            log("startLoginChoose");
+
+            startLoginFederated();
+
+            $("#op-social-facebook-button").click(function() {
+                log("startLoginChoose clicked social-facebook button");
+                identity.type = "facebook";
+                identity.uri = "identity://facebook/";
+                identity.identifier = "";
+                showView("loading");
+                startLoginOauth();
+            });
+        }
+
 
         var startRelogin = function() {
             log("startRelogin");
@@ -352,7 +391,7 @@ either expressed or implied, of the FreeBSD Project.
                 identity.type = "twitter";
                 identity.uri = "identity://twitter/";
             } else {
-                log("ERROR", "Unknown identity type", id);
+                log("WARN", "Unknown identity type", id);
             }
         };
 
@@ -360,31 +399,31 @@ either expressed or implied, of the FreeBSD Project.
             log("startLoginFederated");
 
             function showLoginError(message) {
-                var elm = $("#loginDiv DIV.error");
+                showView("federated-login");
+                var elm = $("#op-federated-login-view DIV.op-error");
                 elm.html(message);
-                elm.removeClass("hidden");                
+                elm.removeClass("op-hidden");                
                 setTimeout(function() {
-                    elm.addClass("hidden");
+                    elm.addClass("op-hidden");
                 }, 5000);
                 window.scrollTo(0, 0);
             }
 
             function showSignupError(message) {
-                var elm = $("#signupDiv DIV.error");
+                showView("federated-signup");
+                var elm = $("#op-federated-signup-view DIV.op-error");
                 elm.html(message);
-                elm.removeClass("hidden");
+                elm.removeClass("op-hidden");
                 setTimeout(function() {
-                    elm.addClass("hidden");
+                    elm.addClass("op-hidden");
                 }, 5000);
                 window.scrollTo(0, 0);
             }
 
-            // show login/sign up form
-            // show federated div
-            $("#" + initData.federatedId).css("display", "block");
-            // add onclick listeners
-            // sign up
-            $("#" + initData.signup.click).click(function() {
+
+            showView("federated-login");
+
+            $("#op-federated-signup-button").click(function() {
                 log("user signup clicked");
 
                 // read data from input fields
@@ -393,17 +432,19 @@ either expressed or implied, of the FreeBSD Project.
                 identity.displayName = $("#" + initData.signup.displayName).val();
 
                 if (!identity.displayName) {
-                    showSignupError("Please specify Display Name!");
+                    showSignupError("Please enter a Display Name!");
                     return;
                 }
                 if (!identity.identifier) {
-                    showSignupError("Please specify Username!");
+                    showSignupError("Please enter a Username!");
                     return;
                 }
                 if (!identity.password) {
-                    showSignupError("Please specify Password!");
+                    showSignupError("Please enter a Password!");
                     return;
                 }
+
+                showView("loading");
 
                 getIdentitySalts(function() {
 
@@ -474,7 +515,7 @@ either expressed or implied, of the FreeBSD Project.
                 });
             });
             // signup upload avatar image handler
-            $("#" + initData.signup.uploadClick).click(function() {
+            $("#op-federated-signup-upload-button").click(function() {
                 log("user uploading avatar");
                 // validate response from avatar upload request.
                 function validateResponseUploadSuccess(data) {
@@ -514,7 +555,7 @@ either expressed or implied, of the FreeBSD Project.
                 });
             });
             // login
-            $("#" + initData.login.click).click(function() {
+            $("#op-federated-login-button").click(function() {
                 log("user login clicked");
                 // read data from input fields
                 identity.identifier = $("#" + initData.login.id).val().toLowerCase();
@@ -523,13 +564,15 @@ either expressed or implied, of the FreeBSD Project.
                 log("identity.password.length", identity.password.length);
 
                 if (!identity.identifier) {
-                    showLoginError("Please specify Username!");
+                    showLoginError("Please enter a Username!");
                     return;
                 }
                 if (!identity.password) {
-                    showLoginError("Please specify Password!");
+                    showLoginError("Please enter a Password!");
                     return;
                 }
+
+                showView("loading");
 
                 getIdentitySalts(function() {
                     getServerNonce(function() {
@@ -550,18 +593,18 @@ either expressed or implied, of the FreeBSD Project.
             identityAccessWindowNotify(true, true);
 
             $(document).ready(function() {
-                if (window.location.search === "?dev=true") {
+                if (/dev=true/.test(window.location.search)) {
                     var button = null;
                     button = $('<button>Display Login Feedback</button>');
                     button.click(function() {
                         showLoginError("login error");
                     });
-                    $("BODY > DIV.ui-page > DIV.label").append(button);
+                    $("DIV.op-view-label").append(button);
                     button = $('<button>Display Signup Feedback</button>');
                     button.click(function() {
                         showSignupError("signup error");
                     });
-                    $("BODY > DIV.ui-page > DIV.label").append(button);
+                    $("DIV.op-view-label").append(button);
                 }
             });
         };
@@ -1397,7 +1440,8 @@ either expressed or implied, of the FreeBSD Project.
         
         return {
             getVersion : getVersion,
-            init : init
+            init : init,
+            showView: showView
         };
     };
 

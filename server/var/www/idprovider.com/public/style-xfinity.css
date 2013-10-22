@@ -1,0 +1,26 @@
+
+DIV#op-logo {
+    background-image: url(images/xfinity-friends-logo-navigation@2x.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 76px;
+    margin-top: 20px;
+    display: block;
+}
+
+DIV#op-spinner {
+    margin-top: 50px;
+}
+
+DIV#op-federated-login-view H1 {
+	display: none;
+}
+
+DIV#op-federated-signup-view H1 {
+	display: none;
+}
+
+1DIV.op-view LABEL {
+	display: none;
+}

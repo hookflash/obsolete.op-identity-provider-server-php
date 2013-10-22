@@ -1,11 +1,9 @@
 
-BODY,
-DIV.ui-page {
+BODY {
     background-image: none;
     background: #C0C0C0 !important;
 }
 
-DIV.label {
+DIV.op-view-label {
     margin: 10px;
-    text-shadow: none;
 }
