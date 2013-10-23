@@ -473,7 +473,7 @@ class User {
 	 * @param string $sIdentifier An identity to be logged in
 	 * @return array $aFederatedIdentity Returns an array of data taken from database that is attached to given identity
 	 */
-	public function signInUsingFederated( $sIdentifier ) {
+	public function signInUsingFederated( $sIdentifier, $appid ) {
 		// Usage of globals
 		global $DB;
 		
@@ -485,6 +485,16 @@ class User {
 		if ( !( $aFederatedIdentity && $aUser ) ) {
 			return null;		
 		}
+                
+                // Update appid upon every login
+                $DB->update( 
+                        'user',
+                        array (
+                            'updated'	=> time(),
+                            'appid'     => $appid != '' ? $appid : $aUser['appid']
+                        ),
+			'where user_id="' . $aFederatedIdentity['user_id'] . '"'
+		);
 		
 		return $aFederatedIdentity;
 	}

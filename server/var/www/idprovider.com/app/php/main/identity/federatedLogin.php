@@ -81,7 +81,7 @@ class FederatedLogin {
 		}
 		
 		// Try logging the user in using the given identity
-		$aUser = $this->oUser->signInUsingFederated($aRequestData['identity']['identifier']);
+		$aUser = $this->oUser->signInUsingFederated($aRequestData['identity']['identifier'], $aRequestData['appid']);
 		
 		// Return 'No such identity' error code
 		if ($aUser['user_id'] == '') {
