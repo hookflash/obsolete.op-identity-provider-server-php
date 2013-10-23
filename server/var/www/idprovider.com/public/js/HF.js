@@ -269,9 +269,6 @@ either expressed or implied, of the FreeBSD Project.
             try {
                 log("startLogin");
                 setType(identityAccessStart);
-                if (initData.ignoreBase) {
-                    startLoginChoose();
-                } else
                 if (
                     identity.type === "email" ||
                     identity.type === "phone"
@@ -284,6 +281,9 @@ either expressed or implied, of the FreeBSD Project.
                     identity.type === "twitter"
                 ) {
                     startLoginOauth();
+                } else
+                if (initData.ignoreBase) {
+                    startLoginChoose();
                 } else
                 if (identity.type === "federated") {
                     startLoginFederated();
