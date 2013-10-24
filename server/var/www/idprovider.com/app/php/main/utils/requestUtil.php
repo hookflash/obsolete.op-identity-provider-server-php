@@ -666,14 +666,14 @@ class RequestUtil {
                                                             'parameter' => 'nonce'
                                                             ));
             }
-            if ( !( key_exists( 'hostingSecretProof', $req ) && $req['hostingSecretProof'] != null ) ) {
+            if ( !( key_exists( 'hostingProof', $req ) && $req['hostingProof'] != null ) ) {
 		throw new RestServerException('002', array(
-                                                            'parameter' => 'hostingSecretProof'
+                                                            'parameter' => 'hostingProof'
                                                             ));
             }
-            if ( !( key_exists( 'hostingSecretProofExpires', $req ) && $req['hostingSecretProofExpires'] != null ) ) {
+            if ( !( key_exists( 'hostingProofExpires', $req ) && $req['hostingProofExpires'] != null ) ) {
 		throw new RestServerException('002', array(
-                                                            'parameter' => 'hostingSecretProofExpires'
+                                                            'parameter' => 'hostingProofExpires'
                                                             ));
             }
             if ( !( key_exists( 'purpose', $req ) && $req['purpose'] != null ) ) {
@@ -1071,8 +1071,8 @@ class RequestUtil {
             return array(
                 'purpose'                   => DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
                 'nonce'                     => DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
-                'hostingSecretProof'        => DatabaseUtil::protectFromSqlInjection( $req['hostingSecretProof'] ),
-                'hostingSecretProofExpires' => DatabaseUtil::protectFromSqlInjection( $req['hostingSecretProofExpires'] ),
+                'hostingSecretProof'        => DatabaseUtil::protectFromSqlInjection( $req['hostingProof'] ),
+                'hostingSecretProofExpires' => DatabaseUtil::protectFromSqlInjection( $req['hostingProofExpires'] ),
                 'appids'                    => $aAppids
             );
         }

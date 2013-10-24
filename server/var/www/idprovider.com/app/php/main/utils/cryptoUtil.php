@@ -369,7 +369,7 @@ class CryptoUtil {
             
             // Check if is equal by calculating
             $sHostingProofCalcRaw = $sPurpose . ':' . $sNonce . ':' . $sDomainHostingSecret . ":{$sExpires}";
-            $sHostingSecretProofCalculated = sha1($sHostingProofRaw);
+            $sHostingSecretProofCalculated = sha1($sHostingProofCalcRaw);
             if ($sHostingSecretProofCalculated != $sHostingProof) {
                 return false;
             }
