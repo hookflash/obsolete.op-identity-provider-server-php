@@ -652,6 +652,41 @@ class RequestUtil {
                                                             ));
             }
         }
+        
+        /**
+	 * Validates if the federatedContactsGet has already set not empty identifier.
+	 * 
+	 * @param array $req Parameters of the request
+	 * @return boolean Returns true if the request is valid, otherwise returns false
+	 */
+	public function validateFederatedContactsGetRequest ( $oRequest ) {
+            $req = $oRequest->aPars['request']; 
+            if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'nonce'
+                                                            ));
+            }
+            if ( !( key_exists( 'hostingProof', $req ) && $req['hostingProof'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'hostingProof'
+                                                            ));
+            }
+            if ( !( key_exists( 'hostingProofExpires', $req ) && $req['hostingProofExpires'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'hostingProofExpires'
+                                                            ));
+            }
+            if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
+		throw new RestServerException('002', array(
+                                                            'parameter' => 'identity'
+                                                            ));
+            }
+            if ( !( key_exists('uri', $req['identity']) && $req['identity']['uri'] != null ) ) {
+                throw new RestServerException('002', array(
+                                                            'parameter' => 'uri'
+                                                            ));
+            }
+        }
 	
         /**
 	 * Validates the devtoolsDBClean request
@@ -1053,6 +1088,27 @@ class RequestUtil {
             return array(
                 'appid'     => $appid,
                 'purpose' => DatabaseUtil::protectFromSqlInjection( $req['purpose'] )
+            );
+        }
+        
+        /**
+	 * Take data from the request in a safe manner and return an array of it
+	 *
+	 * @param array $req The request to take data from
+	 * @return array of needed given-by-request data
+	 */
+	public function takeFederatedContactsGetRequestData ( $oRequest ) {
+            $req = $oRequest->aPars['request'];
+            $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
+            $aIdentity = array(
+            'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
+            );
+            return array(
+            'appid'                 => $appid,
+            'nonce'                 => DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
+            'hostingProof'          => DatabaseUtil::protectFromSqlInjection( $req['hostingProof'] ),
+            'hostingProofExpires'   => DatabaseUtil::protectFromSqlInjection( $req['hostingProofExpires'] ),
+            'identity'              => $aIdentity
             );
         }
         

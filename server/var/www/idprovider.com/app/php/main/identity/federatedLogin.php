@@ -203,6 +203,18 @@ class FederatedLogin {
 		
 		return true;
 	}
+        
+        /**
+         * TODO
+         */
+        public function getContacts() {
+            // Take data from the request
+            $aRequestData = RequestUtil::takeFederatedContactsGetRequestData($this->aRequest);
+            print_r($aRequestData);
+            // TODO validate hosting secret proof
+            
+            // TODO fetch the list of contacts
+        }
 	
 	//--------------------------------------------------------------------------------------------------------------------------//
 	

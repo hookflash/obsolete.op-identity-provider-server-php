@@ -1,0 +1,15 @@
+{
+	"request": {
+		"$domain": "provider.com",
+		"$id": "abc",
+		"$handler": "identity",
+		"$method": "federated-contacts-get",
+	
+		"nonce": "",
+                "hostingProof": "",
+                "hostingProofExpires": ,
+                "identity": {
+                    "uri": ""
+                }
+	}
+}

@@ -95,6 +95,7 @@ $server->registerPostMethod('password-change', 'passwordChange');
 $server->registerPostMethod('lockbox-half-key-store', 'lockboxHalfKeyStore');
 $server->registerPostMethod('identity-access-validate', 'identityAccessValidate');
 $server->registerPostMethod('identity-access-rolodex-credentials-get', 'identityAccessRolodexCredentialsGet');
+$server->registerPostMethod('federated-contacts-get', 'federatedContactsGet');
 $server->registerPostMethod('devtools-database-clean-provider', 'devtoolsDatabaseCleanProvider');
 
 // Create Request and Response objects, and RequestUtils as well
@@ -740,6 +741,31 @@ function hostingDataGet ()
     
     // Result
     $oResponse->addPar('hostingData', $aHostingData);
+    $oResponse->run();
+}
+
+/**
+ * Implementation of federated-contact-get method
+ */
+function federatedContactsGet ()
+{
+    global $oRequest;
+    global $oResponse;
+    global $DB;
+    
+    try {
+        // Check request validity
+        RequestUtil::validateFederatedContactsGetRequest( $oRequest );
+        
+        // TODO
+        require_once(APP . 'php/main/identity/federatedLogin.php');
+        $oFederatedLogin = new FederatedLogin($DB, 'federated', $oRequest);
+        $aIdentity = $oFederatedLogin->getContacts();
+    } catch (Exception $exception) {
+        $oResponse->run($exception);
+    }
+    // Result
+    $oResponse->addPar("identity", $aIdentity);
     $oResponse->run();
 }
 
