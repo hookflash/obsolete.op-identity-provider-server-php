@@ -1,4 +1,4 @@
-<?php include( dirname(dirname(dirname(__FILE__))) . '/app/php/config/config.php' ); ?>
+<?php include( dirname(dirname(dirname(__FILE__))) . '/app/PHP/config/config.php' ); ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
