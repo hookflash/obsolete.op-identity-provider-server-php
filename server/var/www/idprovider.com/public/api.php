@@ -760,12 +760,12 @@ function federatedContactsGet ()
         // TODO
         require_once(APP . 'php/main/identity/federatedLogin.php');
         $oFederatedLogin = new FederatedLogin($DB, 'federated', $oRequest);
-        $aIdentity = $oFederatedLogin->getContacts();
+        $aIdentityList = $oFederatedLogin->getContacts();
     } catch (Exception $exception) {
         $oResponse->run($exception);
     }
     // Result
-    $oResponse->addPar("identity", $aIdentity);
+    $oResponse->addPar("identities", $aIdentityList);
     $oResponse->run();
 }
 

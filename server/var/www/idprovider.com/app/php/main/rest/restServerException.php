@@ -58,7 +58,7 @@ class RestServerException extends Exception {
 	public function __construct ( $sInternalErrorCode, $aErrorMessageParameters ) {
 		$this->sInternalErrorCode = $sInternalErrorCode;
 		$this->aErrorMessageParameters = $aErrorMessageParameters;
-				
+                
 		$this->constructErrorMessage();
 	}
 	

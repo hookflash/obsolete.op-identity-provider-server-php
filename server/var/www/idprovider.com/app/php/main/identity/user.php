@@ -812,6 +812,45 @@ class User {
 		);
 	}
         
+        /** TODO
+         * 
+         */
+        public function fetchFederatedContacts ( $sUserId ) {
+            // Select the user by user_id
+            $aUser = $this->DB->select_single_to_array(
+                    'user',
+                    'appid',
+                    'where user_id=' . $sUserId
+                    );
+            print_r($aUser);
+            // Select all the users by appid
+            $aUsers = $this->DB->select_to_array(
+                    'user',
+                    'user_id',
+                    'where appid="' . $aUser['appid'] . '"'
+                    );
+            print_r($aUsers); die();
+            // Fetch all federated identities by list of user_id-s
+            $aContacts = array();
+            foreach($aUsers as $value) {
+                $aFederatedIdentity = $this->DB->select_to_array(
+                        'federated',
+                        '*',
+                        'where user_id=' . $value['user_id']
+                        );
+                array_push($aContacts, $aFederatedIdentity);
+            }
+            
+            // Exclude the identity that requested the list of contacts
+            foreach($aContacts as $key => $value) {
+                print_r($key);
+                print_r($value);
+            }
+            print_r($aContacts); die();
+            // Sort out nice JSON
+            // TODO
+         }
+        
         /**
          * Clean the DB based on given parameters
          * 

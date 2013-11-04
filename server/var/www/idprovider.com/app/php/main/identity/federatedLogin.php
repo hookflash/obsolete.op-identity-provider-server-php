@@ -210,10 +210,24 @@ class FederatedLogin {
         public function getContacts() {
             // Take data from the request
             $aRequestData = RequestUtil::takeFederatedContactsGetRequestData($this->aRequest);
-            print_r($aRequestData);
-            // TODO validate hosting secret proof
             
-            // TODO fetch the list of contacts
+            // Validate hosting secret proof
+            // TODO
+            
+            // Fetch the user
+            $aIdentity = $this->oUser->parseIdentityUri($aRequestData['identity']['uri']);
+            $aUser = $this->oUser->signInUsingFederated($aIdentity['identifier'], $aRequestData['appid']);
+            // Return 'No such identity' error code
+            if ($aUser['user_id'] == '') {
+                throw new RestServerException('003', array(
+                    'type'          => $aIdentity['type'],
+                    'identifier'    => $aIdentity['identifier']
+                    ));
+            }
+            
+            // Fetch the list of contacts
+            $aIdentities = $this->oUser->fetchFederatedContacts($aUser['user_id']);
+            return $aIdentities;
         }
 	
 	//--------------------------------------------------------------------------------------------------------------------------//
