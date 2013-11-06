@@ -77,7 +77,7 @@
 		$('#btn_start').click( function() {
 	
 			$.ajax({
-				url: '<?php echo 'https://' . $_SERVER['HTTP_HOST'] ?>/api.php',
+				url: '<?php echo 'http://' . $_SERVER['HTTP_HOST'] ?>/api.php',
 				type: $('#frm_type').val(),
 				data: $('#frm_req').val(),
 				success: function(data, textStatus, jqXHR) {
