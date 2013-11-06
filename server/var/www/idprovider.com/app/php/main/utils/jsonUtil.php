@@ -145,7 +145,7 @@ class JsonUtil {
 	 * @param unknown_type $array
 	 * @return unknown
 	 */
-	public function arrayToJson ( $array ) {
+	public static function arrayToJson ( $array ) {
 		return substr( substr( json_encode($array) , 0, -1 ), 1 );
 	}
 	
