@@ -163,8 +163,8 @@ class FederatedLogin {
 		
 		// Adding profile data to the request data
 		require_once (APP . 'php/main/utils/profileUtil.php');
-		$aRequestData['identity']['profile'] = ProfileUtil::PROFILE_ULR_BASE . $aRequestData['identity']['identifier'];
-		$aRequestData['identity']['vprofile'] = ProfileUtil::VPROFILE_ULR_BASE . '&' . $aRequestData['identity']['identifier'];
+		$aRequestData['identity']['profile'] = ProfileUtil::PROFILE_ULR_BASE . '&identifier=' . $aRequestData['identity']['identifier'];
+		$aRequestData['identity']['vprofile'] = ProfileUtil::VPROFILE_ULR_BASE . '&identifier=' . $aRequestData['identity']['identifier'];
 		
 		// Try creating new user with given parameters
 		$aSignUpResult = $this->oUser->signUp( 'federated',

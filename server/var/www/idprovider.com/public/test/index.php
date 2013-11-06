@@ -69,6 +69,10 @@
 	<hr/>
 	
 	<input type="button" id="btn_start" value="GO"/><br/>
+        
+        <div>
+            <p> <?php print_r($_SERVER) ?> </p>
+        </div>
 	
 	
 	<script type="text/javascript">	

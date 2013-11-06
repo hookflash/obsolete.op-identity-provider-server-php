@@ -123,9 +123,9 @@ class User {
 		// Challange user's existance
 		if ( !$this->isThereSuchUser('federated', $aRequestData['identity']['identifier']) ) {
 			throw new RestServerException('003', array(
-												 'type' => 'federated',
-												 'identifier' => $aRequestData['identity']['identifier']
-												 ));
+                                                                    'type' => 'federated',
+                                                                    'identifier' => $aRequestData['identity']['identifier']
+                                                                    ));
 		}
 		
 		// Get the data out of the db

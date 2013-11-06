@@ -40,7 +40,7 @@ require_once(APP . 'php/main/utils/cryptoUtil.php');
 require_once(APP . 'php/main/utils/jsonUtil.php');
 
 define('PROFILE_ULR_BASE_CONST', MY_DOMAIN . 'php/profile/profile.php?');
-define('VPROFILE_ULR_BASE_CONST', MY_DOMAIN . 'php/profile/profile.php?vprofile=1&');
+define('VPROFILE_ULR_BASE_CONST', MY_DOMAIN . 'php/profile/profile.php?vprofile=1');
 
 /**
  * Class ProfileUtil is a utility class that provides public profile data for given input.

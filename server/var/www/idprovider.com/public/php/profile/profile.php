@@ -35,13 +35,14 @@ either expressed or implied, of the FreeBSD Project.
 	require (ROOT . '/app/php/config/config.php');
 	require (ROOT . '/app/php/main/utils/cryptoUtil.php');
 	require (ROOT . '/app/php/main/utils/profileUtil.php');
+        require (ROOT . '/app/php/main/utils/jsonUtil.php');
 	
 	$oResultObject = ProfileUtil::sendProfileGet( CryptoUtil::generateRequestId(),
                                                         $_GET['vprofile'],
                                                         $_GET['identifier'] );
 	
 	if ( isset($_GET['vprofile']) && $_GET['vprofile'] ) {
-		print($oResultObject); die();
+		print(JsonUtil::arrayToJson($oResultObject)); die();
 	}
 	$aProfile = array();
 	
