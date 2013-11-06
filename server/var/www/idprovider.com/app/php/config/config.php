@@ -32,19 +32,84 @@
  */
 
 
-/** 
- * This script imports appropriate config file based on server's host domain.
+/**
+ * This is the configuration file for example.unstable.hookflash.me deployment.
  *
  */
 
-define( 'PROVIDER_HOST', $_SERVER['HTTP_HOST'] );
-define( 'PROVIDER_CONFIG_FILE', dirname(__FILE__) . '/config_' . PROVIDER_HOST . '.php' );
+define('LOG', true);
 
-if ( file_exists(PROVIDER_CONFIG_FILE) ) {
-	include_once(PROVIDER_CONFIG_FILE);
-} else {
-	die('Host ' . PROVIDER_HOST . ' is not configured!');
+if ( !defined('ROOT') ) {
+	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
+}
+if ( !defined('APP') ) {
+	define('APP',  ROOT . '/app/');
 }
 
+//-- IMPORTANT --//
+
+// Here you set your application's standard protocol
+define('PROTOCOL', 'https://');
+
+// Here you set your domain
+define('MY_DOMAIN', PROTOCOL . 'example-unstable.hookflash.me/');
+
+// Here you set your database
+define('APP_DB_NAME', 'provider_db');
+define('APP_DB_HOST', 'localhost');
+define('APP_DB_USER', 'root');
+define('APP_DB_PASS', '*************');
+
+// Here you set your Hookflash service domain
+define('DOMAIN', 'unstable.hookflash.me');
+define('HF_SERVICE_DOMAIN', PROTOCOL . 'unstable.hookflash.me/');
+
+// Here you set your OAuth keys and secrets
+define('LINKEDIN_CONSUMER_KEY', '***********');
+define('LINKEDIN_CONSUMER_SECRET', '******************');
+
+define('FACEBOOK_APP_ID', '**************');
+define('FACEBOOK_APP_SECRET', '**********************************');
+
+define('TWITTER_APP_ID', '************');
+define('TWITTER_APP_SECRET', '**********************************');
+
+// Here you set your SMTP service parameters
+require(APP . 'php/config/special/smtp_config.php');
+
+// Here you set your SMS service parameters
+require(APP . 'php/config/special/sms_config.php');
+
+// Here you set your specific cryptographically random values
+define('PROVIDER_MAGIC_VALUE', '******************************');
+
+// Here you set your domain hosting secret
+define('DOMAIN_HOSTING_SECRET', '***************');
+
+// Here you set your users' avatars uploading location
+define('UPLOAD_LOCATION', ROOT . '/public/php/service/avatars/');
+
+//^^ IMPORTANT ^^//
+
+
+
+// Log events
+function APIEventLog($sText, $iErrorCode='200', $sAPISessionID='') {
+	global $DB;
+	date_default_timezone_set('UTC');
+	$user_agent = '';
+	if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
+		$user_agent = $_SERVER['HTTP_USER_AGENT'];
+	}
+	return $DB->insert('api_event_log', array(
+		'created'=>date('Y:m:d H:i:s'),
+		'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		'http_client'=>$user_agent,
+		'error_code'=>$iErrorCode,
+		'message'=>$sText,
+		'session_id'=>session_id(),
+		'session_dump'=>var_export($_SESSION, true),
+	));
+}
 
 ?>
