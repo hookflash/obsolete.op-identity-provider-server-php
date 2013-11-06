@@ -71,7 +71,7 @@ class UploadUtil {
 	 * 
 	 * As a result, this function prints json-ized response about the uploading of the file.
 	 */
-	public function uploadAvatar () {
+	public static function uploadAvatar () {
 		// Challange the upload of the file
 		if ( !( is_uploaded_file( $_FILES['file']['tmp_name'] ) ) ) {
 			echo '{"result":{"error":{"reason":{"$id":"500","message":"The file has not been uploaded at all."}}}}'; die();

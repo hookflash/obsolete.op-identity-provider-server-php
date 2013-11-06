@@ -58,7 +58,7 @@ class ProfileUtil {
 	 * @param string $sIdentifier An identifier of the identity (such as username or e-mail)
 	 * @return array $aResultObject An array created from JSON result
 	 */
-	public function sendProfileGet ( $nRequestId, $sVprofile, $sIdentifier ) {
+	public static function sendProfileGet ( $nRequestId, $sVprofile, $sIdentifier ) {
 		// import necessary files
 		require_once(APP . 'php/main/utils/curlUtil.php');
 		

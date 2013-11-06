@@ -57,7 +57,7 @@ class SmsUtil {
 	 * @param string $sPin A PIN number to send with the message
 	 * @return boolean Returns true if the mail was sent, otherwise returns false
 	 */
-	public function sendPinValidationEmail ( $sPhoneNumber, $sPin ) {
+	public static function sendPinValidationEmail ( $sPhoneNumber, $sPin ) {
 		// Set general parameters
 		$user = SMS_SERVICE_USER;
 		$password = SMS_SERVICE_PASSWORD;

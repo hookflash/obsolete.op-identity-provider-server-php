@@ -45,7 +45,7 @@ class CryptoUtil {
 	 *
 	 * @return unknown
 	 */
-	public function generateServerPasswordSalt () {
+	public static function generateServerPasswordSalt () {
 		return CryptoUtil::gimmeHash( PROVIDER_MAGIC_VALUE . ':' . CryptoUtil::makeRandomString() );
 	}
 	
@@ -55,7 +55,7 @@ class CryptoUtil {
 	 * @param string $stillNotHashed A string to be hashed
 	 * @return string Returns hashed string
 	 */
-	public function gimmeHash ( $stillNotHashed ) {
+	public static function gimmeHash ( $stillNotHashed ) {
 		return sha1($stillNotHashed);
 	}
 	
@@ -66,7 +66,7 @@ class CryptoUtil {
 	 * @param string $key A key to be used for hashing
 	 * @return string Returns hmac hashed string
 	 */
-	public function gimmeHmac ( $stillNotHashed, $key ) {
+	public static function gimmeHmac ( $stillNotHashed, $key ) {
 		return hash_hmac('sha1', $stillNotHashed, $key);
 	}
 	
@@ -74,7 +74,7 @@ class CryptoUtil {
 	 * Generate a 20 bytes long random
 	 *
 	 */
-	public function generateIv () {
+	public static function generateIv () {
 		return CryptoUtil::makeRandomString(16 * 8);
 	}
         
@@ -166,7 +166,7 @@ class CryptoUtil {
 	 * @param string $sSecretKey Key to be used for encryption
 	 * @return string 
 	 */
-	public function encrypt($sValue, $iv, $sSecretKey)
+	public static function encrypt($sValue, $iv, $sSecretKey)
 	{
             /*
 	    $sEncr = mcrypt_encrypt(
@@ -209,7 +209,7 @@ class CryptoUtil {
 	 * @param string $sSecretKey Key to be used for decryption
 	 * @return string 
 	 */
-	public function decrypt($sValue, $iv, $sSecretKey)
+	public static function decrypt($sValue, $iv, $sSecretKey)
 	{
             /*
 	    $sValue = base64_decode($sValue);
@@ -249,7 +249,7 @@ class CryptoUtil {
 	 *
 	 * @return number Returns random requestId
 	 */
-	public function generateRequestId () {
+	public static function generateRequestId () {
 		return rand(1000000000, 9999999999);
 	}
 	
@@ -258,7 +258,7 @@ class CryptoUtil {
 	 * 
 	 * @return string Generated nonce
 	 */
-	public function generateNonce () {
+	public static function generateNonce () {
 		return CryptoUtil::gimmeHash((CryptoUtil::makeRandomString()));
 	}
 	
@@ -268,7 +268,7 @@ class CryptoUtil {
 	 * @param integer $nExpiryMinutes Number of minutes for a nonce to be valid within
 	 * @return string Returns generated nonce with the provider's signature and the expiry within
 	 */
-	public function generateSelfValidatingNonce ( $nExpiryMinutes ) {
+	public static function generateSelfValidatingNonce ( $nExpiryMinutes ) {
 		$sExpiry = time() + 60 * $nExpiryMinutes;
 		$sNonce = CryptoUtil::generateNonce();
 		// hmac algorithm is necessary here...
@@ -283,7 +283,7 @@ class CryptoUtil {
 	 * @param string $sServerNonce A server nonce to be validated
 	 * @return boolean Returns true if the serverNonce is valid, otherwise return false
 	 */
-	public function validateServerNonce ( $sServerNonce ) {
+	public static function validateServerNonce ( $sServerNonce ) {
 		// Break the nonce into three separate parts: the innerNonce, the expiry and the hash validation
 		$aServerNonce = explode('-', $sServerNonce);
 		
@@ -317,7 +317,7 @@ class CryptoUtil {
 	 * @param string $sServerLoginFinalProof 
 	 * @return boolean 
 	 */
-	public function validateServerLoginProof ( $sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt, $sServerNonce, $sServerLoginProof ) {
+	public static function validateServerLoginProof ( $sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt, $sServerNonce, $sServerLoginProof ) {
 		// Generate serverLoginProofCalculated
 		$sServerLoginInnerProof = CryptoUtil::generateServerLoginInnerProof($sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt);
 		$sServerLoginProofCalculated = CryptoUtil::generateServerLoginProof($sServerLoginInnerProof, $sServerNonce);
@@ -338,7 +338,7 @@ class CryptoUtil {
          * @param string hosting secret
 	 * @return array Returnes hostingProof and hostingProofExpires
 	 */
-	public function generateHostingProof ( $sMethodName, $sNonce, $sDomainHostingSecret ) {
+	public static function generateHostingProof ( $sMethodName, $sNonce, $sDomainHostingSecret ) {
 		// Create hostingProof raw string to be hashed
 		$sHostingProofExpires = time() + ( 3600 * 24 ); // Will expire after a full day
 		$sHostingProofRaw = $sMethodName . ':' . $sNonce . ':' . $sDomainHostingSecret . ":{$sHostingProofExpires}";
@@ -361,7 +361,7 @@ class CryptoUtil {
          * @param string $sHostingProof hosting proof to be validated
 	 * @return array Returnes true if valid, otherwise returns false
 	 */
-	public function validateHostingProof ( $sPurpose, $sNonce, $sExpires, $sDomainHostingSecret, $sHostingProof ) {
+	public static function validateHostingProof ( $sPurpose, $sNonce, $sExpires, $sDomainHostingSecret, $sHostingProof ) {
             // Check if timed out
             if (time() > $sExpires) {
                 return false;
@@ -382,7 +382,7 @@ class CryptoUtil {
 	 * 
 	 * @return string Returns generated pin
 	 */
-	public function generatePin () {
+	public static function generatePin () {
 		return mt_rand( mt_rand(100000, 200000), mt_rand(900000, 999999) );
 	}
 	
@@ -395,7 +395,7 @@ class CryptoUtil {
 	 * @param string $sAuthenticationNonce Some server-generated crypto-random string
 	 * @return string $sServerAuthenticationToken The server authentication token generated using given parameters
 	 */
-	public function generateServerAuthenticationToken ( $sClientAuthenticationToken, $sIdentityType, $sIdentifier, $sAuthenticationNonce ) {
+	public static function generateServerAuthenticationToken ( $sClientAuthenticationToken, $sIdentityType, $sIdentifier, $sAuthenticationNonce ) {
 		// Generate separate building blocks of serverAuthenticatonToken
 		$sInnerToken = CryptoUtil::generateInnerToken( $sClientAuthenticationToken, $sIdentityType, $sIdentifier, $sAuthenticationNonce );
 		$sExpiry = time() + 60 * 30; // Expires in 30 minutes
@@ -416,7 +416,7 @@ class CryptoUtil {
 	 * @param string $sIdentifier Identity
 	 * @return boolean Returns true if the token is valid, otherwise returns false
 	 */
-	public function verifyServerAuthenticationToken( $sClientAuthenticationToken, $sServerAuthenticationToken, $sIdentityType, $sIdentifier ) {
+	public static function verifyServerAuthenticationToken( $sClientAuthenticationToken, $sServerAuthenticationToken, $sIdentityType, $sIdentifier ) {
 		// Break the serverAuthenticationToken into three separate parts: the innerToken, the expiry and the hash validation
 		$aServerAuthenticationToken = explode('-', $sServerAuthenticationToken);
 		
@@ -455,7 +455,7 @@ class CryptoUtil {
 	 * @param string $sIdentifier identity
 	 * @return array Returns an array which is consisted of identity access data
 	 */
-	public function generateIdentityAccess ( $sIdentityType, $sIdentifier ) {
+	public static function generateIdentityAccess ( $sIdentityType, $sIdentifier ) {
 		// Generate token and secret
                 $sAccessSecretExpires = time() + 60*1440*60; // 60secs * 1440mins/day * 60days = 2months
 		$sAccessToken = $sIdentityType . '-' . $sIdentifier . '-' . $sAccessSecretExpires . '-' . CryptoUtil::generateNonce();
@@ -475,7 +475,7 @@ class CryptoUtil {
 	 * @param string $sAccessToken Access token
 	 * @return string Returns calculated accessSecret
 	 */
-	public function calculateAccessSecret ( $sAccessToken ) {
+	public static function calculateAccessSecret ( $sAccessToken ) {
 		$sAccessSecretBase = "identity-access-secret:" . $sAccessToken . '-' . PROVIDER_MAGIC_VALUE;
 		return CryptoUtil::gimmeHash($sAccessSecretBase); 
 	}
@@ -493,7 +493,7 @@ class CryptoUtil {
 	 * @param string $sPurpose A string we use to calculate the proof (different requests have different purpose values)
 	 * @return boolean Returns true if validation succeeded. Otherwise returns false.
 	 */
-	public function validateIdentityAccessSecretProof ( $sClientNonce, $sAccessToken, $sAccessSecretProof, $sAccessSecretExpires, $sIdentityType, $sIdentifier, $sUri, $sPurpose ) {
+	public static function validateIdentityAccessSecretProof ( $sClientNonce, $sAccessToken, $sAccessSecretProof, $sAccessSecretExpires, $sIdentityType, $sIdentifier, $sUri, $sPurpose ) {
 		APIEventLog('function call: validateIdentityAccessSecretProof(' .
 					'clientNonce=' . $sClientNonce . ' accessToken=' . $sAccessToken . ' accessSecretProof=' . $sAccessSecretProof . ' accessSecretExpires=' . $sAccessSecretExpires . ' uri=' . $sUri . ' purpose=' . $sPurpose);
 		// Challange the token first
@@ -525,7 +525,7 @@ class CryptoUtil {
 	  Private functions
 	-------------------*/
 	
-	private function makeRandomString( $bits = 256 ) {
+	private static function makeRandomString( $bits = 256 ) {
 	    $bytes = ceil($bits / 8);
 	    $return = '';
 	    for ($i = 0; $i < $bytes; $i++) {
@@ -534,21 +534,21 @@ class CryptoUtil {
 	    return $return;
 	}
 	//TODO private
-	public function generateServerLoginInnerProof ( $sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt ) {
+	public static function generateServerLoginInnerProof ( $sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt ) {
 		$sServerLoginInnerProofInnerHmac = CryptoUtil::gimmeHmac('password-hash:' . $sIdentifier . ':' . base64_encode($sServerPasswordSalt), $sPasswordHash);
 		$sIdentitySaltHash = CryptoUtil::gimmeHash('salt:' . $sIdentifier . ':' . base64_encode($sIdentitySecretSalt));
 		return CryptoUtil::gimmeHash(PROVIDER_MAGIC_VALUE . ':' . $sServerLoginInnerProofInnerHmac . ':' . $sIdentitySaltHash);
 	}
 	//TODO private
-	public function generateServerLoginProof ( $sServerLoginInnerProof, $sServerNonce ) {
+	public static function generateServerLoginProof ( $sServerLoginInnerProof, $sServerNonce ) {
 		return CryptoUtil::gimmeHmac('final:' . $sServerLoginInnerProof . ':' . $sServerNonce, PROVIDER_MAGIC_VALUE);
 	}
 	
-	private function generateInnerToken ( $sClientAuthenticationToken, $sIdentityType, $sIdentifier, $sAuthenticationNonce ) {
+	private static function generateInnerToken ( $sClientAuthenticationToken, $sIdentityType, $sIdentifier, $sAuthenticationNonce ) {
 		return CryptoUtil::gimmeHash('innerToken:' . $sClientAuthenticationToken . ':' . $sIdentityType . $sIdentifier . ':' . $sAuthenticationNonce . ':' . PROVIDER_MAGIC_VALUE);
 	}
 	// TODO private
-	public function generateAccessSecretProof ( $sUri, $sClientNonce, $sAccessSecretExpires, $sAccessToken, $sPurpose, $sAccessSecret ) {
+	public static function generateAccessSecretProof ( $sUri, $sClientNonce, $sAccessSecretExpires, $sAccessToken, $sPurpose, $sAccessSecret ) {
 		$sMessage = 'identity-access-validate:' . $sUri . ':' . $sClientNonce . ':' . $sAccessSecretExpires . ':' . $sAccessToken . ':' . $sPurpose;
 		APIEventLog('identityAccessSecretProof generation message=' . $sMessage);
 		return CryptoUtil::gimmeHmac( $sMessage, $sAccessSecret );

@@ -44,7 +44,7 @@ class JsonUtil {
 	 * @param string $string A string to be checked 
 	 * @return boolean Returns true if the string is JSON, otherwise returns false
 	 */
-	public function isJsonString( $string ) {
+	public static function isJsonString( $string ) {
 	    try {
 	        $object = json_decode( $string );
 	    } catch (Exception $e) {
@@ -124,7 +124,7 @@ class JsonUtil {
 	 * @param unknown_type $sBody
 	 * @return unknown
 	 */
-	public function generalJsonToArray ( $sBody ) {
+	public static function generalJsonToArray ( $sBody ) {
 		// Set required imports
 		require_once ( APP . 'php/main/utils/arrayUtil.php' );
 		
@@ -145,7 +145,7 @@ class JsonUtil {
 	 * @param unknown_type $array
 	 * @return unknown
 	 */
-	public function arrayToJson ( $array ) {
+	public static function arrayToJson ( $array ) {
 		return substr( substr( json_encode($array) , 0, -1 ), 1 );
 	}
 	

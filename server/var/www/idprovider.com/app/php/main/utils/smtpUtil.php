@@ -59,7 +59,7 @@ class SmtpUtil {
 	 * @param string $sPin A PIN number to send with the message
 	 * @return boolean Returns true if the mail was sent, otherwise returns false
 	 */
-	public function sendPinValidationEmail ( $sEmail, $sPin ) {
+	public static function sendPinValidationEmail ( $sEmail, $sPin ) {
 		$oMailer = new PHPMailer();
 		$oMailer->IsSMTP();
 		$oMailer->SMTPSecure = 'tls';

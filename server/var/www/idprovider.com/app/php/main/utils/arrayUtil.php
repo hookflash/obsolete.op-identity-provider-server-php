@@ -45,7 +45,7 @@ class ArrayUtil {
 	 * @param stdClass $object An object to be converted to array
 	 * @return array Generated array
 	 */
-	public function objectToArray ( $object ) {
+	public static function objectToArray ( $object ) {
 		if ( is_object( $object ) ) {
 			// Gets the properties of the given object
 			$object = get_object_vars($object);
@@ -66,7 +66,7 @@ class ArrayUtil {
 	 * @param array $array An array to be converted to object
 	 * @return stdClass Generated object
 	 */
-	public function arrayToObject ( $array ) {
+	public static function arrayToObject ( $array ) {
 		if ( is_array( $array ) ) {
 			// Return array converted to object
 			return (object) array_map(__METHOD__, $array);
@@ -83,7 +83,7 @@ class ArrayUtil {
 	 * @param array $array An array to be modified
 	 * @return array $array Returns modified array
 	 */
-	public function replaceNullsWithEmptyStrings ( $array ) {
+	public static function replaceNullsWithEmptyStrings ( $array ) {
 		array_walk_recursive($array, 'ArrayUtil::replacer');
 		return $array;
 	}

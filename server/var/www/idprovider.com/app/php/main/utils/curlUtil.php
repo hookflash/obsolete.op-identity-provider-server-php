@@ -47,7 +47,7 @@ class CurlUtil {
 	 * @param number $timeout A time window after the request will be considered failed
 	 * @return string $output A result fired by the server that is being hit via cURL
 	 */
-	public function sendPostRequest($url, $requestData, $postfields = true, $timeout = 0)
+	public static function sendPostRequest($url, $requestData, $postfields = true, $timeout = 0)
 	{
 		// Initialize and setup the cURL:
 		

@@ -45,7 +45,7 @@ class DatabaseUtil
 	 * @param string $sParam String to be protected from SQL injection
 	 * @return string Returns the given string, but without anything dangerous in it
 	 */
-	public function protectFromSqlInjection($sParam)
+	public static function protectFromSqlInjection($sParam)
 	{
 		$badWords = array("/revoke /i","/select /i","/delete /i", "/update /i","/union /i","/insert /i","/drop /i","/http /i","/--/i");
 		$sResult = preg_replace($badWords, "", DatabaseUtil::mysql_escape_mimic((string) $sParam));
@@ -58,7 +58,7 @@ class DatabaseUtil
 	  Private functions
 	-------------------*/
 	
-	private function mysql_escape_mimic($inp) { 
+	private static function mysql_escape_mimic($inp) { 
 	    if(is_array($inp)) 
 	        return array_map(__METHOD__, $inp); 
 	

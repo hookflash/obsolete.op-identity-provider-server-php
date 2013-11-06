@@ -49,7 +49,7 @@ class LoginUtil {
 	 * @param CryptUtil $oCryptoUtil A CryptoUtil object to be used for cryptographic purposes
 	 * @return array Returns nonce, hostingProof, hostingProofExpires
 	 */
-	public function generateHostingData ( $sMethodName ) {
+	public static function generateHostingData ( $sMethodName ) {
 		// Generate the nonce
 		$sNonce = CryptoUtil::generateNonce();
 		
@@ -66,7 +66,7 @@ class LoginUtil {
         /**
          * TODO document
          */
-        public function calculateIdentityUri ( $aRequestData ) {
+        public static function calculateIdentityUri ( $aRequestData ) {
             $sUri = '';
             $sMyDomain = str_replace('https://','',MY_DOMAIN);
             switch ($aRequestData['identity']['type']) {
@@ -102,7 +102,7 @@ class LoginUtil {
 	 * @param array $aUser Array of data taken from the user table
 	 * @return array $aResultObject An array created from JSON result
 	 */
-	public function sendHostedIdentityUpdate ( $nRequestId, $aRequestData, $aHostingData, $aUser ) {
+	public static function sendHostedIdentityUpdate ( $nRequestId, $aRequestData, $aHostingData, $aUser ) {
 		// import necessary files
 		require_once(APP . 'php/main/utils/curlUtil.php');
 		require_once(APP . 'php/main/utils/jsonUtil.php');
@@ -188,7 +188,7 @@ class LoginUtil {
 	 * @param string $sIdentifier e-mail or phone number
 	 * @return array $aResultObject An array created from JSON result
 	 */
-	public function sendIdentityLookup ( $nRequestId, $sIdentityType, $sIdentifier ) {
+	public static function sendIdentityLookup ( $nRequestId, $sIdentityType, $sIdentifier ) {
 		// import necessary files
 		require_once(APP . 'php/main/utils/curlUtil.php');
 		
@@ -230,7 +230,7 @@ class LoginUtil {
 		}
 	}
 	
-	public function sendProviderDelete () {
+	public static function sendProviderDelete () {
 		// import necessary files
 		require_once(APP . 'php/main/utils/curlUtil.php');
 		require_once(APP . 'php/main/utils/cryptoUtil.php');
@@ -273,7 +273,7 @@ class LoginUtil {
 	  Private functions
 	-------------------*/
 	
-	private function setOptional ( $sOptional ) {
+	private static function setOptional ( $sOptional ) {
 		if ( $sOptional == '' || $sOptional == 'Array' || $sOptional == null ) {
 			return '';
 		} else {

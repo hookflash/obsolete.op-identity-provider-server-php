@@ -54,7 +54,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateLoginRequest ( $oRequest ) {
+	public static function validateLoginRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
 		if ( key_exists( 'afterPinValidation', $req ) ) {
 			if ( $req['afterPinValidation'] != 'true' ) {
@@ -132,7 +132,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateSignUpRequest ( $oRequest ){
+	public static function validateSignUpRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -213,7 +213,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateIdentitySaltsGetRequest ( $oRequest ){
+	public static function validateIdentitySaltsGetRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -251,7 +251,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateIdentitySaltsSetRequest ( $oRequest ){
+	public static function validateIdentitySaltsSetRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];		
 		if ( !( key_exists( 'clientAuthenticationToken', $req ) && $req['clientAuthenticationToken'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -306,7 +306,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateOAuthProviderAuthenticationRequest ( $oRequest ){
+	public static function validateOAuthProviderAuthenticationRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'clientAuthenticationToken', $req ) && $req['clientAuthenticationToken'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -344,7 +344,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validatePinValidationRequest ( $oRequest ){
+	public static function validatePinValidationRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'pin', $req ) && $req['pin'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -359,7 +359,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateProfileGetRequest ( $oRequest ){
+	public static function validateProfileGetRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -379,7 +379,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateProfileUpdateRequest ( $oRequest ){
+	public static function validateProfileUpdateRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'identity', $req ) && $req['identity'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -448,7 +448,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validatePasswordChangeRequest ( $oRequest ) {
+	public static function validatePasswordChangeRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'clientToken', $req ) && $req['clientToken'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -503,7 +503,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateLockboxHalfKeyStoreRequest ( $oRequest ) {
+	public static function validateLockboxHalfKeyStoreRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -559,7 +559,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateIdentityAccessValidateRequest ( $oRequest ) {
+	public static function validateIdentityAccessValidateRequest ( $oRequest ) {
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -604,7 +604,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateIdentityAccessRolodexCredentialsGetRequest ( $oRequest ){
+	public static function validateIdentityAccessRolodexCredentialsGetRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'clientNonce', $req ) && $req['clientNonce'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -644,7 +644,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateHostingDataGetRequest ( $oRequest ) {
+	public static function validateHostingDataGetRequest ( $oRequest ) {
             $req = $oRequest->aPars['request']; 
             if ( !( key_exists( 'purpose', $req ) && $req['purpose'] != null ) ) {
 		throw new RestServerException('002', array(
@@ -659,7 +659,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public function validateFederatedContactsGetRequest ( $oRequest ) {
+	public static function validateFederatedContactsGetRequest ( $oRequest ) {
             $req = $oRequest->aPars['request']; 
             if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 		throw new RestServerException('002', array(
@@ -694,7 +694,7 @@ class RequestUtil {
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-        public function validateDevtoolsDatabaseCleanProviderRequest ( $oRequest ) {
+        public static function validateDevtoolsDatabaseCleanProviderRequest ( $oRequest ) {
             $req = $oRequest->aPars['request'];
             if ( !( key_exists( 'nonce', $req ) && $req['nonce'] != null ) ) {
 		throw new RestServerException('002', array(
@@ -737,7 +737,7 @@ class RequestUtil {
 	 * @param array $post The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeLoginRequestData ( $oRequest ){
+	public static function takeLoginRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		if ( key_exists( 'afterPinValidation', $req ) ) {
@@ -783,7 +783,7 @@ class RequestUtil {
 	 * @param array $post The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeSignUpRequestData ( $oRequest ){
+	public static function takeSignUpRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aAvatars = array();
@@ -824,7 +824,7 @@ class RequestUtil {
 	 * @param array $post The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeIdentitySaltsGetRequestData ( $oRequest ){
+	public static function takeIdentitySaltsGetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentiy = array(
@@ -843,7 +843,7 @@ class RequestUtil {
 	 * @param array $post The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeIdentitySaltsSetRequestData ( $oRequest ){
+	public static function takeIdentitySaltsSetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
@@ -866,7 +866,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeLinkedinTokenExhangeRequestData ( $oRequest ){
+	public static function takeLinkedinTokenExhangeRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		return array(
@@ -881,7 +881,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeOAuthProviderAuthenticationRequestData ( $oRequest ){
+	public static function takeOAuthProviderAuthenticationRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
@@ -901,7 +901,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takePinValidationRequestData ( $oRequest ){
+	public static function takePinValidationRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		return array(
@@ -916,7 +916,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeProfileGetRequestData ( $oRequest ){
+	public static function takeProfileGetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
@@ -934,7 +934,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeProfileUpdateRequestData ( $oRequest ){ 
+	public static function takeProfileUpdateRequestData ( $oRequest ){ 
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aAvatars = array();
@@ -983,7 +983,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takePasswordChangeRequestData ( $oRequest ){
+	public static function takePasswordChangeRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
@@ -1009,7 +1009,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeLockboxHalfKeyStoreRequestData ( $oRequest ){
+	public static function takeLockboxHalfKeyStoreRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
@@ -1037,7 +1037,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeIdentityAccessValidateRequestData ( $oRequest ){
+	public static function takeIdentityAccessValidateRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
@@ -1060,7 +1060,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeIdentityAccessRolodexCredentialsGetRequestData ( $oRequest ){
+	public static function takeIdentityAccessRolodexCredentialsGetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
@@ -1082,7 +1082,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeHostingDataGetRequestData ( $oRequest ) {
+	public static function takeHostingDataGetRequestData ( $oRequest ) {
             $req = $oRequest->aPars['request'];
             $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
             return array(
@@ -1097,7 +1097,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public function takeFederatedContactsGetRequestData ( $oRequest ) {
+	public static function takeFederatedContactsGetRequestData ( $oRequest ) {
             $req = $oRequest->aPars['request'];
             $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
             $aIdentity = array(
@@ -1115,7 +1115,7 @@ class RequestUtil {
         /**
          * Take data 
          */
-        public function takeDevtoolsDatabaseCleanProviderRequestData ( $oRequest ) {
+        public static function takeDevtoolsDatabaseCleanProviderRequestData ( $oRequest ) {
             $req = $oRequest->aPars['request'];
             $aAppids = array();
             $nAppid = 0;
