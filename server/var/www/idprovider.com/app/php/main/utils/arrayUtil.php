@@ -94,7 +94,7 @@ class ArrayUtil {
 	  Private functions
 	-------------------*/
 	
-	private function replacer(& $item, $key) {
+	private static function replacer(& $item, $key) {
 	    if ($item == null) {
 	    	$item = '';
 	    }
