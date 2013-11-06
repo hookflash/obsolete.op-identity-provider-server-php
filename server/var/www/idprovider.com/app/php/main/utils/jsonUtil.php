@@ -59,7 +59,7 @@ class JsonUtil {
 	 * @param unknown_type $sBody
 	 * @return unknown
 	 */
-	public function jsonToArray( $sBody, $bIsRequest = true ) {
+	public static function jsonToArray( $sBody, $bIsRequest = true ) {
 		// Set required imports
 		require_once ( APP . 'php/main/utils/arrayUtil.php' );
 		
@@ -145,7 +145,7 @@ class JsonUtil {
 	 * @param unknown_type $array
 	 * @return unknown
 	 */
-	public static function arrayToJson ( $array ) {
+	public function arrayToJson ( $array ) {
 		return substr( substr( json_encode($array) , 0, -1 ), 1 );
 	}
 	
