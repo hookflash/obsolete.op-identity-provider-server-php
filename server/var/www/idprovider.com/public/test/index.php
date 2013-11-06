@@ -69,10 +69,6 @@
 	<hr/>
 	
 	<input type="button" id="btn_start" value="GO"/><br/>
-        
-        <div>
-            <p> <?php print_r($_SERVER) ?> </p>
-        </div>
 	
 	
 	<script type="text/javascript">	
@@ -99,7 +95,7 @@
 		$('#demoreq').click( function() {
 			
 			$.ajax({
-				url: '<?php echo 'https://' . $_SERVER['HTTP_HOST'] ?>' + "/test/load_request.php?method=" + escape ( $('#frm_method').val() ) + "&fileType=" + escape ( $('#frm_fileType').val() ),
+				url: '<?php echo 'http://' . $_SERVER['HTTP_HOST'] ?>' + "/test/load_request.php?method=" + escape ( $('#frm_method').val() ) + "&fileType=" + escape ( $('#frm_fileType').val() ),
 				type: 'GET',
 				success: function(data, textStatus, jqXHR) {
 					$('#frm_req').val(data);
