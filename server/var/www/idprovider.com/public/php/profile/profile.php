@@ -32,10 +32,10 @@ either expressed or implied, of the FreeBSD Project.
 
 <?php 
 	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
-	require (ROOT . '/app/php/config/config.php');
-	require (ROOT . '/app/php/main/utils/cryptoUtil.php');
-	require (ROOT . '/app/php/main/utils/profileUtil.php');
-        require (ROOT . '/app/php/main/utils/jsonUtil.php');
+	require_once (ROOT . '/app/php/config/config.php');
+	require_once (ROOT . '/app/php/main/utils/cryptoUtil.php');
+	require_once (ROOT . '/app/php/main/utils/profileUtil.php');
+        require_once (ROOT . '/app/php/main/utils/jsonUtil.php');
 	
 	$oResultObject = 
                 ProfileUtil::sendProfileGet( CryptoUtil::generateRequestId(),
