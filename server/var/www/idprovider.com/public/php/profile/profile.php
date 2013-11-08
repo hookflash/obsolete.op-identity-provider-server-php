@@ -37,20 +37,29 @@ either expressed or implied, of the FreeBSD Project.
 	require (ROOT . '/app/php/main/utils/profileUtil.php');
         require (ROOT . '/app/php/main/utils/jsonUtil.php');
 	
-	$oResultObject = ProfileUtil::sendProfileGet( CryptoUtil::generateRequestId(),
-                                                        $_GET['vprofile'],
-                                                        $_GET['identifier'] );
+	$oResultObject = 
+                ProfileUtil::sendProfileGet( CryptoUtil::generateRequestId(),
+                   $_GET['vprofile'],
+                   $_GET['identifier'] );
 	
+        $aProfileInner = array (
+            'uri'           => 'identity://' . MY_DOMAIN . '/' . 
+                                $oResultObject['identity']['identifier'],
+            'displayName'   => $oResultObject['identity']['displayName'],
+            'avatars'       => $oResultObject['identity']['avatars']
+        );
+        $aProfile = array ( 'profile' => $aProfileInner );
+        
 	if ( isset($_GET['vprofile']) && $_GET['vprofile'] ) {
-		print(JsonUtil::arrayToJson($oResultObject)); die();
+            print(JsonUtil::arrayToJson($aProfile)); die();
 	}
-	$aProfile = array();
+        $aProfileHolder = array();
 	
 	if ( ( $oResultObject != null ) ) {
 		if ( isset($oResultObject['request']['error']) ) {
-			array_push($aProfile, $oResultObject['error']);
+			array_push($aProfileHolder, $oResultObject['error']);
 		} else {
-			array_push($aProfile, $oResultObject['identity']);
+			array_push($aProfileHolder, $aProfile['profile']);
 		}
 	}
 	
@@ -66,9 +75,9 @@ either expressed or implied, of the FreeBSD Project.
 			<img src="<?php echo $aProfile['0']['avatars']['0']['url']; ?>">
 		</div>
 		<div id="text">
-			<p id="identifier"><?php echo $aProfile['0']['identifier']; ?></p>
+			<p id="identifier">Identity URI = <?php echo $aProfile['0']['uri']; ?></p>
 			<br/>
-			<p id="displayName"><?php echo $aProfile['0']['displayName']; ?></p>
+			<p id="displayName">Display name = <?php echo $aProfile['0']['displayName']; ?></p>
 			<br/>
 		</div>
 	</div>

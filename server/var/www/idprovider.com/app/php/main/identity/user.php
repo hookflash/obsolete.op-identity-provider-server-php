@@ -131,7 +131,7 @@ class User {
 		// Get the data out of the db
 		$aIdentity = $DB->select_single_to_array('federated', '*', 'where identifier="' . $aRequestData['identity']['identifier'] . '"');
 		$aAvatars = $DB->select_to_array('avatar', '*', 
-										 'where identity_type="' . 'federated' . '" and identity_id="' . $aRequestData['identity']['identifier'] . '"');
+						'where identity_id="' . $aRequestData['identity']['identifier'] . '"');
 		$nAvatar = 0;
 		$aAvatarsInProfile = array();
 		while ( isset($aAvatars[$nAvatar]) ) {
