@@ -37,6 +37,13 @@ either expressed or implied, of the FreeBSD Project.
 	require_once (ROOT . '/app/php/main/utils/profileUtil.php');
         require_once (ROOT . '/app/php/main/utils/jsonUtil.php');
 	
+        if (!isset($_GET['vprofile'])) {
+            $_GET['vprofile'] = 0;
+        }
+        if (!isset($_GET['identifier'])) {
+            print('Fatal: identifier is null');
+            die();
+        }
 	$oResultObject = 
                 ProfileUtil::sendProfileGet( CryptoUtil::generateRequestId(),
                    $_GET['vprofile'],
