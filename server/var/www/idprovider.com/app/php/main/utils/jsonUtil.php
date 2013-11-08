@@ -36,7 +36,7 @@
  * Class JsonUtil provides common JSON utility functions. 
  */
 
-class JsonUtil {
+class JSON_Util {
 
 	/**
 	 * Check if the string is JSON
