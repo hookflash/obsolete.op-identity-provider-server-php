@@ -89,6 +89,9 @@ define('DOMAIN_HOSTING_SECRET', '***************');
 // Here you set your users' avatars uploading location
 define('UPLOAD_LOCATION', ROOT . '/public/php/service/avatars/');
 
+// Where to send JS logs
+define('HF_LOGGER_HOST', 'logger.hookflash.me');
+
 //^^ IMPORTANT ^^//
 
 
