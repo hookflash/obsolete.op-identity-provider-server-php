@@ -16,6 +16,17 @@ if ( !isset( $_SESSION['created'] ) ) {
     $_SESSION['created'] = time();
 }
 
+// Set required imports
+if ( !defined('ROOT') ) {
+    define('ROOT', dirname(dirname(__FILE__)));
+}
+if ( !defined('APP') ) {
+    define('APP', ROOT . '/app/');
+}
+
+require (APP . 'php/config/config.php');
+
+
 ?><!-- 
 
 Copyright (c) 2012, SMB Phone Inc.
@@ -83,7 +94,7 @@ if (isset($_SERVER['QUERY_STRING'])) {
 
 <script type="text/javascript">
 
-    window.__LOGGER.setUrl("//logger.hookflash.me/tools/logger/record");
+    window.__LOGGER.setUrl("//<?php echo constant('HF_LOGGER_HOST'); ?>/tools/logger/record");
     window.__LOGGER.setChannel("identity-provider-js-all");
 
     var HF = new HF_LoginAPI();
