@@ -30,7 +30,7 @@
  either expressed or implied, of the FreeBSD Project.
  
  */
-die('proba');
+
 /**
  * TODO
  */
