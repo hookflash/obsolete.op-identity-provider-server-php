@@ -30,11 +30,11 @@
  either expressed or implied, of the FreeBSD Project.
  
  */
-
+die('proba');
 /**
  * TODO
  */
-die(session_id());
+
 // Set session_id
 if ( session_id() === '' ) {
 	session_start();
@@ -49,10 +49,10 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports and define path constants
 if ( !defined(ROOT) ) {
-	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
+    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
 }
 if ( !defined(APP) ) {
-	define('APP', ROOT . '/app/');
+    define('APP', ROOT . '/app/');
 }
 require (APP . 'php/main/identity/legacyOAuthLogin.php');
 
