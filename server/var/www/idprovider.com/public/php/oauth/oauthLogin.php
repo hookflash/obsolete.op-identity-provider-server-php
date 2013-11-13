@@ -34,7 +34,7 @@
 /**
  * TODO
  */
-
+die(session_id());
 // Set session_id
 if ( session_id() === '' ) {
 	session_start();
