@@ -83,7 +83,7 @@ class CryptoUtil {
          * @param type $string
          * @return type
          */
-        function strToHex($string)
+        public static function strToHex($string)
         {
             $hex='';
             for ($i=0; $i < strlen($string); $i++)
@@ -98,7 +98,7 @@ class CryptoUtil {
          * @param type $hex
          * @return type
          */
-        function hexToStr($hex)
+        public static function hexToStr($hex)
         {
             $string='';
             for ($i=0; $i < strlen($hex)-1; $i+=2)
@@ -111,21 +111,21 @@ class CryptoUtil {
         /**
          * TEST.
          */
-        function hexbin($hex) {
+        public static function hexbin($hex) {
             $bin = decbin(hexdec($hex)); 
             return $bin; 
         }
         /**
          * TEST. Result = 0 (after called binhex(hexbin(hex)))
          */
-        function binhex($bin) {
+        public static function binhex($bin) {
             $hex = dechex(bindec($bin)); 
             return $hex;
         }
         /**
          * TEST. **WORKS**
          */
-        function hexbin1($hex){
+        public static function hexbin1($hex){
             $bin='';
             for($i=0;$i<strlen($hex);$i++)
                 $bin.=str_pad(decbin(hexdec($hex{$i})),4,'0',STR_PAD_LEFT);
@@ -134,7 +134,7 @@ class CryptoUtil {
         /**
          * TEST. **WORKS** (after called binhex1(hexbin1(hex)))
          */
-        function binhex1($bin){
+        public static function binhex1($bin){
             $hex='';
             for($i=strlen($bin)-4;$i>=0;$i-=4)
                 $hex.=dechex(bindec(substr($bin,$i,4)));
@@ -143,7 +143,7 @@ class CryptoUtil {
         /**
          * TEST. Result = Error: pack(): Type H: illegal hex digit -
          */
-        function hextobin($hexstr){
+        public static function hextobin($hexstr){
             $n = strlen($hexstr);
             $sbin="";  
             $i=0;
