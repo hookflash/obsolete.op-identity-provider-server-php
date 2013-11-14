@@ -66,12 +66,14 @@ DROP TABLE IF EXISTS `avatar`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `avatar` (
   `avatar_id` int(10) NOT NULL AUTO_INCREMENT,
-  `identity_id` int(10) NOT NULL,
+  `user_id` int(10) NOT NULL,
   `name` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `width` int(5) DEFAULT NULL,
   `height` int(5) DEFAULT NULL,
   PRIMARY KEY (`avatar_id`)
+  KEY `FK_user_id_cascade_avatar` (`user_id`),
+  CONSTRAINT `FK_user_id_cascade_avatar` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
