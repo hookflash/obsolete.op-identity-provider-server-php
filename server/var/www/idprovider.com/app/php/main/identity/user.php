@@ -138,7 +138,7 @@ class User {
                         )
                     );
         }
-
+        
         // Get the data out of the db
         $aIdentity = $DB->select_single_to_array(
                 'federated', 
@@ -148,7 +148,7 @@ class User {
         $aAvatars = $DB->select_to_array(
                 'avatar', 
                 '*', 
-                'where identity_id="' . $aRequestData['identity']['identifier'] . '"'
+                'where user_id="' . $aIdentity['user_id'] . '"'
                 );
         $nAvatar = 0;
         $aAvatarsInProfile = array();
@@ -229,7 +229,7 @@ class User {
                 if ( $aAvatarFromDB == null ) {
                     $DB->insert('avatar', 
                             array (
-                                'identity_id' => $aIdentity['federated_id'],
+                                'user_id' => $aIdentity['user_id'],
                                 'name' => $aRequestData['identity']['avatars'][$nAvatar]['name'],
                                 'url' => $aRequestData['identity']['avatars'][$nAvatar]['url'],
                                 'width' => $aRequestData['identity']['avatars'][$nAvatar]['width'],
@@ -246,7 +246,7 @@ class User {
         if ( !(empty( $aRequestData['identity']['removeAvatars'] )) ) {
             $nAvatar = 0;
             while ( isset($aRequestData['identity']['removeAvatars'][$nAvatar]) ) {
-                $deleted = $DB->delete('avatar', 'where identity_id="' . $aIdentity['federated_id'] . '" and url="' . $aRequestData['identity']['removeAvatars'][$nAvatar]['url'] . '"');
+                $deleted = $DB->delete('avatar', 'where user_id="' . $aIdentity['user_id'] . '" and url="' . $aRequestData['identity']['removeAvatars'][$nAvatar]['url'] . '"');
                 if ( !$deleted ) {
                     array_push($aCouldNotDelete, $aRequestData['identity']['removeAvatars'][$nAvatar]['url']);
                 }
@@ -456,14 +456,12 @@ class User {
                     '*', 
                     'where identifier="' . $sIdentifier . '"'
                     );
-            $sIdentityTypeSpecificIdentityIdFieldName = 
-                    $this->getAppropriateIdentityIdFieldName($sIdentityType);
             $nAvatar = 0;
             while ( isset($aAvatars[$nAvatar]) ) {
                 $DB->insert(
                         'avatar', 
                         array (
-                            'identity_id' => $aIdentity["$sIdentityTypeSpecificIdentityIdFieldName"],
+                            'user_id' => $aIdentity['user_id'],
                             'name' => $aAvatars[$nAvatar]['name'],
                             'url' => $aAvatars[$nAvatar]['url'],
                             'width' => $aAvatars[$nAvatar]['width'],
@@ -1134,27 +1132,6 @@ class User {
         return $sDBTable;
     }
 
-    private function getAppropriateIdentityIdFieldName ( $sIdentityType ) {
-        $sIdentityIdFieldName = '';
-        switch ($sIdentityType) {
-            case 'federated':
-                $sIdentityIdFieldName = 'federated_id';
-                break;
-            case 'email':
-                $sIdentityIdFieldName = 'email_id';
-                break;
-            case 'phone':
-                $sIdentityIdFieldName = 'phone_id';
-                break;
-            case 'linkedin':
-            case 'twitter':
-            case 'facebook':
-                $sIdentityIdFieldName = 'oauth_id';
-                break;
-        }
-        return $sIdentityIdFieldName;
-    }
-
     private function updateIdentityService ( $aRequestData, $DB ) {
         require_once(APP . 'php/main/utils/loginUtil.php');
         $aHostingData = LoginUtil::generateHostingData('hosted-identity-update');
@@ -1167,7 +1144,7 @@ class User {
         $aAvatarsFromDB = $DB->select_to_array(
                 'avatar', 
                 '*', 
-                'where identity_id="' . $aIdentityFromDB['federated_id'] . '"'
+                'where user_id="' . $aIdentityFromDB['user_id'] . '"'
                 );
         $aIdentity = array(
             'uri'           => $aRequestData['identity']['uri'],
