@@ -74,7 +74,10 @@ if (isset($_SERVER['QUERY_STRING'])) {
     parse_str($_SERVER['QUERY_STRING'], $query);
     if (isset($query['skin'])) {
         echo '<link rel="stylesheet" href="style-' . $query['skin'] . '.css" />';
-        if ($query['skin'] === 'xfinity') {
+        if (
+            $query['view'] === 'choose' ||
+            $query['skin'] === 'xfinity'
+        ) {
             $IGNORE_BASE = true;
         }
     }
