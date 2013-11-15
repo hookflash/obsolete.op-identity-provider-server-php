@@ -199,7 +199,7 @@ class mysqldb{
       return FALSE;
     foreach( $values as $k=>$v){
       $fld[]= "`$k`";
-      $val[]= "'".mysql_escape_string($v)."'";
+      $val[]= "'".mysql_real_escape_string($v)."'";
     }
     $Q_str = "INSERT INTO $table (".$this->array_to_str($fld).") VALUES (".$this->array_to_str($val).")";
     if ($this->debug) echo "<p>$Q_str";
