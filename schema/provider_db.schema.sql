@@ -71,7 +71,7 @@ CREATE TABLE `avatar` (
   `url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `width` int(5) DEFAULT NULL,
   `height` int(5) DEFAULT NULL,
-  PRIMARY KEY (`avatar_id`)
+  PRIMARY KEY (`avatar_id`),
   KEY `FK_user_id_cascade_avatar` (`user_id`),
   CONSTRAINT `FK_user_id_cascade_avatar` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
