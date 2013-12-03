@@ -31,24 +31,19 @@
  
  */
 
+// Set required imports
 if ( !defined('ROOT') ) {
-    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
+	define('ROOT', dirname(dirname(dirname(__FILE__))));
 }
-
-require (ROOT . '/app/php/config/config.php');
-
-print '{
-  "result": {
-    "$domain": "' . DOMAIN . '",
-    "$handler": "bootstrapper",
-    "$method": "services-get",
-
-    "error": {
-      "$id": 302,
-      "#text": "Found",
-      "location": "' . HF_SERVICE_DOMAIN . 'services-get"
-    }
-  }
-}';
+if ( !defined('APP') ) {
+	define('APP', ROOT . '/app/');
+}
+ 
+require (APP . 'php/config/config.php');
+ 
+$DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
+print('MySQL driver working!');
+ 
+die('Success!');
 
 ?>
