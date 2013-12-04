@@ -33,7 +33,7 @@
 
 
 /**
- * This is the configuration file for example.unstable.hookflash.me deployment.
+ * This is the configuration file idprovider-javascript.hookflash.me deployment.
  *
  */
 
@@ -48,31 +48,28 @@ if ( !defined('APP') ) {
 
 //-- IMPORTANT --//
 
-// Here you set your application's standard protocol
-define('PROTOCOL', 'https://');
-
 // Here you set your domain
-define('MY_DOMAIN', PROTOCOL . 'example-unstable.hookflash.me/');
+define('MY_DOMAIN', 'https://' . $_SERVER['SERVER_NAME'] . '/');
 
 // Here you set your database
 define('APP_DB_NAME', 'provider_db');
-define('APP_DB_HOST', 'localhost');
-define('APP_DB_USER', 'root');
-define('APP_DB_PASS', '*************');
+define('APP_DB_HOST', '127.0.0.1');
+define('APP_DB_USER', 'user');
+define('APP_DB_PASS', 'DHs83dSJCJDJj27274847OPCEYscd');
 
 // Here you set your Hookflash service domain
-define('DOMAIN', 'unstable.hookflash.me');
-define('HF_SERVICE_DOMAIN', PROTOCOL . 'unstable.hookflash.me/');
+define('DOMAIN', $_SERVER['HTTP_HOST']);
+define('HF_SERVICE_DOMAIN', siteURL('hfservice-v1-adriano-maljkovic-i.hcs.io/'));
 
 // Here you set your OAuth keys and secrets
-define('LINKEDIN_CONSUMER_KEY', '***********');
-define('LINKEDIN_CONSUMER_SECRET', '******************');
+define('LINKEDIN_CONSUMER_KEY', 'zlum98nx6wnr');
+define('LINKEDIN_CONSUMER_SECRET', 'jlV0VHI4znPB0Ofk');
 
-define('FACEBOOK_APP_ID', '**************');
-define('FACEBOOK_APP_SECRET', '**********************************');
+define('FACEBOOK_APP_ID', '658774394142826');
+define('FACEBOOK_APP_SECRET', 'ad51f0ef56ec731c441a3d8620c11d38');
 
-define('TWITTER_APP_ID', '************');
-define('TWITTER_APP_SECRET', '**********************************');
+define('TWITTER_APP_ID', 'KD0Vhsu4VqsC7AesfjlBFA');
+define('TWITTER_APP_SECRET', 'qiJuRKmHAqvhJTDcqi50JlHcWkuh1EekuXKIre49Nwc');
 
 // Here you set your SMTP service parameters
 require(APP . 'php/config/special/smtp_config.php');
@@ -81,20 +78,28 @@ require(APP . 'php/config/special/smtp_config.php');
 require(APP . 'php/config/special/sms_config.php');
 
 // Here you set your specific cryptographically random values
-define('PROVIDER_MAGIC_VALUE', '******************************');
+define('PROVIDER_MAGIC_VALUE', '');
 
 // Here you set your domain hosting secret
-define('DOMAIN_HOSTING_SECRET', '***************');
+define('DOMAIN_HOSTING_SECRET', '');
 
 // Here you set your users' avatars uploading location
 define('UPLOAD_LOCATION', ROOT . '/public/php/service/avatars/');
 
 // Where to send JS logs
-define('HF_LOGGER_HOST', 'logger.hookflash.me');
+define('HF_LOGGER_HOST', 'logger-v1-adriano-maljkovic-i.hcs.io');
+
 
 //^^ IMPORTANT ^^//
 
-
+function siteURL($domainName="")
+{
+    $protocol = ((!empty( $_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    if ($domainName=="") {
+	$domainName = $SERVER['HTTP_HOST'];
+    }
+    return $protocol.$domainName;
+}
 
 // Log events
 function APIEventLog($sText, $iErrorCode='200', $sAPISessionID='') {
@@ -114,5 +119,3 @@ function APIEventLog($sText, $iErrorCode='200', $sAPISessionID='') {
 		'session_dump'=>var_export($_SESSION, true),
 	));
 }
-
-?>

@@ -43,8 +43,8 @@ require (APP . 'php/config/config.php');
 require (APP . 'php/libs/mySQL/class-mysqldb.php');
  
 $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
-print('MySQL driver working!');
+print(' MySQL driver working!');
  
-die('Success!');
+die(' Success!');
 
 ?>
