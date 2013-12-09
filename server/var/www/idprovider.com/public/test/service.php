@@ -42,35 +42,69 @@ if ( !defined('APP') ) {
 require (APP . 'php/config/config.php');
 require (APP . 'php/libs/mySQL/class-mysqldb.php');
 
-performTests();
+$sResult = performTests();
 
 function performTests() {
-    // Service tests
     $sTestsOutcome = '';
+    $numErrors = 0;
     
-    $sTestsOutcome .= 'Checking MySQL driver...<br/>';
+    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking MySQL driver...');
     if (!function_exists('mysql_get_host_info')) {
-        $sTestsOutcome .= 'MySQL driver FAILURE!<br/>';
-        addCriticalFailureEnd($sTestsOutcome);
+        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'MySQL driver FAILURE!');
+        return $sTestsOutcome;
     }
     $sTestsOutcome .= 'MySQL driver working!<br/>';
-    try {
-        $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
-    } catch (Exception $ex) {
-        $sTestsOutcome .= 'MySQL driver FAILURE!<br/>';
-    }
-    $sTestsOutcome .= 'MySQL driver working!<br/>';
-    $sTestsOutcome .= '<br/>';
+    // try {
+    //     $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
+    // } catch (Exception $ex) {
+    //     $sTestsOutcome .= 'MySQL driver FAILURE!<br/>';
+    // }
+    // $sTestsOutcome .= 'MySQL driver working!<br/>';
+    // $sTestsOutcome .= '<br/>';
      
-    $sTestsOutcome .= '<br/>';
-    $sTestsOutcome .= '--------------------------------------------------------<br/>';
-    $sTestsOutcome .= 'All tests succeeded!<br/>';
+    if ($numErrors > 0) {
+        $sTestsOutcome = addEndWithErrors($sTestsOutcome, $numErrors);
+    } else {
+        $sTestsOutcome = addSuccessfullEnd($sTestsOutcome);
+    }
+    
+    return $sTestsOutcome;
 }
 
-function addCriticalFailureEnd($sTestsOutcome) {
-    $sTestsOutcome .= '<div id="danger">--------------------------------------------------------<br/></div>';
+function addInfo($sTestsOutcome, $sMessage) {
+    $sTestsOutcome .= '<div id="info">' . $sMessage . '<br/></div>';
+    return $sTestsOutcome;
+}
+
+function addFailure($sTestsOutcome, $sMessage) {
+    $sTestsOutcome .= '<div id="danger">' . $sMessage . '<br/></div>';
+    return $sTestsOutcome;
+}
+
+function addSuccess($sTestsOutcome, $sMessage) {
+    $sTestsOutcome .= '<div id="success">' . $sMessage . '<br/></div>';
+    return $sTestsOutcome;
+}
+
+function addCriticalFailureEnd($sTestsOutcome, $sMessage) {
+    $sTestsOutcome .= '<div id="danger">' . $sMessage . '<br/></div>';
+    $sTestsOutcome .= '<div id="info">--------------------------------------------------------<br/></div>';
     $sTestsOutcome .= '<div id="danger">Testing failed due to CRITICAL FAILURE!<br/></div>';
-    die($sTestsOutcome);
+    return $sTestsOutcome;
+}
+
+function addSuccessfulEnd($sTestsOutcome) {
+    $sTestsOutcome .= '<br/>';
+    $sTestsOutcome .= '<div id="info">--------------------------------------------------------<br/></div>';
+    $sTestsOutcome .= '<div id="success">All tests succeeded!<br/></div>';
+    return $sTestsOutcome;
+}
+
+function addEndWithErrors($sTestsOutcome, $numErrors) {
+    $sTestsOutcome .= '<br/>';
+    $sTestsOutcome .= '<div id="info">--------------------------------------------------------<br/></div>';
+    $sTestsOutcome .= '<div id="success">Tests completed with ' . $numErrors . ' errors!<br/></div>';
+    return $sTestsOutcome;
 }
 
 
@@ -82,9 +116,10 @@ function addCriticalFailureEnd($sTestsOutcome) {
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-	<div id="tests_outcome">
-		<?php echo $tests_outcome; ?>
-	</div>
+    
+    <div id="tests_outcome">
+	<?php echo $sResult; ?>
+    </div>
 	
 </body>
 </html>
