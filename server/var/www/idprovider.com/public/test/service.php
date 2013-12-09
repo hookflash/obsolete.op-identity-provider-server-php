@@ -38,9 +38,6 @@ if ( !defined('ROOT') ) {
 if ( !defined('APP') ) {
 	define('APP', ROOT . '/app/');
 }
- 
-require (APP . 'php/config/config.php');
-require (APP . 'php/libs/mySQL/class-mysqldb.php');
 
 $numErrors = 0;
 $sResult = performTests();
@@ -49,21 +46,64 @@ function performTests() {
     global $numErrors;
     $sTestsOutcome = '';
     
-    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking MySQL driver...');
-    if (function_exists('mysql_get_host_info')) {
+    // Configuration tests
+    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Configuration files existance...');
+    if (!file_exists(APP.'php/config/config.php')) {
+        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'Missing configaration file:' . APP.'php/config/config.php');
+        return $sTestsOutcome;
+    }
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'File found: '.APP.'php/config/config.php');
+    require(APP . 'php/config/config.php');
+    if (!file_exists(APP.'php/libs/mySQL/class-mysqldb.php')) {
+        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'Missing configaration file:' . APP.'php/libs/mySQL/class-mysqldb.php');
+        return $sTestsOutcome;
+    }
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'File found: '.APP.'php/libs/mySQL/class-mysqldb.php');
+    require(APP . 'php/libs/mySQL/class-mysqldb.php');
+    
+    // Driver support tests
+    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: MySQL driver...');
+    if (!function_exists('mysql_get_host_info')) {
         $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'MySQL driver FAILURE!');
         return $sTestsOutcome;
     }
     $sTestsOutcome = addSuccess($sTestsOutcome, 'MySQL driver working!');
-    // try {
-    //     $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
-    // } catch (Exception $ex) {
-    //     $sTestsOutcome .= 'MySQL driver FAILURE!<br/>';
-    // }
-    // $sTestsOutcome .= 'MySQL driver working!<br/>';
-    // $sTestsOutcome .= '<br/>';
      
-    $sTestsOutcome = addFailure($sTestsOutcome, 'Error probe!');
+    // Database setup tests
+    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Database setup...');
+    $dbcheck = mysql_query("SHOW TABLES LIKE 'user'");
+    if (mysql_num_rows($dbcheck) < 1) {
+        addFailure($sTestsOutcome, 'Table \'user\' not found!');
+    }
+    addSuccess($sTestsOutcome, 'Table \'user\' found!');
+    $dbcheck = mysql_query("SHOW TABLES LIKE 'avatar'");
+    if (mysql_num_rows($dbcheck) < 1) {
+        addFailure($sTestsOutcome, 'Table \'avatar\' not found!');
+    }
+    addSuccess($sTestsOutcome, 'Table \'avatar\' found!');
+    $dbcheck = mysql_query("SHOW TABLES LIKE 'federated'");
+    if (mysql_num_rows($dbcheck) < 1) {
+        addFailure($sTestsOutcome, 'Table \'federated\' not found!');
+    }
+    addSuccess($sTestsOutcome, 'Table \'federated\' found!');
+    $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_oauth'");
+    if (mysql_num_rows($dbcheck) < 1) {
+        addFailure($sTestsOutcome, 'Table \'legacy_oauth\' not found!');
+    }
+    addSuccess($sTestsOutcome, 'Table \'legacy_oauth\' found!');
+    $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_phone'");
+    if (mysql_num_rows($dbcheck) < 1) {
+        addFailure($sTestsOutcome, 'Table \'legacy_phone\' not found!');
+    }
+    addSuccess($sTestsOutcome, 'Table \'legacy_phone\' found!');
+    $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_email'");
+    if (mysql_num_rows($dbcheck) < 1) {
+        addFailure($sTestsOutcome, 'Table \'legacy_email\' not found!');
+    }
+    addSuccess($sTestsOutcome, 'Table \'legacy_email\' found!');
+    
+    //$DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
+    
      
     if ($numErrors > 0) {
         $sTestsOutcome = addEndWithErrors($sTestsOutcome, $numErrors);
