@@ -42,18 +42,19 @@ if ( !defined('APP') ) {
 require (APP . 'php/config/config.php');
 require (APP . 'php/libs/mySQL/class-mysqldb.php');
 
+$numErrors = 0;
 $sResult = performTests();
 
 function performTests() {
+    global $numErrors;
     $sTestsOutcome = '';
-    $numErrors = 0;
     
     $sTestsOutcome = addInfo($sTestsOutcome, 'Checking MySQL driver...');
-    if (!function_exists('mysql_get_host_info')) {
+    if (function_exists('mysql_get_host_info')) {
         $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'MySQL driver FAILURE!');
         return $sTestsOutcome;
     }
-    $sTestsOutcome .= 'MySQL driver working!<br/>';
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'MySQL driver working!');
     // try {
     //     $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
     // } catch (Exception $ex) {
@@ -62,10 +63,12 @@ function performTests() {
     // $sTestsOutcome .= 'MySQL driver working!<br/>';
     // $sTestsOutcome .= '<br/>';
      
+    $sTestsOutcome = addFailure($sTestsOutcome, 'Error probe!');
+     
     if ($numErrors > 0) {
         $sTestsOutcome = addEndWithErrors($sTestsOutcome, $numErrors);
     } else {
-        $sTestsOutcome = addSuccessfullEnd($sTestsOutcome);
+        $sTestsOutcome = addSuccessfulEnd($sTestsOutcome);
     }
     
     return $sTestsOutcome;
@@ -77,6 +80,9 @@ function addInfo($sTestsOutcome, $sMessage) {
 }
 
 function addFailure($sTestsOutcome, $sMessage) {
+    global $numErrors;
+    
+    $numErrors += 1;
     $sTestsOutcome .= '<div id="danger">' . $sMessage . '<br/></div>';
     return $sTestsOutcome;
 }
@@ -103,7 +109,7 @@ function addSuccessfulEnd($sTestsOutcome) {
 function addEndWithErrors($sTestsOutcome, $numErrors) {
     $sTestsOutcome .= '<br/>';
     $sTestsOutcome .= '<div id="info">--------------------------------------------------------<br/></div>';
-    $sTestsOutcome .= '<div id="success">Tests completed with ' . $numErrors . ' errors!<br/></div>';
+    $sTestsOutcome .= '<div id="warning">Tests completed with ' . $numErrors . ' errors!<br/></div>';
     return $sTestsOutcome;
 }
 
