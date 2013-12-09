@@ -39,118 +39,138 @@ if ( !defined('APP') ) {
 	define('APP', ROOT . '/app/');
 }
 
+define(UNDERLINE_DIV, '<div id="info">--------------------------------------------------------<br/></div>');
+define(NEW_LINE_DIV, '<br/>');
+
 $numErrors = 0;
 $sResult = performTests();
 
 function performTests() {
     global $numErrors;
-    $sTestsOutcome = '';
+    $sRes = '';
     
     // Configuration tests
-    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Configuration files existance...');
+    $sRes = addInfo($sRes, 
+            'Checking: Configuration files existance...');
     if (!file_exists(APP.'php/config/config.php')) {
-        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'Missing configaration file:' . APP.'php/config/config.php');
-        return $sTestsOutcome;
+        $sRes = addCriticalFailureEnd($sRes, 
+                'Missing configaration file:' . APP.'php/config/config.php');
+        return $sRes;
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'File found: '.APP.'php/config/config.php');
+    $sRes = addSuccess($sRes, 
+            'File found: '.APP.'php/config/config.php');
     require(APP . 'php/config/config.php');
     if (!file_exists(APP.'php/libs/mySQL/class-mysqldb.php')) {
-        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'Missing configaration file:' . APP.'php/libs/mySQL/class-mysqldb.php');
-        return $sTestsOutcome;
+        $sRes = addCriticalFailureEnd($sRes, 
+                'Missing configaration file:' . 
+                APP.'php/libs/mySQL/class-mysqldb.php');
+        return $sRes;
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'File found: '.APP.'php/libs/mySQL/class-mysqldb.php');
+    $sRes = addSuccess($sRes, 
+            'File found: '.APP.'php/libs/mySQL/class-mysqldb.php');
     require(APP . 'php/libs/mySQL/class-mysqldb.php');
+    //------------------------------------------------------------------------//
     
     // Driver support tests
-    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: MySQL driver...');
+    $sRes = addNewLine($sRes);
+    $sRes = addInfo($sRes, 'Checking: Driver support...');
     if (!function_exists('mysql_get_host_info')) {
-        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'MySQL driver FAILURE!');
-        return $sTestsOutcome;
+        $sRes = addCriticalFailureEnd($sRes, 
+                'MySQL driver failure!');
+        return $sRes;
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'MySQL driver working!');
-     
+    $sRes = addSuccess($sRes, 'MySQL driver working!');
+    //------------------------------------------------------------------------//
+    
     // Database setup tests
-    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Database setup...');
+    $sRes = addNewLine($sRes);
+    $sRes = addInfo($sRes, 'Checking: Database setup...');
     $dbcheck = mysql_query("SHOW TABLES LIKE 'user'");
     if (mysql_num_rows($dbcheck) < 1) {
-        addFailure($sTestsOutcome, 'Table \'user\' not found!');
+        $sRes = addFailure($sRes, 'Table \'user\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'user\' found!');
+    addSuccess($sRes, 'Table \'user\' found!');
     $dbcheck = mysql_query("SHOW TABLES LIKE 'avatar'");
     if (mysql_num_rows($dbcheck) < 1) {
-        addFailure($sTestsOutcome, 'Table \'avatar\' not found!');
+        $sRes = addFailure($sRes, 'Table \'avatar\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'avatar\' found!');
+    addSuccess($sRes, 'Table \'avatar\' found!');
     $dbcheck = mysql_query("SHOW TABLES LIKE 'federated'");
     if (mysql_num_rows($dbcheck) < 1) {
-        addFailure($sTestsOutcome, 'Table \'federated\' not found!');
+        $sRes = addFailure($sRes, 'Table \'federated\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'federated\' found!');
+    addSuccess($sRes, 'Table \'federated\' found!');
     $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_oauth'");
     if (mysql_num_rows($dbcheck) < 1) {
-        addFailure($sTestsOutcome, 'Table \'legacy_oauth\' not found!');
+        $sRes = addFailure($sRes, 'Table \'legacy_oauth\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'legacy_oauth\' found!');
+    addSuccess($sRes, 'Table \'legacy_oauth\' found!');
     $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_phone'");
     if (mysql_num_rows($dbcheck) < 1) {
-        addFailure($sTestsOutcome, 'Table \'legacy_phone\' not found!');
+        $sRes = addFailure($sRes, 'Table \'legacy_phone\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'legacy_phone\' found!');
+    addSuccess($sRes, 'Table \'legacy_phone\' found!');
     $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_email'");
     if (mysql_num_rows($dbcheck) < 1) {
-        addFailure($sTestsOutcome, 'Table \'legacy_email\' not found!');
+        $sRes = addFailure($sRes, 'Table \'legacy_email\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'legacy_email\' found!');
+    addSuccess($sRes, 'Table \'legacy_email\' found!');
     
     //$DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
+    //------------------------------------------------------------------------//
     
      
     if ($numErrors > 0) {
-        $sTestsOutcome = addEndWithErrors($sTestsOutcome, $numErrors);
+        $sRes = addEndWithErrors($sRes, $numErrors);
     } else {
-        $sTestsOutcome = addSuccessfulEnd($sTestsOutcome);
+        $sRes = addSuccessfulEnd($sRes);
     }
     
-    return $sTestsOutcome;
+    return $sRes;
 }
 
-function addInfo($sTestsOutcome, $sMessage) {
-    $sTestsOutcome .= '<div id="info">' . $sMessage . '<br/></div>';
-    return $sTestsOutcome;
+function addInfo($sRes, $sMessage) {
+    $sRes .= '<div id="info">' . $sMessage . '<br/></div>';
+    return $sRes;
 }
 
-function addFailure($sTestsOutcome, $sMessage) {
+function addFailure($sRes, $sMessage) {
     global $numErrors;
     
     $numErrors += 1;
-    $sTestsOutcome .= '<div id="danger">' . $sMessage . '<br/></div>';
-    return $sTestsOutcome;
+    $sRes .= '<div id="danger">' . $sMessage . '<br/></div>';
+    return $sRes;
 }
 
-function addSuccess($sTestsOutcome, $sMessage) {
-    $sTestsOutcome .= '<div id="success">' . $sMessage . '<br/></div>';
-    return $sTestsOutcome;
+function addSuccess($sRes, $sMessage) {
+    $sRes .= '<div id="success">' . $sMessage . '<br/></div>';
+    return $sRes;
 }
 
-function addCriticalFailureEnd($sTestsOutcome, $sMessage) {
-    $sTestsOutcome .= '<div id="danger">' . $sMessage . '<br/></div>';
-    $sTestsOutcome .= '<div id="info">--------------------------------------------------------<br/></div>';
-    $sTestsOutcome .= '<div id="danger">Testing failed due to CRITICAL FAILURE!<br/></div>';
-    return $sTestsOutcome;
+function addCriticalFailureEnd($sRes, $sMessage) {
+    $sRes .= '<div id="danger">' . $sMessage . '<br/></div>';
+    $sRes .= UNDERLINE_DIV;
+    $sRes .= '<div id="danger">Testing failed due to CRITICAL FAILURE!<br/></div>';
+    return $sRes;
 }
 
-function addSuccessfulEnd($sTestsOutcome) {
-    $sTestsOutcome .= '<br/>';
-    $sTestsOutcome .= '<div id="info">--------------------------------------------------------<br/></div>';
-    $sTestsOutcome .= '<div id="success">All tests succeeded!<br/></div>';
-    return $sTestsOutcome;
+function addSuccessfulEnd($sRes) {
+    $sRes .= NEW_LINE_DIV;
+    $sRes .= UNDERLINE_DIV;
+    $sRes .= '<div id="success">All tests succeeded!<br/></div>';
+    return $sRes;
 }
 
-function addEndWithErrors($sTestsOutcome, $numErrors) {
-    $sTestsOutcome .= '<br/>';
-    $sTestsOutcome .= '<div id="info">--------------------------------------------------------<br/></div>';
-    $sTestsOutcome .= '<div id="warning">Tests completed with ' . $numErrors . ' errors!<br/></div>';
-    return $sTestsOutcome;
+function addEndWithErrors($sRes, $numErrors) {
+    $sRes .= NEW_LINE_DIV;
+    $sRes .= UNDERLINE_DIV;
+    $sRes .= '<div id="warning">Tests completed with ' . $numErrors . ' errors!<br/></div>';
+    return $sRes;
+}
+
+function addNewLine($sRes) {
+    $sRes .= NEW_LINE_DIV;
+    return $sRes;
 }
 
 
