@@ -41,10 +41,50 @@ if ( !defined('APP') ) {
  
 require (APP . 'php/config/config.php');
 require (APP . 'php/libs/mySQL/class-mysqldb.php');
- 
-$DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
-print(' MySQL driver working!');
- 
-die(' Success!');
+
+performTests();
+
+function performTests() {
+    // Service tests
+    $sTestsOutcome = '';
+    
+    $sTestsOutcome .= 'Checking MySQL driver...<br/>';
+    if (!function_exists('mysql_get_host_info')) {
+        $sTestsOutcome .= 'MySQL driver FAILURE!<br/>';
+        addCriticalFailureEnd($sTestsOutcome);
+    }
+    $sTestsOutcome .= 'MySQL driver working!<br/>';
+    try {
+        $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
+    } catch (Exception $ex) {
+        $sTestsOutcome .= 'MySQL driver FAILURE!<br/>';
+    }
+    $sTestsOutcome .= 'MySQL driver working!<br/>';
+    $sTestsOutcome .= '<br/>';
+     
+    $sTestsOutcome .= '<br/>';
+    $sTestsOutcome .= '--------------------------------------------------------<br/>';
+    $sTestsOutcome .= 'All tests succeeded!<br/>';
+}
+
+function addCriticalFailureEnd($sTestsOutcome) {
+    $sTestsOutcome .= '<div id="danger">--------------------------------------------------------<br/></div>';
+    $sTestsOutcome .= '<div id="danger">Testing failed due to CRITICAL FAILURE!<br/></div>';
+    die($sTestsOutcome);
+}
+
 
 ?>
+
+<html>
+<head>
+<title>Example Identity Provider - Test Service</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div id="tests_outcome">
+		<?php echo $tests_outcome; ?>
+	</div>
+	
+</body>
+</html>

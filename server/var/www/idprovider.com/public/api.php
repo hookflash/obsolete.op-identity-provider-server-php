@@ -153,18 +153,6 @@ function internal_calculateIdentityAccessSecretProof () {
 
 // TODO delete
 function internal_parseRolodexCredentialsToken () {
-    /*
-        global $oRequest;
-	require_once(APP . 'php/main/utils/cryptoUtil.php');
-        $sSecret = 'klksd9887w6uysjkksd89893kdnvbter';
-        $sTokenEncrypted = $oRequest->aPars['request']['rolodexCredentialsTokenEncrypted'];
-        $aTokenEncrypted = explode('-', $sTokenEncrypted);
-        $sToken = CryptoUtil::decrypt(
-                CryptoUtil::hextobin($aTokenEncrypted[1]),
-                CryptoUtil::hextobin($aTokenEncrypted[0]),
-                hash('sha256',$sSecret,TRUE));
-        die($sToken);
-     */
     global $oRequest;
     require_once(APP . 'php/main/utils/cryptoUtil.php');
     include(APP . 'php/libs/seclib/Crypt/AES.php');
@@ -182,25 +170,6 @@ function internal_parseRolodexCredentialsToken () {
 
 // TODO delete
 function internal_encryptRolodexCredentialsToken () {
-	/*
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
-        $sSecret = 'klksd9887w6uysjkksd89893kdnvbter';
-        $sIV = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_NOFB));
-        $sServerTokenCredentials = '{"service":"github","consumer_key":"264ea34924b00a5fa84e","consumer_secret":"6d21988222de0f9cc3c0257b70357a5b22bd23b8","token":"ffd648ab7b9461bbfc48405dd26e0fc12aedbb57"}';
-	$sServerToken = CryptoUtil::encrypt(
-                                $sServerTokenCredentials,
-                                $sIV,
-                                hash('sha256',$sSecret,TRUE));
-        $sTokenEncrypted = bin2hex($sIV) . '-' . bin2hex($sServerToken);
-        die($sTokenEncrypted);
-        ///////////////////////////////////
-        $aTokenEncrypted = explode('-', $sTokenEncrypted);
-        $sToken = CryptoUtil::decrypt(
-                CryptoUtil::hextobin($aTokenEncrypted[1]),
-                CryptoUtil::hextobin($aTokenEncrypted[0]),
-                hash('sha256',$sSecret,TRUE));
-        die($sToken);*/
-    //------------------------------------------------------------//
     include(APP . 'php/libs/seclib/Crypt/AES.php');
 
     $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
@@ -224,7 +193,7 @@ function servicesGet()
 	$aError = array (
 		'$id' 		=> 302,
 		'#text' 	=> 'Found',
-		'location' 	=> HF_SERVICE_DOMAIN . '.well-known/openpeer-services-get'
+		'location' 	=> HF_SERVICE_DOMAIN . 'services-get'
 	);
 	$oResponse->addPar('error', $aError);
 	$oResponse->run();

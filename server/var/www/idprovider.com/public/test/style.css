@@ -1,0 +1,25 @@
+/* 
+    Document   : style.css
+    Created on : Dec 9, 2013, 5:21:23 PM
+    Author     : adriano
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+#danger {
+    color: red;
+}
+#warning {
+    color: yellow;
+}
+#info {
+    color: gray;
+}
+#success {
+    color: yellowgreen;
+}
+
