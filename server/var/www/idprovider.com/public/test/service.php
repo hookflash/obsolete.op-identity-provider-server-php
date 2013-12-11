@@ -85,38 +85,42 @@ function performTests() {
     // Database setup tests
     $sTestsOutcome = addNewLine($sTestsOutcome);
     $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Database setup...');
-    $dbcheck = mysql_query("SHOW TABLES LIKE 'user'");
-    if (mysql_num_rows($dbcheck) < 1) {
+    $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
+    $dbcheck = $DB->select_single_to_array('INFORMATION_SCHEMA.SCHEMATA', 'SCHEMA_NAME', "WHERE SCHEMA_NAME='".APP_DB_NAME."'");
+    if ($dbcheck['SCHEMA_NAME'] != APP_DB_NAME) {
+        $sTestsOutcome = addFailure($sTestsOutcome, 'Database \''.APP_DB_NAME.'\' not found!');
+    }
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \''.APP_DB_NAME.'\' found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'user'");
+    if ($dbcheck[0]['Tables_in_provider_db (user)'] != 'user') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'user\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'user\' found!');
-    $dbcheck = mysql_query("SHOW TABLES LIKE 'avatar'");
-    if (mysql_num_rows($dbcheck) < 1) {
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'user\' found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'avatar'");
+    if ($dbcheck[0]['Tables_in_provider_db (avatar)'] != 'avatar') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'avatar\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'avatar\' found!');
-    $dbcheck = mysql_query("SHOW TABLES LIKE 'federated'");
-    if (mysql_num_rows($dbcheck) < 1) {
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'avatar\' found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'federated'");
+    if ($dbcheck[0]['Tables_in_provider_db (federated)'] != 'federated') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'federated\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'federated\' found!');
-    $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_oauth'");
-    if (mysql_num_rows($dbcheck) < 1) {
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'federated\' found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_oauth'");
+    if ($dbcheck[0]['Tables_in_provider_db (legacy_oauth)'] != 'legacy_oauth') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_oauth\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'legacy_oauth\' found!');
-    $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_phone'");
-    if (mysql_num_rows($dbcheck) < 1) {
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_oauth\' found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_phone'");
+    if ($dbcheck[0]['Tables_in_provider_db (legacy_phone)'] != 'legacy_phone') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_phone\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'legacy_phone\' found!');
-    $dbcheck = mysql_query("SHOW TABLES LIKE 'legacy_email'");
-    if (mysql_num_rows($dbcheck) < 1) {
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_phone\' found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_email'");
+    if ($dbcheck[0]['Tables_in_provider_db (legacy_email)'] != 'legacy_email') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_email\' not found!');
     }
-    addSuccess($sTestsOutcome, 'Table \'legacy_email\' found!');
-    
-    //$DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
+    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_email\' found!');
     //------------------------------------------------------------------------//
     
      
