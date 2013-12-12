@@ -74,7 +74,7 @@ class mysqldb{
   * check and activate db connection
   * @param string $action (active, kill, check) active by default
   */
-  function check_conn($action = ''){
+  function check_conn($action = ''){ //var_dump($this->host, $this->user,$this->pass,TRUE,131074,mysqli_connect($this->host,$this->user,$this->pass,TRUE,131074),mysqli_connect_errno());die();
     if(! $host = @mysqli_get_host_info($this->conn)){
       switch ($action){
         case 'kill':

@@ -60,21 +60,21 @@ function performTests() {
     $sTestsOutcome = addSuccess($sTestsOutcome, 
             'File found: '.APP.'php/config/config.php');
     require(APP . 'php/config/config.php');
-    if (!file_exists(APP.'php/libs/mySQL/class-mysqldb.php')) {
+    if (!file_exists(APP.'php/libs/mySQL/class-mysqlidb.php')) {
         $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 
                 'Missing configaration file:' . 
-                APP.'php/libs/mySQL/class-mysqldb.php');
+                APP.'php/libs/mySQL/class-mysqlidb.php');
         return $sTestsOutcome;
     }
     $sTestsOutcome = addSuccess($sTestsOutcome, 
-            'File found: '.APP.'php/libs/mySQL/class-mysqldb.php');
-    require(APP . 'php/libs/mySQL/class-mysqldb.php');
+            'File found: '.APP.'php/libs/mySQL/class-mysqlidb.php');
+    require(APP . 'php/libs/mySQL/class-mysqlidb.php');
     //------------------------------------------------------------------------//
     
     // Driver support tests
     $sTestsOutcome = addNewLine($sTestsOutcome);
     $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Driver support...');
-    if (!function_exists('mysql_get_host_info')) {
+    if (!function_exists('mysqli_get_host_info')) {
         $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 
                 'MySQL driver failure!');
         return $sTestsOutcome;
@@ -89,38 +89,45 @@ function performTests() {
     $dbcheck = $DB->select_single_to_array('INFORMATION_SCHEMA.SCHEMATA', 'SCHEMA_NAME', "WHERE SCHEMA_NAME='".APP_DB_NAME."'");
     if ($dbcheck['SCHEMA_NAME'] != APP_DB_NAME) {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Database \''.APP_DB_NAME.'\' not found!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \''.APP_DB_NAME.'\' found!');
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \''.APP_DB_NAME.'\' found!');
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'user'");
     if ($dbcheck[0]['Tables_in_provider_db (user)'] != 'user') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'user\' not found!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'user\' found!');
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'user\' found!');
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'avatar'");
     if ($dbcheck[0]['Tables_in_provider_db (avatar)'] != 'avatar') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'avatar\' not found!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'avatar\' found!');
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'avatar\' found!');
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'federated'");
     if ($dbcheck[0]['Tables_in_provider_db (federated)'] != 'federated') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'federated\' not found!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'federated\' found!');
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'federated\' found!');
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_oauth'");
     if ($dbcheck[0]['Tables_in_provider_db (legacy_oauth)'] != 'legacy_oauth') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_oauth\' not found!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_oauth\' found!');
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_oauth\' found!');
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_phone'");
     if ($dbcheck[0]['Tables_in_provider_db (legacy_phone)'] != 'legacy_phone') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_phone\' not found!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_phone\' found!');
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_phone\' found!');
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_email'");
     if ($dbcheck[0]['Tables_in_provider_db (legacy_email)'] != 'legacy_email') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_email\' not found!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_email\' found!');
     }
-    $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_email\' found!');
     //------------------------------------------------------------------------//
     
      
