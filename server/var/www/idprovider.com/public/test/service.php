@@ -88,7 +88,6 @@ function performTests() {
     $sTestsOutcome = addNewLine($sTestsOutcome);
     $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Database setup...');
 
-    var_dump("Mysql connect info:", APP_DB_NAME, APP_DB_HOST, APP_DB_USER);
     $mysqli = new mysqli(APP_DB_HOST, APP_DB_USER, APP_DB_PASS, APP_DB_NAME);
     if ($mysqli->connect_errno) {
         $sTestsOutcome = addFailure($sTestsOutcome, "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
