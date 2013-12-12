@@ -62,7 +62,7 @@ class mysqldb{
       return FALSE;
     if($dbname)
       $this->dbname = $dbname;
-    if(! $this->db = @mysqli_select_db($this->dbname,$this->conn)){
+    if(! $this->db = $this->conn->select_db($this->dbname)){
       $this->verbose("FATAL ERROR CAN'T CONNECT TO database ".$this->dbname);
       $this->set_error();
       return FALSE;
@@ -74,7 +74,7 @@ class mysqldb{
   * check and activate db connection
   * @param string $action (active, kill, check) active by default
   */
-  function check_conn($action = ''){ //var_dump($this->host, $this->user,$this->pass,TRUE,131074,mysqli_connect($this->host,$this->user,$this->pass,TRUE,131074),mysqli_connect_errno());die();
+  function check_conn($action = ''){ 
     if(! $host = @mysqli_get_host_info($this->conn)){
       switch ($action){
         case 'kill':
@@ -85,7 +85,7 @@ class mysqldb{
           break;
         default:
         case 'active':
-          if(! $this->conn = @mysqli_connect($this->host,$this->user,$this->pass,TRUE,131074)){
+          if(! $this->conn = new mysqli($this->host,$this->user,$this->pass)){
             $this->verbose("CONNECTION TO $this->host FAILED");
             return FALSE;
           }
@@ -200,7 +200,7 @@ class mysqldb{
       return FALSE;
     foreach( $values as $k=>$v){
       $fld[]= "`$k`";
-      $val[]= "'".mysqli_real_escape_string($v)."'";
+      $val[]= "'".mysqli_real_escape_string($this->conn, $v)."'";
     }
     $Q_str = "INSERT INTO $table (".$this->array_to_str($fld).") VALUES (".$this->array_to_str($val).")";
     if ($this->debug) echo "<p>$Q_str";
@@ -208,7 +208,7 @@ class mysqldb{
       //echo $Q_str;
       return FALSE;
     }
-    $this->last_id = @mysqli_insert_id($this->conn);
+    $this->last_id = mysqli_insert_id($this->conn);
     return $return_id?$this->last_id:TRUE;
   }
   /**
@@ -238,7 +238,7 @@ class mysqldb{
 		if (is_null($v)) { 
       		$str[]= " `$k` = null";
 		} else {
-      		$str[]= " `$k` = '".mysqli_escape_string($v)."'";
+      		$str[]= " `$k` = '".mysqli_escape_string($this->conn, $v)."'";
 		}
     }elseif(! is_string($values)){
       return FALSE;
@@ -275,7 +275,7 @@ class mysqldb{
         return FALSE;
     }
     # echo "\n**SQL QUERY on $this->db :\n$Q_str\n";
-    if(! $this->last_qres = mysqli_query($Q_str,$this->conn))
+    if(! $this->last_qres = $this->conn->query($Q_str))
       $this->set_error();
     return $this->last_qres;
   }
@@ -291,7 +291,7 @@ class mysqldb{
         return FALSE;
     }
     # echo "\n**SQL QUERY on $this->db :\n$Q_str\n";
-    $this->last_qres = @mysqli_query($Q_str,$this->conn);
+    $this->last_qres = $this->conn->query($Q_str);
     $num = @mysqli_affected_rows($this->conn);
 
     if( $num == -1)

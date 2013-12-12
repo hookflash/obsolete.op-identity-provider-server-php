@@ -108,12 +108,6 @@ function performTests() {
     }
 
     $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
-    $dbcheck = $DB->select_single_to_array('INFORMATION_SCHEMA.SCHEMATA', 'SCHEMA_NAME', "WHERE SCHEMA_NAME='".APP_DB_NAME."'");
-    if ($dbcheck['SCHEMA_NAME'] != APP_DB_NAME) {
-        $sTestsOutcome = addFailure($sTestsOutcome, 'Database \''.APP_DB_NAME.'\' not found!');
-    } else {
-        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \''.APP_DB_NAME.'\' found!');
-    }
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'user'");
     if ($dbcheck[0]['Tables_in_provider_db (user)'] != 'user') {
         $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'user\' not found!');
@@ -152,7 +146,43 @@ function performTests() {
     }
     //------------------------------------------------------------------------//
     
-     
+    // Persistance layer operability tests
+    $sTestsOutcome = addNewLine($sTestsOutcome);
+    $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Persistance layer operability...');
+    
+    $dbcheck_id = $DB->insert(
+        'user',
+        array ('updated' => 1)
+    );
+    if (!($dbcheck_id && $DB->select_single_to_array('user','*','where user_id='.$dbcheck_id))) {
+        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'Function \'insert\' not working!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Function \'insert\' working!');
+    }
+    $dbcheck_num = $DB->update(
+        'user',
+        array ('updated' => 2),
+        'where user_id='.$dbcheck_id
+    );
+    $dbcheck = $DB->select_single_to_array('user','*','where user_id='.$dbcheck_id);
+    if (!($dbcheck_num && $dbcheck['updated'] == 2)) {
+        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'Function \'update\' not working!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Function \'update\' working!');
+    }
+    $dbcheck_num = $DB->delete(
+        'user',
+        'where user_id='.$dbcheck_id 
+    );
+    $dbcheck = $DB->select_single_to_array('user','*','where user_id='.$dbcheck_id);
+    if (!$dbcheck_num || $dbcheck) {
+        $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 'Function \'delete\' not working!');
+        return $sTestsOutcome;
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Function \'delete\' working!');
+    }
+    //------------------------------------------------------------------------//
+    
     if ($numErrors > 0) {
         $sTestsOutcome = addEndWithErrors($sTestsOutcome, $numErrors);
     } else {
@@ -181,6 +211,7 @@ function addSuccess($sTestsOutcome, $sMessage) {
 }
 
 function addCriticalFailureEnd($sTestsOutcome, $sMessage) {
+    http_response_code(500);
     $sTestsOutcome .= '<div id="danger">' . $sMessage . '<br/></div>';
     $sTestsOutcome .= UNDERLINE_DIV;
     $sTestsOutcome .= '<div id="danger">Testing failed due to CRITICAL FAILURE!<br/></div>';
@@ -195,6 +226,7 @@ function addSuccessfulEnd($sTestsOutcome) {
 }
 
 function addEndWithErrors($sTestsOutcome, $numErrors) {
+    http_response_code(500);
     $sTestsOutcome .= NEW_LINE_DIV;
     $sTestsOutcome .= UNDERLINE_DIV;
     $sTestsOutcome .= '<div id="warning">Tests completed with ' . $numErrors . ' errors!<br/></div>';
@@ -205,7 +237,6 @@ function addNewLine($sTestsOutcome) {
     $sTestsOutcome .= NEW_LINE_DIV;
     return $sTestsOutcome;
 }
-
 
 ?>
 
