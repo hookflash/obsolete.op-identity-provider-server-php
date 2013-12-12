@@ -48,6 +48,8 @@ $sResult = performTests();
 function performTests() {
     global $numErrors;
     $sTestsOutcome = '';
+
+    trigger_error("Test error to ensure error log works");
     
     // Configuration tests
     $sTestsOutcome = addInfo($sTestsOutcome, 
@@ -85,6 +87,27 @@ function performTests() {
     // Database setup tests
     $sTestsOutcome = addNewLine($sTestsOutcome);
     $sTestsOutcome = addInfo($sTestsOutcome, 'Checking: Database setup...');
+
+    var_dump("Mysql connect info:", APP_DB_NAME, APP_DB_HOST, APP_DB_USER);
+    $mysqli = new mysqli(APP_DB_HOST, APP_DB_USER, APP_DB_PASS, APP_DB_NAME);
+    if ($mysqli->connect_errno) {
+        $sTestsOutcome = addFailure($sTestsOutcome, "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'MySQL host info: \''.$mysqli->host_info.'\'');
+        $sql="SHOW DATABASES";
+        $result = mysqli_query($mysqli, $sql);
+        if (!mysqli_query($mysqli, $sql)) {
+            $sTestsOutcome = addFailure($sTestsOutcome, "Error: %s", mysqli_error($mysqli));
+        }
+        $row_getRS = mysqli_fetch_assoc($result);
+        while( $row = mysqli_fetch_row( $result ) ):
+            if (($row[0]!="information_schema") && ($row[0]!="mysql")) {
+                $sTestsOutcome = addSuccess($sTestsOutcome, 'Found database table: \''.$row[0].'\'');
+            }
+        endwhile;
+        $mysqli->close();
+    }
+
     $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
     $dbcheck = $DB->select_single_to_array('INFORMATION_SCHEMA.SCHEMATA', 'SCHEMA_NAME', "WHERE SCHEMA_NAME='".APP_DB_NAME."'");
     if ($dbcheck['SCHEMA_NAME'] != APP_DB_NAME) {
