@@ -75,8 +75,10 @@ either expressed or implied, of the FreeBSD Project.
 <script type="text/javascript" src="js/lib/jquery/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="js/lib/ajaxfileupload.js"></script>
 <script type="text/javascript" src="js/lib/base64.js"></script>
+<!--
 <script type="text/javascript" src="js/lib/cifre/aes.js"></script>
 <script type="text/javascript" src="js/lib/cifre/utils.js"></script>
+-->
 <script type="text/javascript" src="js/HF.js"></script>
 
 <link rel="stylesheet" href="style.css"/>
