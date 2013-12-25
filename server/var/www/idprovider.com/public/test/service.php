@@ -82,6 +82,11 @@ function performTests() {
         return $sTestsOutcome;
     }
     $sTestsOutcome = addSuccess($sTestsOutcome, 'MySQL driver working!');
+    if (!function_exists('curl_init')) {
+        $sTestsOutcome = addFailure($sTestsOutcome, 'CURL driver failure!');
+    } else {
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'CURL driver working!');
+    }
     //------------------------------------------------------------------------//
     
     // Database setup tests
