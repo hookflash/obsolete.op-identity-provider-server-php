@@ -105,7 +105,7 @@ if (isset($_SERVER['QUERY_STRING'])) {
               unset($_SESSION['identityServiceAuthenticationURL']);
           }
         ?>",
-        $identityProvider: "idprovider-javascript.hookflash.me",
+        $identityProvider: document.domain,
         login: {
             click: "loginClick",
             id: "loginId",

@@ -90,6 +90,7 @@ either expressed or implied, of the FreeBSD Project.
             try {
                 initData = bundle;
                 $identityProviderDomain = initData.$identityProvider;
+                log("INFO", "init bundle", initData);
 
                 // Buffer logging calls until we have an `$appid` available.
                 window.__LOGGER.setChannel(false);
@@ -325,7 +326,7 @@ either expressed or implied, of the FreeBSD Project.
                 identityAccessStart.identity.uri &&
                 /^identity:\/\/facebook\.com\/.+$/.test(identityAccessStart.identity.uri)
             ) {
-                log("startLoginChoose", "found full '" + identity.type + "' identity. logging in right away.");
+                log("startLoginChoose", "found full '" + identity.type + "' identity. Logging in right away.");
 
                 identity.uri = identityAccessStart.identity.uri;
 
