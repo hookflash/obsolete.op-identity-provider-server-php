@@ -61,7 +61,7 @@ if ( !defined('APP') ) {
 }
 
 require (APP . 'php/config/config.php');
-require (APP . 'php/libs/mySQL/class-mysqldb.php');
+require (APP . 'php/libs/mySQL/class-mysqlidb.php');
 
 require (APP . 'php/main/rest/restServer.php');
 require (APP . 'php/main/rest/request.php');
