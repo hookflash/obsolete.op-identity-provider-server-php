@@ -159,7 +159,7 @@ class FederatedLogin {
         // Adding profile data to the request data
         require_once (APP . 'php/main/utils/profileUtil.php');
         $aRequestData['identity']['profile'] = 
-                ProfileUtil::PROFILE_ULR_BASE . '&identifier=' . 
+                ProfileUtil::PROFILE_ULR_BASE . 'identifier=' . 
                 $aRequestData['identity']['identifier'];
         $aRequestData['identity']['vprofile'] = 
                 ProfileUtil::VPROFILE_ULR_BASE . '&identifier=' . 
