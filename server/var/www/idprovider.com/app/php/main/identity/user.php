@@ -160,6 +160,7 @@ class User {
                 'height' 	=> $aAvatars[$nAvatar]['height'],
             );
             array_push($aAvatarsInProfile, $aAvatar);
+            $nAvatar++;
         }
         $aProfile = array (
             'identifier'	=> $aIdentity['identifier'],

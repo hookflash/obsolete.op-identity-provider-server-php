@@ -39,64 +39,59 @@ date_default_timezone_set('UTC');
 require_once(APP . 'php/main/utils/cryptoUtil.php');
 require_once(APP . 'php/main/utils/jsonUtil.php');
 
-define('PROFILE_ULR_BASE_CONST', MY_DOMAIN . 'php/profile/profile.php?');
-define('VPROFILE_ULR_BASE_CONST', MY_DOMAIN . 'php/profile/profile.php?vprofile=1');
+define('PROFILE_ULR_BASE_CONST', DOMAIN . '/php/profile/profile.php?');
+define('VPROFILE_ULR_BASE_CONST', DOMAIN . '/php/profile/profile.php?vprofile=1');
 
 /**
  * Class ProfileUtil is a utility class that provides public profile data for given input.
  */
 class ProfileUtil {
 	
-	// Usefull public constants
-	const PROFILE_ULR_BASE = PROFILE_ULR_BASE_CONST;
-	const VPROFILE_ULR_BASE = VPROFILE_ULR_BASE_CONST;
+    // Usefull public constants
+    const PROFILE_ULR_BASE = PROFILE_ULR_BASE_CONST;
+    const VPROFILE_ULR_BASE = VPROFILE_ULR_BASE_CONST;
 	
-	/**
-	 * Try sending a profile-get request using cURL, for given data
-	 * 
-	 * @param string $sIdentityType could be: 'federated', 'email', 'phone', 'facebook', 'linkedin', 'twitter'
-	 * @param string $sIdentifier An identifier of the identity (such as username or e-mail)
-	 * @return array $aResultObject An array created from JSON result
-	 */
-	public static function sendProfileGet ( $nRequestId, $sVprofile, $sIdentifier ) {
-		// import necessary files
-		require_once(APP . 'php/main/utils/curlUtil.php');
+    /**
+     * Try sending a profile-get request using cURL, for given data
+     * 
+     * @param string $sIdentityType could be: 'federated', 'email', 'phone', 'facebook', 'linkedin', 'twitter'
+     * @param string $sIdentifier An identifier of the identity (such as username or e-mail)
+     * @return array $aResultObject An array created from JSON result
+     */
+    public static function sendProfileGet ( $nRequestId, $sIdentifier ) {
+        // import necessary files
+        require_once(APP . 'php/main/utils/curlUtil.php');
 		
-		// URL of identityService server
-		$url = MY_DOMAIN . 'api.php';
+        // URL of identityService server
+        $url = DOMAIN . '/api.php';
 		
-		// Request data
-		$requestData = '' .
-		'{' .
-			'"request": {' .
-				'"$domain": "provider.com",' .
-				'"$id": ' . $nRequestId . ',' .
-				'"$handler": "identity-provider",' .
-				'"$method": "profile-get",' .
-				'"identity": {' .
-					'"identifier": "' . $sIdentifier . '"' .
-				'}' .
-			'}' .
-		'}';
+        // Request data
+        $requestData = '' .
+        '{' .
+            '"request": {' .
+                '"$domain": "provider.com",' .
+                '"$id": ' . $nRequestId . ',' .
+                '"$handler": "identity-provider",' .
+                '"$method": "profile-get",' .
+                '"identity": {' .
+                    '"identifier": "' . $sIdentifier . '"' .
+                '}' .
+            '}' .
+        '}';
 		
-		// Send cURL request
-		$sResult = CurlUtil::sendPostRequest($url, $requestData);
+        // Send cURL request
+        $sResult = CurlUtil::sendPostRequest($url, $requestData);
 		
-		// If it's the vprofile the client wanted (JSON), then just return it
-		if ( $sVprofile == 'true' ) {
-			return $sResult;
-		}
+        // Convert the result to an array
+        $aResultObject = JsonUtil::jsonToArray($sResult, false);	
 		
-		// Convert the result to an array
-		$aResultObject = JsonUtil::jsonToArray($sResult, false);	
-		
-		// If the id of the request matches with the id of the result, return the marshalled result, otherwise return null
-		if ( ( $aResultObject != null ) && ( key_exists ( 'id', $aResultObject['request_attr'] ) ) && ( $aResultObject['request_attr']['id'] == $nRequestId ) ) {
-			return $aResultObject['request'];
-		} else {
-			return null;
-		}
-	}
+        // If the id of the request matches with the id of the result, return the marshalled result, otherwise return null
+        if ( ( $aResultObject != null ) && ( key_exists ( 'id', $aResultObject['request_attr'] ) ) && ( $aResultObject['request_attr']['id'] == $nRequestId ) ) {
+            return $aResultObject['request'];
+        } else {
+            return null;
+        }
+    }
 	
 }
 

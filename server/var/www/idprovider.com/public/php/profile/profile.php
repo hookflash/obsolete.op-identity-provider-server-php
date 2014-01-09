@@ -31,44 +31,44 @@ either expressed or implied, of the FreeBSD Project.
 
 
 <?php 
-	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
-	require_once (ROOT . '/app/php/config/config.php');
-	require_once (ROOT . '/app/php/main/utils/cryptoUtil.php');
-	require_once (ROOT . '/app/php/main/utils/profileUtil.php');
-        require_once (ROOT . '/app/php/main/utils/jsonUtil.php');
+    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
+    require_once (ROOT . '/app/php/config/config.php');
+    require_once (ROOT . '/app/php/main/utils/cryptoUtil.php');
+    require_once (ROOT . '/app/php/main/utils/profileUtil.php');
+    require_once (ROOT . '/app/php/main/utils/jsonUtil.php');
 	
-        if (!isset($_GET['vprofile'])) {
-            $_GET['vprofile'] = 0;
-        }
-        if (!isset($_GET['identifier'])) {
-            print('Fatal: identifier is null');
-            die();
-        }
-	$oResultObject = 
-                ProfileUtil::sendProfileGet( CryptoUtil::generateRequestId(),
-                   $_GET['vprofile'],
-                   $_GET['identifier'] );
-	
-        $aProfileInner = array (
-            'uri'           => 'identity://' . MY_DOMAIN . '/' . 
-                                $oResultObject['identity']['identifier'],
-            'displayName'   => $oResultObject['identity']['displayName'],
-            'avatars'       => $oResultObject['identity']['avatars']
-        );
-        $aProfile = array ( 'profile' => $aProfileInner );
+    if (!isset($_GET['vprofile'])) {
+        $_GET['vprofile'] = 0;
+    }
+    if (!isset($_GET['identifier'])) {
+        print('Fatal: identifier is null');
+        die();
+    }
+    
+    $oResultObject = 
+        ProfileUtil::sendProfileGet( 
+            CryptoUtil::generateRequestId(), 
+            $_GET['identifier'] );
+    $aProfileInner = array (
+        'uri'           => 'identity://' . DOMAIN . '/' . 
+                            $oResultObject['identity']['identifier'],
+        'displayName'   => $oResultObject['identity']['displayName'],
+        'avatars'       => $oResultObject['identity']['avatars']
+    );
+    $aProfile = array ( 'profile' => $aProfileInner );
         
-	if ( isset($_GET['vprofile']) && $_GET['vprofile'] ) {
-            print(JsonUtil::arrayToJson($aProfile)); die();
-	}
-        $aProfileHolder = array();
-	
-	if ( ( $oResultObject != null ) ) {
-		if ( isset($oResultObject['request']['error']) ) {
-			array_push($aProfileHolder, $oResultObject['error']);
-		} else {
-			array_push($aProfileHolder, $aProfile['profile']);
-		}
-	}
+    if ( isset($_GET['vprofile']) && $_GET['vprofile'] ) {
+        print('{'. JsonUtil::arrayToJson($aProfile) .'}'); die();
+    }
+    $aProfileHolder = array();
+    
+    if ( ( $oResultObject != null ) ) {
+        if ( isset($oResultObject['request']['error']) ) {
+            array_push($aProfileHolder, $oResultObject['error']);
+        } else {
+            array_push($aProfileHolder, $aProfile['profile']);
+        }
+    }
 	
 ?>
 
@@ -77,17 +77,14 @@ either expressed or implied, of the FreeBSD Project.
 <title>Example Identity Provider - Public Profile</title>
 </head>
 <body>
-	<div id="profile">
-		<div id="avatar">
-			<img src="<?php echo $aProfile['0']['avatars']['0']['url']; ?>">
-		</div>
-		<div id="text">
-			<p id="identifier">Identity URI = <?php echo $aProfile['0']['uri']; ?></p>
-			<br/>
-			<p id="displayName">Display name = <?php echo $aProfile['0']['displayName']; ?></p>
-			<br/>
-		</div>
-	</div>
-	
+    <div id="profile">
+        <div id="avatar">
+            <img src="<?php echo $aProfile['profile']['avatars']['0']['url']; ?>"> <br/>
+        </div>
+        <div id="text">
+            <p id="identifier">Identity URI = <?php echo $aProfile['profile']['uri']; ?></p> <br/>
+            <p id="displayName">Display name = <?php echo $aProfile['profile']['displayName']; ?></p> <br/>
+        </div>
+    </div>
 </body>
 </html>
