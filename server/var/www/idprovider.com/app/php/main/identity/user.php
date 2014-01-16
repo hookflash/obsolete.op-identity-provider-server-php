@@ -331,7 +331,6 @@ class User {
 
         // Send hookflash-login-confirm request to the IdentityService server
         $aRequestData['identity']['secretSalt'] = $aIdentity['secret_salt'];
-        $aRequestData['identity']['secretEncrypted'] = $aIdentity['secret_encrypted'];
         $aLoginConfirmResult = LoginUtil::sendHostedLoginConfirm(
                 CryptoUtil::generateRequestId(), 
                 $aRequestData, 

@@ -81,7 +81,6 @@ CREATE TABLE `federated` (
   `display_name` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `profile_url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `vprofile_url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
-  `secret_encrypted` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `secret_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `server_password_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `lockbox_half_key_encrypted` varchar(100) COLLATE utf8_bin DEFAULT NULL,
