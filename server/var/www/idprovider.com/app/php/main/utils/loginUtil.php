@@ -68,7 +68,7 @@ class LoginUtil {
          */
         public static function calculateIdentityUri ( $aRequestData ) {
             $sUri = '';
-            $sMyDomain = str_replace('https://','',MY_DOMAIN);
+            $sMyDomain = str_replace('https://','',DOMAIN);
             switch ($aRequestData['identity']['type']) {
                 case 'federated':
                     $sUri = 'identity://' . $sMyDomain . $aRequestData['identity']['identifier'];
