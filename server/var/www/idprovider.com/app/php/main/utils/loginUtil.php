@@ -71,7 +71,7 @@ class LoginUtil {
             $sMyDomain = str_replace('https://','',DOMAIN);
             switch ($aRequestData['identity']['type']) {
                 case 'federated':
-                    $sUri = 'identity://' . $sMyDomain . $aRequestData['identity']['identifier'];
+                    $sUri = 'identity://' . $sMyDomain . '/' . $aRequestData['identity']['identifier'];
                     break;
                 case 'email':
                     // TODO
