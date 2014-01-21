@@ -110,6 +110,7 @@ if (isset($_SERVER['QUERY_STRING'])) {
               unset($_SESSION['identityServiceAuthenticationURL']);
           }
         ?>",
+        // TODO: Don't use `document.domain` here. Should use config variable instead.
         $identityProvider: document.domain,
         login: {
             click: "loginClick",
