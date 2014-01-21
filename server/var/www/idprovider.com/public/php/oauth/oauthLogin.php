@@ -48,10 +48,10 @@ if ( !isset( $_SESSION['created'] ) ) {
 }
 
 // Set required imports and define path constants
-if ( !defined(ROOT) ) {
+if ( !defined('ROOT') ) {
     define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
 }
-if ( !defined(APP) ) {
+if ( !defined('APP') ) {
     define('APP', ROOT . '/app/');
 }
 require (APP . 'php/main/identity/legacyOAuthLogin.php');

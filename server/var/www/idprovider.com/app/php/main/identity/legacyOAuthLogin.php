@@ -99,7 +99,7 @@ class LegacyOAuthLogin {
         $_SESSION['identity'] = $aRequestData['identity'];
 
         // Return the redirect URL 
-        $aAuthenticationResult['redirectURL'] = MY_DOMAIN . 'php/oauth/oauthLogin.php';
+        $aAuthenticationResult['redirectURL'] = 'http://' . DOMAIN . '/php/oauth/oauthLogin.php';
         APIEventLog('aAuthenticationResult[redirectURL]=' . $aAuthenticationResult['redirectURL']);
         return $aAuthenticationResult;
     }
