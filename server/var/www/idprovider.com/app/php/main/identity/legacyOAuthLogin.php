@@ -53,7 +53,7 @@ require (APP . 'php/main/identity/user.php');
 require_once (APP . 'php/main/utils/cryptoUtil.php');
 require_once (APP . 'php/config/config.php');
 require_once (APP . 'php/main/utils/requestUtil.php');
-require_once (APP . 'php/libs/mySQL/class-mysqldb.php');
+require_once (APP . 'php/libs/mySQL/class-mysqlidb.php');
 
 /**
  * Class LegacyOAuthLogin provides all the needed features 
