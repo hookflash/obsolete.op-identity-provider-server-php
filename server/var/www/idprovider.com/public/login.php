@@ -85,6 +85,9 @@ either expressed or implied, of the FreeBSD Project.
 <?php
 if (isset($_SERVER['QUERY_STRING'])) {
     parse_str($_SERVER['QUERY_STRING'], $query);
+    if (isset($query['view']) && $query['view'] === 'choose') {
+        $IGNORE_BASE = true;
+    }
     if (isset($query['skin'])) {
         echo '<link rel="stylesheet" href="style-' . $query['skin'] . '.css" />';
         if ($query['skin'] === 'xfinity') {
