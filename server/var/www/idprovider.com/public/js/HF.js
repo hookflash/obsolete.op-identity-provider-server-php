@@ -74,8 +74,8 @@ either expressed or implied, of the FreeBSD Project.
         var loginResponseJSON = null; 
         
         //  passwordServers
-        var passwordServer1 = 'https://hcs-javascript.hookflash.me/password1';
-        var passwordServer2 = 'https://hcs-javascript.hookflash.me/password2';
+        var passwordServer1 = 'http://hfservice-v1-adriano-maljkovic-i.hcs.io/password1';
+        var passwordServer2 = 'http://hfservice-v1-adriano-maljkovic-i.hcs.io/password2';
         
         /**
          * Gets the current version
