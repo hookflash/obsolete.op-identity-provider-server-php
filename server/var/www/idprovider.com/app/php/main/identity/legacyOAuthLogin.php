@@ -499,7 +499,7 @@ class LegacyOAuthLogin {
 
         // Set the initial value of the redirectURL
         $sRedirectURL = $_SESSION['callbackURL'];
-        if ( strpos( $sRedirectURL, '?' ) !== false ) {
+        if ( !strpos( $sRedirectURL, '?' ) ) {
             $sRedirectURL .= '?'; // add '?' if no parameters added to the url
         } else {
             $sRedirectURL .= '&'; // add '&' if the url already contains some parameters
