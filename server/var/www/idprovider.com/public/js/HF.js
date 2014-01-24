@@ -809,8 +809,11 @@ either expressed or implied, of the FreeBSD Project.
             // loginOAuthStartScenario callback.
             function validateOauthProviderAuthentication(response) {
                 try {
+                    log("DEBUG", "validateOauthProviderAuthentication - response", response);
                     var responseJSON = JSON.parse(response);
+                    log("DEBUG", "validateOauthProviderAuthentication - responseJSON", responseJSON);
                     var redirectURL = responseJSON.result.providerRedirectURL;
+                    log("DEBUG", "validateOauthProviderAuthentication - redirectURL", redirectURL);
                     if (redirectURL){
                         identity.redirectURL = redirectURL;
                         return true;
@@ -914,9 +917,12 @@ either expressed or implied, of the FreeBSD Project.
                 // remove domain
                 var params = url.split("?").pop();
                 params = params.split("&").pop();
+                log("finishOAuthScenario", "params 1", params);
                 // facebook fix (remove #...)
                 params = params.split("#")[0];
+                log("finishOAuthScenario", "params 2", params);
                 params = decodeURIComponent(params);
+                log("finishOAuthScenario", "params 3 - to be JSON parsed", params);
                 var paramsJSON = JSON.parse(params);
 
                 log("finishOAuthScenario", "paramsJSON", paramsJSON);
