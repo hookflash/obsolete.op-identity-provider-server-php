@@ -72,11 +72,11 @@ either expressed or implied, of the FreeBSD Project.
         var secretSetResults = 0;               //
         var secretGetResults = 0;               //
         var loginResponseJSON = null; 
-        
+
         //  passwordServers
-        var passwordServer1 = 'http://hfservice-v1-adriano-maljkovic-i.hcs.io/password1';
-        var passwordServer2 = 'http://hfservice-v1-adriano-maljkovic-i.hcs.io/password2';
-        
+        var passwordServer1 = null;
+        var passwordServer2 = null;
+
         /**
          * Gets the current version
          * 
@@ -90,6 +90,10 @@ either expressed or implied, of the FreeBSD Project.
             try {
                 initData = bundle;
                 $identityProviderDomain = initData.$identityProvider;
+
+                passwordServer1 = initData.passwordServer1;
+                passwordServer2 = initData.passwordServer2;
+
                 log("INFO", "init bundle", initData);
 
                 // Buffer logging calls until we have an `$appid` available.

@@ -92,6 +92,9 @@ define('UPLOAD_LOCATION', ROOT . '/public/php/service/avatars/');
 // Where to send JS logs
 define('HF_LOGGER_HOST', 'logger.hookflash.me');
 
+define('HF_PASSWORD1_BASEURI', '***************');
+define('HF_PASSWORD2_BASEURI', '***************');
+
 //^^ IMPORTANT ^^//
 
 
