@@ -921,11 +921,19 @@ either expressed or implied, of the FreeBSD Project.
                 // remove domain
                 var params = url.split("?").pop();
                 params = params.split("&").pop();
-                log("finishOAuthScenario", "params 1", params);
+//                log("finishOAuthScenario", "params 1", params);
                 // facebook fix (remove #...)
                 params = params.split("#")[0];
-                log("finishOAuthScenario", "params 2", params);
+//                log("finishOAuthScenario", "params 2", params);
                 params = decodeURIComponent(params);
+
+                // HACK fix for:
+                // `["finishOAuthScenario","params 3 - to be JSON parsed","{\"reason\":{\"error\":\"Sign+in+failed+due+to+missing+parameter+values\"}}{\"result\":{\"loginState\":\"OAuthAuthenticationSucceeded\",\"identity\":{\"type\":\"facebook\",\"identifier\":\"100084075\"},\"serverAuthenticationToken\":\"3994743e949e5b7f2fcd4c0782135192568e5d6\"}}"]`
+                var doubleJsonIndex = params.indexOf("}{");
+                if (doubleJsonIndex > 0) {
+                    params = params.substring(doubleJsonIndex + 1);
+                }
+
                 log("finishOAuthScenario", "params 3 - to be JSON parsed", params);
                 var paramsJSON = JSON.parse(params);
 
