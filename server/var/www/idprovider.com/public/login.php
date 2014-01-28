@@ -1,33 +1,6 @@
 <?php
 
-
-// Set time
-date_default_timezone_set('UTC');
-
-// Set session_id
-if ( session_id() === '' ) {
-    session_start();
-}
-// Make sure session expires in 30 minutes
-if ( !isset( $_SESSION['created'] ) ) {
-    $_SESSION['created'] = time();
-} else if ( time() - $_SESSION['created'] > 1800 ) {
-    session_regenerate_id(true);
-    $_SESSION['created'] = time();
-}
-
-// Set required imports
-if ( !defined('ROOT') ) {
-    define('ROOT', dirname(dirname(__FILE__)));
-}
-if ( !defined('APP') ) {
-    define('APP', ROOT . '/app/');
-}
-
-require (APP . 'php/config/config.php');
-
-
-?><!-- 
+/*
 
 Copyright (c) 2012, SMB Phone Inc.
 All rights reserved.
@@ -56,140 +29,53 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
- -->
+*/
 
-<!--
-  Example Identity Provider Login page.
--->
+// Set time
+date_default_timezone_set('UTC');
 
-<html>
-<head>
-<title>Example Identity Provider - Login/Sign up</title>
-
-<script type="text/javascript" src="//logger.hookflash.me/tools/logger/logger.js"></script>
-
-<script type="text/javascript" src="js/lib/cryptojs/rollups/sha1.js"></script>
-<script type="text/javascript" src="js/lib/cryptojs/rollups/sha256.js"></script>
-<script type="text/javascript" src="js/lib/cryptojs/rollups/hmac-sha1.js"></script>
-<script type="text/javascript" src="js/lib/cryptojs/rollups/aes.js"></script>
-<script type="text/javascript" src="js/lib/jquery/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="js/lib/ajaxfileupload.js"></script>
-<script type="text/javascript" src="js/lib/base64.js"></script>
-<!--
-<script type="text/javascript" src="js/lib/cifre/aes.js"></script>
-<script type="text/javascript" src="js/lib/cifre/utils.js"></script>
--->
-<script type="text/javascript" src="js/HF.js"></script>
-
-<link rel="stylesheet" href="style.css"/>
-<?php
-if (isset($_SERVER['QUERY_STRING'])) {
-    parse_str($_SERVER['QUERY_STRING'], $query);
-    if (isset($query['view']) && $query['view'] === 'choose') {
-        $IGNORE_BASE = true;
-    }
-    if (isset($query['skin'])) {
-        echo '<link rel="stylesheet" href="style-' . $query['skin'] . '.css" />';
-        if ($query['skin'] === 'xfinity') {
-            $IGNORE_BASE = true;
-        }
-    }
+// Set session_id
+if ( session_id() === '' ) {
+    session_start();
 }
-?>
+// Make sure session expires in 30 minutes
+if ( !isset( $_SESSION['created'] ) ) {
+    $_SESSION['created'] = time();
+} else if ( time() - $_SESSION['created'] > 1800 ) {
+    session_regenerate_id(true);
+    $_SESSION['created'] = time();
+}
 
-<script type="text/javascript">
+// Set required imports
+if ( !defined('ROOT') ) {
+    define('ROOT', dirname(dirname(__FILE__)));
+}
+if ( !defined('APP') ) {
+    define('APP', ROOT . '/app/');
+}
 
-    window.__LOGGER.setUrl("//<?php echo constant('HF_LOGGER_HOST'); ?>/tools/logger/record");
-    window.__LOGGER.setChannel("identity-provider-js-all");
+require (APP . 'php/config/config.php');
 
-    var HF = new HF_LoginAPI();
-    var initBundle = {
-        identityServiceAuthenticationURL: "<?php
-          if (isset($_SESSION['identityServiceAuthenticationURL'])) {
-              echo $_SESSION['identityServiceAuthenticationURL'];
-              unset($_SESSION['identityServiceAuthenticationURL']);
-          }
-        ?>",
-        // TODO: Don't use `document.domain` here. Should use config variable instead.
-        $identityProvider: document.domain,
-        passwordServer1: "<?php echo constant('HF_PASSWORD1_BASEURI'); ?>",
-        passwordServer2: "<?php echo constant('HF_PASSWORD2_BASEURI'); ?>",
-        login: {
-            click: "loginClick",
-            id: "loginId",
-            password: "loginPassword"
-        },
-        signup: {   
-            click: "signupClick",
-            id: "signUpId",
-            password: "signUpPassword",
-            displayName: "signUpDisplayName"
-        },
-        pinClick: "pinClick",
-        ignoreBase: <?php if (isset($IGNORE_BASE) && $IGNORE_BASE) echo 'true'; else echo 'false'; ?>
-    };
 
-    $(document).ready(function() {
-        if (/dev=true/.test(window.location.search)) {
-            $("HEAD").append('<link rel="stylesheet" href="style-dev.css"/>');
-            $("BODY").prepend('<div class="op-view-label">' + window.location.pathname + '</div>');
-        }
-    });
+// We collect some configuration values and populate the template before
+// we return it to the browser.
 
-</script>
-</head>
+$config['HF_LOGGER_HOST'] = constant('HF_LOGGER_HOST');
+$config['SESSION_identityServiceAuthenticationURL'] = '';
+if (isset($_SESSION['identityServiceAuthenticationURL'])) {
+    $config['SESSION_identityServiceAuthenticationURL'] = $_SESSION['identityServiceAuthenticationURL'];
+    unset($_SESSION['identityServiceAuthenticationURL']);
+}
+$config['HF_PASSWORD1_BASEURI'] = constant('HF_PASSWORD1_BASEURI');
+$config['HF_PASSWORD2_BASEURI'] = constant('HF_PASSWORD2_BASEURI');
+$config['IGNORE_BASE'] = (isset($IGNORE_BASE) && $IGNORE_BASE) ? 'true' : 'false';
+$config['ASSET_PATH'] = '/client-www/';
 
-<body onload='HF.init(initBundle);'>
-    <div class="op-centered">
-        <div id="op-logo"></div>
-        <div id="op-spinner"></div>
-        <div id="op-federated-login-view" class="op-hidden">
-            <div class="op-view">
-                <h1>Login</h1>
-                <div class="op-error op-hidden"></div>
-                <div class="op-fieldset"><input type="text" id="loginId" placeholder="username" autocorrect="off" autocapitalize="off"/></div>
-                <div class="op-fieldset"><input type="password" id="loginPassword" placeholder="password" autocorrect="off" autocapitalize="off"/></div>
-                <div class="op-fieldset">
-                    <button id="op-federated-login-button">Login</button>
-                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('federated-signup');">Sign Up</a></div>
-                </div>
-            </div>
-        </div>
+$template = file_get_contents(__DIR__ . '/../../../../../dependencies/op-identity-provider-client/www/login.tpl');
 
-        <div id="op-federated-signup-view" class="op-hidden">
-            <div class="op-view">
-                <h1>Create Account</h1>
+foreach ( $config as $name => $value ) {
+    $template = str_replace('{{ config.' . $name . ' }}', $value, $template);
+}
 
-                <div class="op-headerlink"><a class="op-headerlink" href="#" onclick="HF.showView('federated-login');">Back</a></div>
+echo $template;
 
-                <div class="op-error op-hidden"></div>
-<!--                
-                <div class="op-fieldset"><label>Avatar</label><input type="file" name="file" id="file" /><button id="op-federated-signup-upload-button">Upload</button></div>
--->
-                <div class="op-fieldset"><label>Display Name</label><input type="text" id="signUpDisplayName" autocorrect="off" autocapitalize="off"/></div>
-                <div class="op-fieldset"><label>Username</label><input type="text" id="signUpId" autocorrect="off" autocapitalize="off"/></div>
-                <div class="op-fieldset"><label>Password</label><input type="password" id="signUpPassword" autocorrect="off" autocapitalize="off"/></div>
-                <div class="op-fieldset">
-                    <button id="op-federated-signup-button">Sign up</button>
-                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('federated-login');">Log In</a></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="op-social-facebook-view" class="op-hidden">
-            <div class="op-view">
-                <button id="op-social-facebook-button"><img src="images/iPhone_signin_facebook@2x.png"></button>
-            </div>
-        </div>
-
-        <div id="op-pinvalidation-view" class="op-hidden">
-            <div class="op-view">
-                <h1>Enter PIN</h1>
-                <input type="text" size="6" id="pin" autocorrect="off" autocapitalize="off"/>
-                <button onclick="op-pinvalidation-button" >Validate PIN</button>
-                <div id="pinexpired">&nbps;</div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
