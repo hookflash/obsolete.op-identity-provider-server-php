@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  
  Copyright (c) 2012, SMB Phone Inc.
