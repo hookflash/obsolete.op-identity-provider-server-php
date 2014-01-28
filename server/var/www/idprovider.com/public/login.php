@@ -68,7 +68,21 @@ if (isset($_SESSION['identityServiceAuthenticationURL'])) {
 }
 $config['HF_PASSWORD1_BASEURI'] = constant('HF_PASSWORD1_BASEURI');
 $config['HF_PASSWORD2_BASEURI'] = constant('HF_PASSWORD2_BASEURI');
+
+if (isset($_SERVER['QUERY_STRING'])) {
+    parse_str($_SERVER['QUERY_STRING'], $query);
+    if (isset($query['view']) && $query['view'] === 'choose') {
+        $IGNORE_BASE = true;
+    }
+    if (isset($query['skin'])) {
+        echo '<link rel="stylesheet" href="style-' . $query['skin'] . '.css" />';
+        if ($query['skin'] === 'xfinity') {
+            $IGNORE_BASE = true;
+        }
+    }
+}
 $config['IGNORE_BASE'] = (isset($IGNORE_BASE) && $IGNORE_BASE) ? 'true' : 'false';
+
 $config['ASSET_PATH'] = '/client-www/';
 
 $template = file_get_contents(__DIR__ . '/../../../../../dependencies/op-identity-provider-client/www/login.tpl');
