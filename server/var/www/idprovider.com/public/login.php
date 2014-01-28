@@ -112,6 +112,8 @@ if (isset($_SERVER['QUERY_STRING'])) {
         ?>",
         // TODO: Don't use `document.domain` here. Should use config variable instead.
         $identityProvider: document.domain,
+        passwordServer1: "<?php echo constant('HF_PASSWORD1_BASEURI'); ?>",
+        passwordServer2: "<?php echo constant('HF_PASSWORD2_BASEURI'); ?>",
         login: {
             click: "loginClick",
             id: "loginId",
