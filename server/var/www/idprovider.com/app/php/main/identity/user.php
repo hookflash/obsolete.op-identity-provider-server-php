@@ -934,9 +934,9 @@ class User {
             $this->DB->update( 
                     'legacy_oauth',
                     array (
-                        'token' 	=> $sToken,
+                        'token'     => $sToken,
                         'secret'    => $sSecret,
-                        'updated'   => sUpdated
+                        'updated'   => $sUpdated
                         ),
                     'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"'
                     );
