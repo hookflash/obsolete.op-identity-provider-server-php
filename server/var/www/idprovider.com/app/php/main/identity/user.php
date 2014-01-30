@@ -943,7 +943,7 @@ class User {
             $this->DB->update(
                     'user',
                     array (
-                        'updated'   => sUpdated
+                        'updated'   => $sUpdated
                         ),
                     'where user_id="' . $aOAuthIdentity['user_id'] . '"'
                     );
