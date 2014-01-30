@@ -14,3 +14,10 @@ an email login provider, a phone number login provider, or a simple username/pas
 This is meant to serve those who want to integrate their applications with Hookflash Cloud Services
 by providing a fully integrated examples using simple, well known and user-oriented
 easy-to-read programming techniques.
+
+
+Setup
+-----
+
+Clone https://github.com/openpeer/op-identity-provider-client to `dependencies/op-identity-provider-client`.
+

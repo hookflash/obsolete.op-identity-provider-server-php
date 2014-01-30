@@ -1,4 +1,5 @@
 nbproject/
 .rt/
 node_modules/
+/dependencies/
 .program.json
