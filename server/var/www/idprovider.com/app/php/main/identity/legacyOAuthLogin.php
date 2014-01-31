@@ -114,42 +114,72 @@ class LegacyOAuthLogin {
         $aRequestData = RequestUtil::takeLoginRequestData($this->aRequest);
 
         // Try logging the user in using the given identity
-        $aUser = $this->oUser->signInUsingLegacyOAuth($aRequestData['identity']['type'], $aRequestData['identity']['identifier']);
+        $aUser = $this->oUser->signInUsingLegacyOAuth(
+            $aRequestData['identity']['type'],
+            $aRequestData['identity']['identifier']
+        );
 
         // Return 'No such identity' error code
         if ($aUser['user_id'] == '') {
-                throw new RestServerException('003', array(
-                                                                                         'type' => $aRequestData['identity']['type'],
-                                                                                         'identifier' => $aRequestData['identity']['identifier']
-                                                                                         ));
+            throw new RestServerException('003', array(
+                'type' => $aRequestData['identity']['type'],
+                'identifier' => $aRequestData['identity']['identifier'])
+            );
         }
 
         // Validate the client that is performing the login request
         require_once(APP . 'php/main/utils/cryptoUtil.php');
-        $bVerificationResult = CryptoUtil::verifyServerAuthenticationToken( $aRequestData['proof']['clientAuthenticationToken'],
-                                                                                                                                                $aRequestData['proof']['serverAuthenticationToken'],
-                                                                                                                                                $aRequestData['identity']['type'],
-                                                                                                                                                $aRequestData['identity']['identifier']
-                                                                                                                                           );
+        $bVerificationResult = CryptoUtil::verifyServerAuthenticationToken( 
+            $aRequestData['proof']['clientAuthenticationToken'],
+            $aRequestData['proof']['serverAuthenticationToken'],
+            $aRequestData['identity']['type'],
+            $aRequestData['identity']['identifier']
+        );
         if ( !$bVerificationResult ) {
-                throw new RestServerException('007', array(
-                                                                                         'parameter' => 'serverAuthenticationToken',
-                                                                                         'parameterValue' => $aRequestData['serverAuthenticationToken']
-                                                                                         ));
+            throw new RestServerException('007', array(
+                'parameter' => 'serverAuthenticationToken',
+                'parameterValue' => $aRequestData['serverAuthenticationToken'])
+            );
         }
 
         // Generate and store accessToken and accessSecret for logged in identity
-        $aIdentityAccessResult = CryptoUtil::generateIdentityAccess($aRequestData['identity']['type'], $aRequestData['identity']['identifier']);
+        $aIdentityAccessResult = CryptoUtil::generateIdentityAccess(
+            $aRequestData['identity']['type'],
+            $aRequestData['identity']['identifier']
+        );
         $aIdentityAccessResult['updated'] = $aUser['updated'];
 
         // Keep info about logged in identity in session
         $_SESSION['logged-in-identity'] = $aRequestData['identity'];
+        
+        // Inform the identity service about the identity registration/
+        $aHostingData = LoginUtil::generateHostingData('hosted-identity-update');
+        $aRequestData['identity']['uri'] = LoginUtil::calculateIdentityUri($aRequestData);
+        $aRequestData['identity']['profile'] = $aUser['profile_url'];
+        $aRequestData['identity']['displayName'] = $aUser['full_name'];
+        
+        // Send hookflash-login-confirm request to the IdentityService server
+        $aIdentityUpdateResult = LoginUtil::sendHostedIdentityUpdate( 
+            CryptoUtil::generateRequestId(), 
+            $aRequestData, 
+            $aHostingData, 
+            $aUser 
+        );
+                    
+        // Return 'Login failed' error
+        if ( $aIdentityUpdateResult == null || key_exists( 'error', $aIdentityUpdateResult ) ) {
+            throw new RestServerException('005', 
+                array(
+                    'message' => $aIdentityUpdateResult['error']['reason']
+                )
+            );
+        }
 
         // Since everything went well, return no error code and fill loginResult with the rest of the data
         return array(
-        'identity'	=> $aIdentityAccessResult,
-        'lockboxReset'	=> 'false',
-        'lockboxKey'	=> !empty($aUser['lockbox_half_key_encrypted']) ? $aUser['lockbox_half_key_encrypted'] : ''
+            'identity'      => $aIdentityAccessResult,
+            'lockboxReset'  => 'false',
+            'lockboxKey'    => !empty($aUser['lockbox_half_key_encrypted']) ? $aUser['lockbox_half_key_encrypted'] : ''
         );
     }
 	
