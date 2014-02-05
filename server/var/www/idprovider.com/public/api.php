@@ -752,7 +752,7 @@ function devtoolsDatabaseCleanProvider ()
         RequestUtil::validateDevtoolsDatabaseCleanProviderRequest( $oRequest );
         
         // Take data from request
-	$aRequestData = RequestUtil::takeDevtoolsDatabaseCleanProviderRequestData( $oRequest );
+	    $aRequestData = RequestUtil::takeDevtoolsDatabaseCleanProviderRequestData( $oRequest );
         
         // Perform db clean
         require_once(APP . 'php/main/identity/user.php');

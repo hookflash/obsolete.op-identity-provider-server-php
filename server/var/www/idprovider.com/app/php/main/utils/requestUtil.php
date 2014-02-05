@@ -1117,13 +1117,8 @@ class RequestUtil {
          */
         public static function takeDevtoolsDatabaseCleanProviderRequestData ( $oRequest ) {
             $req = $oRequest->aPars['request'];
-            $aAppids = array();
-            $nAppid = 0;
-            while ( isset($req['appids'][$nAppid]) ) {
-                $sAppid = DatabaseUtil::protectFromSqlInjection( $req['appids'][$nAppid] );
-                array_push($aAppids, $sAppid);
-                $nAppid++;
-            }
+            $aAppids = explode(",",$req['appids']);
+            
             return array(
                 'purpose'                   => DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
                 'nonce'                     => DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),

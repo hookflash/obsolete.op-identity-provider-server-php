@@ -550,9 +550,9 @@ class User {
         $DB->update(
                 $sDBTable,
                 array (
-                    'relogin_key'		=> $sReloginKey,
+                    'relogin_key'	=> $sReloginKey,
                     'relogin_expires'	=> $sReloginKeyExires,
-                    'updated'			=> $sNow
+                    'updated'		=> $sNow
                     ),
                 'where identifier="' . $aIdentity['identifier'] . '"'
                 );
@@ -1051,10 +1051,10 @@ class User {
                         )
                     ); 
         }
-
+        
         // Perform clean
         foreach ( $aRequestData['appids'] as $v ) {
-            $this->DB->delete('user', 'where appid like "' . $v . '-%"');
+            $this->DB->delete('user', 'where appid="' . $v . '"');
         }
     }
 	

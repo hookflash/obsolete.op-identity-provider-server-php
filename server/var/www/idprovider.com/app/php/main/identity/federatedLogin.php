@@ -79,20 +79,23 @@ class FederatedLogin {
         // Take data from the request
         $aRequestData = RequestUtil::takeLoginRequestData($this->aRequest);
         if ( key_exists( 'reloginKeyServerPart', $aRequestData['identity'] ) ) {
-                $aRequestData = $this->oUser->fetchIdentityBasedOnReloginKey($aRequestData);
+            $aRequestData = $this->oUser->fetchIdentityBasedOnReloginKey($aRequestData);
         }
 
         // Try logging the user in using the given identity
-        $aUser = $this->oUser->signInUsingFederated($aRequestData['identity']['identifier'],
-                $aRequestData['appid']);
+        $aUser = $this->oUser->signInUsingFederated(
+            $aRequestData['identity']['identifier'],
+            $aRequestData['appid']
+        );
 
         // Return 'No such identity' error code
         if ($aUser['user_id'] == '') {
             throw new RestServerException('003', 
-                    array(
-                        'type' => $aRequestData['identity']['type'],
-                        'identifier' => $aRequestData['identity']['identifier']
-                        ));
+                array(
+                    'type' => $aRequestData['identity']['type'],
+                    'identifier' => $aRequestData['identity']['identifier']
+                )
+            );
         }
 
         // Validate the client that is performing the login request
