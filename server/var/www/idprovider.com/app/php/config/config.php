@@ -37,6 +37,8 @@
  *
  */
 
+header('Access-Control-Allow-Origin: *');
+
 define( 'PROVIDER_HOST', $_SERVER['HTTP_HOST'] );
 define( 'PROVIDER_CONFIG_FILE', dirname(__FILE__) . '/config_' . PROVIDER_HOST . '.php' );
 
