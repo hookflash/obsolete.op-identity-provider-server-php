@@ -74,6 +74,9 @@ if (isset($_SERVER['QUERY_STRING'])) {
     if (isset($query['view']) && $query['view'] === 'choose') {
         $IGNORE_BASE = true;
     }
+    if (isset($query['federated']) && $query['federated'] === 'false') {
+        $HIDE_FEDERATED = true;
+    }
     if (isset($query['skin'])) {
         echo '<link rel="stylesheet" href="style-' . $query['skin'] . '.css" />';
         if ($query['skin'] === 'xfinity') {
@@ -82,6 +85,7 @@ if (isset($_SERVER['QUERY_STRING'])) {
     }
 }
 $config['IGNORE_BASE'] = (isset($IGNORE_BASE) && $IGNORE_BASE) ? 'true' : 'false';
+$config['HIDE_FEDERATED'] = (isset($HIDE_FEDERATED) && $HIDE_FEDERATED) ? 'true' : 'false';
 
 $config['ASSET_PATH'] = '/client-www/';
 
