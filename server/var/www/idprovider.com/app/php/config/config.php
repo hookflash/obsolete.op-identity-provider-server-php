@@ -46,7 +46,6 @@ if ( !defined('APP') ) {
         define('APP',  ROOT . '/app/');
 }
 
-
 require (dirname(__FILE__) . '/config-custom.php');
 
 
@@ -62,6 +61,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         header("HTTP/1.0 204 No Content");
         exit(0);
 }
+
+
+// Debug logging system
+
+require (dirname(dirname(dirname(dirname(ROOT)))) . '/vendor/autoload.php');
+
+use Monolog\Logger;
+use Monolog\Formatter\JsonFormatter;
+use Monolog\Handler\StreamHandler;
+
+$LOGGER = new Logger('name');
+$stream = new StreamHandler(dirname(dirname(dirname(dirname(ROOT)))) . '/debug.log', Logger::DEBUG);
+//$stream->setFormatter(new JsonFormatter());
+$LOGGER->pushHandler($stream);
+
+function LOG_EVENT($message) {
+    global $LOGGER;
+    $LOGGER->debug($message);
+}
+
+ob_start();
+
+LOG_EVENT('Request: ' . $_SERVER['REQUEST_URI']);
+LOG_EVENT('POST DATA: ' . var_export($_POST, true));
+
+
 
 
 function siteURL($domainName="") {

@@ -105,6 +105,9 @@ $oResponse = new Response($oRequest);
 // Start executing relevant function based on method given in the request attributes
 $server->run();
 
+LOG_EVENT('RESPONSE: ' . var_export(ob_get_contents(), true));
+
+
 //------------------------------------------------------------------------------------------------------------------//
 
 // TODO delete

@@ -6,5 +6,7 @@ install:
 		rm -Rf dependencies/op-identity-provider-client; \
 		ln -s ../../github.com+openpeer+op-identity-provider-client dependencies/op-identity-provider-client; \
 	fi
+	touch debug.log; chmod 777 debug.log
+	php composer.phar install
 
 .PHONY: install
