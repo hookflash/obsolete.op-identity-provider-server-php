@@ -84,8 +84,8 @@ function LOG_EVENT($message) {
 ob_start();
 
 LOG_EVENT('Request: ' . $_SERVER['REQUEST_URI']);
-LOG_EVENT('POST DATA: ' . var_export($_POST, true));
-
+LOG_EVENT('SESSION: ' . var_export($_SESSION, true));
+LOG_EVENT('POST DATA: ' . file_get_contents('php://input'));
 
 
 

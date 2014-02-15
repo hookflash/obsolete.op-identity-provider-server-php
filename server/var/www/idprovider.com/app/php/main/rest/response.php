@@ -350,7 +350,12 @@ $sEnveloplessResponse
 		}
 		else {
 			require_once ( APP . 'php/main/utils/jsonUtil.php' );
+
+//			LOG_EVENT('JSON converted: ' . var_export($aResponse, true));
+
 			$this->sResponse = JsonUtil::arrayToJson( $aResponse );
+
+//			LOG_EVENT('JSON to: ' . var_export($this->sResponse, true));
 		}
 	}
 

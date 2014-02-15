@@ -101,6 +101,9 @@ class LegacyOAuthLogin {
         // Return the redirect URL 
         $aAuthenticationResult['redirectURL'] = 'http://' . DOMAIN . '/php/oauth/oauthLogin.php';
         APIEventLog('aAuthenticationResult[redirectURL]=' . $aAuthenticationResult['redirectURL']);
+
+        LOG_EVENT('$aAuthenticationResult: ' . var_export($aAuthenticationResult, true));
+
         return $aAuthenticationResult;
     }
 	
@@ -363,6 +366,9 @@ class LegacyOAuthLogin {
                     'redirect_uri' => 'http://' . $_SERVER['HTTP_HOST'] . '/php/oauth/index.php'
                 )
                 );								  
+
+        LOG_EVENT('facebook redirect URL: ' . var_export($url, true));
+
         header('Location: ' . $url);
     }
 	

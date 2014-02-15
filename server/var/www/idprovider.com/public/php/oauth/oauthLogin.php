@@ -54,11 +54,13 @@ if ( !defined('ROOT') ) {
 if ( !defined('APP') ) {
     define('APP', ROOT . '/app/');
 }
+
 require (APP . 'php/main/identity/legacyOAuthLogin.php');
 
 // Start the login using LegacyOAuthLogin object
 $oLegacyOAuthLogin = new LegacyOAuthLogin($_SESSION['identity']['type'], null);
 $oLegacyOAuthLogin->startOAuthLogin();
 
+LOG_EVENT('RESPONSE: ' . var_export(ob_get_contents(), true));
 
 ?>
