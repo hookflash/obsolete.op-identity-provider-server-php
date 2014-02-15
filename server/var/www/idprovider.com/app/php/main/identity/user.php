@@ -35,7 +35,7 @@
 // Set time
 date_default_timezone_set('UTC');
 
-/*
+
 function OUR_hex2bin($h)
   {
   if (!is_string($h)) return null;
@@ -53,7 +53,6 @@ function OUR_bin2hex($str) {
     } while ($i < strlen($str));
     return $hex;
 }
-*/
 
 /**
  * Class User is responsible for storage and management of the users and their identities
@@ -891,6 +890,9 @@ class User {
         }
 
         $sServerTokenCredentials = $this->generateServerTokenCredentials($aIdentityFromDB);
+
+		// NOTE: This is the implementation compatible with [cifre](https://github.com/openpeer/cifre) used in
+		//       [opjs](https://github.com/openpeer/opjs) and [rolodex](https://github.com/openpeer/rolodex).
 
         require_once(APP . 'php/libs/seclib/Crypt/AES.php');
         $key = hash('sha256', DOMAIN_HOSTING_SECRET);
