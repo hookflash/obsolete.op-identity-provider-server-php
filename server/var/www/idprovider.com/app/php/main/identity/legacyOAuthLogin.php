@@ -168,7 +168,9 @@ class LegacyOAuthLogin {
             $aHostingData, 
             $aUser 
         );
-                    
+
+        LOG_EVENT('legacyOAuthLogin - login - $aIdentityUpdateResult: ' . var_export($aIdentityUpdateResult, true));
+
         // Return 'Login failed' error
         if ( $aIdentityUpdateResult == null || key_exists( 'error', $aIdentityUpdateResult ) ) {
             throw new RestServerException('005', 
