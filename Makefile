@@ -7,7 +7,7 @@ install:
 		ln -s ../../github.com+openpeer+op-identity-provider-client dependencies/op-identity-provider-client; \
 	fi
 	# NOTE: We keep everything composer installes in the repository now.
-	#touch debug.log; chmod 777 debug.log
+	touch debug.log; chmod 777 debug.log
 	#php composer.phar install
 
 .PHONY: install
