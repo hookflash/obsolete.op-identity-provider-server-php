@@ -30,7 +30,7 @@
  either expressed or implied, of the FreeBSD Project.
  
  */
-
+die('puko!');
 // Set required imports
 if ( !defined('ROOT') ) {
 	define('ROOT', dirname(dirname(dirname(__FILE__))));
