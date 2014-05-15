@@ -250,8 +250,8 @@ function addNewLine($sTestsOutcome) {
 <body>
     
     <div id="tests_outcome">
-	<?php echo $sResult; ?>
+    <?php echo $sResult; ?>
     </div>
-	
+    
 </body>
 </html>
