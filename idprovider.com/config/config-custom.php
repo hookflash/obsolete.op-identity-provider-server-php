@@ -29,10 +29,10 @@ define('TWITTER_APP_ID', '************');
 define('TWITTER_APP_SECRET', '**********************************');
 
 // Here you set your SMTP service parameters
-require(APP . 'php/config/special/smtp_config.php');
+require(ROOT . 'config/special/smtp_config.php');
 
 // Here you set your SMS service parameters
-require(APP . 'php/config/special/sms_config.php');
+require(ROOT . 'config/special/sms_config.php');
 
 // Here you set your specific cryptographically random values
 define('PROVIDER_MAGIC_VALUE', '******************************');
@@ -41,7 +41,7 @@ define('PROVIDER_MAGIC_VALUE', '******************************');
 define('DOMAIN_HOSTING_SECRET', '***************');
 
 // Here you set your users' avatars uploading location
-define('UPLOAD_LOCATION', ROOT . '/public/php/service/avatars/');
+define('UPLOAD_LOCATION', ROOT . 'public/php/service/avatars/');
 
 // Where to send JS logs
 define('HF_LOGGER_HOST', 'logger.hookflash.me');

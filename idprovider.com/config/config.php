@@ -40,13 +40,10 @@
 define('LOG', true);
 
 if ( !defined('ROOT') ) {
-        define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
-}
-if ( !defined('APP') ) {
-        define('APP',  ROOT . '/app/');
+        define('ROOT', dirname(dirname(__FILE__)) . "/");
 }
 
-require (dirname(__FILE__) . '/config-custom.php');
+require (ROOT . 'config/config-custom.php');
 
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -65,25 +62,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 // Debug logging system
 
-require (dirname(dirname(dirname(dirname(ROOT)))) . '/vendor/autoload.php');
+require ( (dirname(ROOT)) . '/vendor/autoload.php');
 
 use Monolog\Logger;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\StreamHandler;
 
 $LOGGER = new Logger('name');
-$stream = new StreamHandler(dirname(dirname(dirname(dirname(ROOT)))) . '/debug.log', Logger::DEBUG);
+$stream = new StreamHandler( (dirname(ROOT)) . '/debug.log', Logger::DEBUG);
 //$stream->setFormatter(new JsonFormatter());
 $LOGGER->pushHandler($stream);
 
+
 function LOG_EVENT($message) {
     global $LOGGER;
-    $LOGGER->debug($message);
+    // TODO fix LOGGER
+    //$LOGGER->debug($message);
 }
 
 ob_start();
 
-LOG_EVENT('Request: ' . $_SERVER['REQUEST_URI']);
+LOG_EVENT($LOGGER, 'Request: ' . $_SERVER['REQUEST_URI']);
 LOG_EVENT('SESSION: ' . var_export($_SESSION, true));
 LOG_EVENT('POST DATA: ' . file_get_contents('php://input'));
 
