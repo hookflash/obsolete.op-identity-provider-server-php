@@ -6,7 +6,7 @@
 	"private": true,
 	"config": {
 		"run": {
-			"packagePath": "server/var/www/idprovider.com/public"
+			"packagePath": "idprovider.com/public"
 		}
 	},
     "devMappings": {
