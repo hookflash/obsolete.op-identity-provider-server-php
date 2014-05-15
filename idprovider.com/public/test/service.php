@@ -30,13 +30,10 @@
  either expressed or implied, of the FreeBSD Project.
  
  */
-die('puko!');
+
 // Set required imports
 if ( !defined('ROOT') ) {
-	define('ROOT', dirname(dirname(dirname(__FILE__))));
-}
-if ( !defined('APP') ) {
-	define('APP', ROOT . '/app/');
+    define('ROOT', dirname(dirname(dirname(__FILE__))) . "/");
 }
 
 define(UNDERLINE_DIV, '<div id="info">--------------------------------------------------------<br/></div>');
@@ -54,23 +51,23 @@ function performTests() {
     // Configuration tests
     $sTestsOutcome = addInfo($sTestsOutcome, 
             'Checking: Configuration files existance...');
-    if (!file_exists(APP.'php/config/config.php')) {
+    if (!file_exists(ROOT.'config/config.php')) {
         $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 
-                'Missing configaration file:' . APP.'php/config/config.php');
+                'Missing configaration file:' . ROOT.'config/config.php');
         return $sTestsOutcome;
     }
     $sTestsOutcome = addSuccess($sTestsOutcome, 
-            'File found: '.APP.'php/config/config.php');
-    require(APP . 'php/config/config.php');
-    if (!file_exists(APP.'php/libs/mySQL/class-mysqlidb.php')) {
+            'File found: '.ROOT.'config/config.php');
+    require(ROOT.'config/config.php');
+    if (!file_exists(ROOT.'libs/mySQL/class-mysqlidb.php')) {
         $sTestsOutcome = addCriticalFailureEnd($sTestsOutcome, 
                 'Missing configaration file:' . 
-                APP.'php/libs/mySQL/class-mysqlidb.php');
+                ROOT.'libs/mySQL/class-mysqlidb.php');
         return $sTestsOutcome;
     }
     $sTestsOutcome = addSuccess($sTestsOutcome, 
-            'File found: '.APP.'php/libs/mySQL/class-mysqlidb.php');
-    require(APP . 'php/libs/mySQL/class-mysqlidb.php');
+            'File found: '.ROOT.'libs/mySQL/class-mysqlidb.php');
+    require(ROOT.'libs/mySQL/class-mysqlidb.php');
     //------------------------------------------------------------------------//
     
     // Driver support tests
@@ -253,8 +250,8 @@ function addNewLine($sTestsOutcome) {
 <body>
     
     <div id="tests_outcome">
-	<?php echo $sResult; ?>
+    <?php echo $sResult; ?>
     </div>
-	
+    
 </body>
 </html>
