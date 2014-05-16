@@ -37,7 +37,7 @@ date_default_timezone_set('UTC');
     
 // Set required imports
 require (ROOT . 'utils/loginUtil.php');
-require (ROOT . 'identity/user.php');
+require (ROOT . 'login/user.php');
 require_once (ROOT . 'utils/cryptoUtil.php');
 require_once (ROOT . 'utils/requestUtil.php');
     

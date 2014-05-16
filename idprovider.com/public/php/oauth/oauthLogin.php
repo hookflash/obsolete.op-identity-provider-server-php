@@ -49,13 +49,13 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports and define path constants
 if ( !defined('ROOT') ) {
-    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) + "/");
+    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . "/");
 }
-
-require (ROOT . 'identity/legacyOAuthLogin.php');
+require (ROOT . 'login/legacyOAuthLogin.php');
 
 // Start the login using LegacyOAuthLogin object
 $oLegacyOAuthLogin = new LegacyOAuthLogin($_SESSION['identity']['type'], null);
+
 $oLegacyOAuthLogin->startOAuthLogin();
 
 LOG_EVENT('RESPONSE: ' . var_export(ob_get_contents(), true));
