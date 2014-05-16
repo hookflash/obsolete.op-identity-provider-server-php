@@ -36,7 +36,7 @@
  * This script provides the dispatching functionality for the rest server.
  * Also it implements all the API functions.
  */
-
+die('jebo mamu');
 // Set time
 date_default_timezone_set('UTC');
 

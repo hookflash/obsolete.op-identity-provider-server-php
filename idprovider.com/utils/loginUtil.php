@@ -36,7 +36,7 @@
 date_default_timezone_set('UTC');
 
 // Set required imports
-require_once(APP . 'php/main/utils/cryptoUtil.php');
+require_once(ROOT . 'utils/cryptoUtil.php');
 
 /**
  * Class LoginUtil is a utility class that is being used by other login classes to perform outgoing requests.
@@ -104,8 +104,8 @@ class LoginUtil {
      */
     public static function sendHostedIdentityUpdate ( $nRequestId, $aRequestData, $aHostingData, $aUser ) {
         // import necessary files
-        require_once(APP . 'php/main/utils/curlUtil.php');
-        require_once(APP . 'php/main/utils/jsonUtil.php');
+        require_once(ROOT . 'utils/curlUtil.php');
+        require_once(ROOT . 'utils/jsonUtil.php');
 
         // URL of identityService server
         $url = HF_SERVICE_DOMAIN . 'hostedidentity';
@@ -190,7 +190,7 @@ class LoginUtil {
      */
     public static function sendIdentityLookup ( $nRequestId, $sIdentityType, $sIdentifier ) {
         // import necessary files
-        require_once(APP . 'php/main/utils/curlUtil.php');
+        require_once(ROOT . 'utils/curlUtil.php');
 
         // URL of identityService server
         $url = HF_SERVICE_DOMAIN . 'identity';
@@ -232,8 +232,8 @@ class LoginUtil {
 	
     public static function sendProviderDelete () {
         // import necessary files
-        require_once(APP . 'php/main/utils/curlUtil.php');
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
+        require_once(ROOT . 'utils/curlUtil.php');
+        require_once(ROOT . 'utils/cryptoUtil.php');
 
         // URL of identityService server
         $url = HF_SERVICE_DOMAIN . 'registration';
