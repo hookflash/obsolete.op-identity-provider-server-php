@@ -131,7 +131,7 @@ class LegacyOAuthLogin {
         }
 
         // Validate the client that is performing the login request
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
+        require_once(ROOT . 'utils/cryptoUtil.php');
         $bVerificationResult = CryptoUtil::verifyServerAuthenticationToken( 
             $aRequestData['proof']['clientAuthenticationToken'],
             $aRequestData['proof']['serverAuthenticationToken'],
@@ -237,7 +237,7 @@ class LegacyOAuthLogin {
     -----------------------------*/
     private function loginUsingFacebook () {
         // Set required imports
-        require_once (APP . 'php/libs/oauth/facebook/facebook.php');
+        require_once (ROOT . 'libs/oauth/facebook/facebook.php');
 
         // Create the Facebook object
         $facebook = new Facebook(array(
@@ -264,7 +264,7 @@ class LegacyOAuthLogin {
 
     private function afterSuccessfullFacebookLogin () {
         // Set required imports
-        require_once (APP . 'php/libs/oauth/facebook/facebook.php');
+        require_once (ROOT . 'libs/oauth/facebook/facebook.php');
 
         // Create Facebook object
         $facebook = new Facebook(array(
@@ -366,7 +366,7 @@ class LegacyOAuthLogin {
                     $sAuthenticationNonce
                     );
             // Fill the result with valid values
-            require_once (APP . 'php/main/utils/loginUtil.php');
+            require_once (ROOT . 'utils/loginUtil.php');
             $aAuthenticationResult['loginState'] = LoginStates::OAUTH_AUTHENTICATION_SUCCEEDED;				
             $aIdentity = array (
                 'type'			=> $aSignInResult['providerType'],
