@@ -191,7 +191,7 @@ class CryptoUtil {
             
             //--------------//
             
-            require_once(APP . 'php/libs/seclib/Crypt/AES.php');
+            require_once(ROOT . 'libs/seclib/Crypt/AES.php');
 
             $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
             $key = hash('sha256', $sSecretKey);
@@ -234,7 +234,7 @@ class CryptoUtil {
             
             //--------------//
             
-            require_once(APP . 'php/libs/seclib/Crypt/AES.php');
+            require_once(ROOT . 'libs/seclib/Crypt/AES.php');
 
             $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
             $key = hash('sha256', $sSecretKey);

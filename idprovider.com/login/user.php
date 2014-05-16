@@ -75,7 +75,7 @@ class User {
      * Try getting the identitySecretSalt and the serverPasswordSalt of a user from the database
      * and return these two as a result 
      *
-     * @param string $sIdentityType could be: federated, email, phone, linkedin, facebook, twitter
+     * @param string $sIdentityType could be: federated, facebook
      * @param string $sIdentifier An identity to fetch the salts for
      * @return array Returns the salts of the given identity
      */
@@ -325,7 +325,7 @@ class User {
         $aIdentity['updated'] = $time;
 
         // Generate hosting data
-        require_once(APP . 'php/main/utils/loginUtil.php');
+        require_once(ROOT . 'utils/loginUtil.php');
         $aHostingData = LoginUtil::generateHostingData('hosted-identity-login-confirm');
 
         // Send hookflash-login-confirm request to the IdentityService server
@@ -361,7 +361,7 @@ class User {
     /**
      * Checks if there is a user in database that is suitable
      *
-     * @param string $sIdentityType Could be: federated, email, phone, linkedin, facebook, twitter
+     * @param string $sIdentityType Could be: federated, facebook
      * @param string $sIdentifier Identity to look for
      * @return boolean Returns true if there is such iser, otherwise returns false
      */
@@ -396,7 +396,7 @@ class User {
     /**
      * Create new identity and attach it to new user.
      *
-     * @param string $sIdentityType Could be: federated, email, phone, linkedin, facebook, twitter
+     * @param string $sIdentityType Could be: federated, facebook
      * @param string $sIdentifier Identity to create
      * @param string $sPasswordHash Hash of the password to store in the database
      * @param string $sIdentitySecretSalt Identity secret salt to store
@@ -611,7 +611,7 @@ class User {
     /**
      * Get the identity data for legacyOAuth identities out of the database
      *
-     * @param string $sIdentityType Could be: facebook, twitter or linkedin
+     * @param string $sIdentityType Could be: facebook
      * @param string $sIdentifier An identity to be logged in
      * @return array $aLegacyOAuthIdentity Returns an array of data taken from database that is attached to given identity
      */
@@ -750,7 +750,7 @@ class User {
         $aRequestData = RequestUtil::takeLockboxHalfKeyStoreRequestData($oRequest);
 
         // Challange the accessSecretProof
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
+        require_once(ROOT . 'utils/cryptoUtil.php');
         $bAccessSecretProofValidity = CryptoUtil::validateIdentityAccessSecretProof(
                 $aRequestData['clientNonce'],
                 $aRequestData['identity']['accessToken'],
@@ -806,7 +806,7 @@ class User {
         $aRequestData = RequestUtil::takeIdentityAccessValidateRequestData($oRequest);
 
         // Challange the accessSecretProof
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
+        require_once(ROOT . 'utils/cryptoUtil.php');
 
         $aIdentity = $this->parseIdentityUri($aRequestData['identity']['uri']);
 
@@ -849,7 +849,7 @@ class User {
         $aRequestData = RequestUtil::takeIdentityAccessRolodexCredentialsGetRequestData($oRequest);
 
         // Challange the accessSecretProof
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
+        require_once(ROOT . 'utils/cryptoUtil.php');
 
         $aIdentity = $this->parseIdentityUri($aRequestData['identity']['uri']);
 
@@ -894,7 +894,7 @@ class User {
 		// NOTE: This is the implementation compatible with [cifre](https://github.com/openpeer/cifre) used in
 		//       [opjs](https://github.com/openpeer/opjs) and [rolodex](https://github.com/openpeer/rolodex).
 
-        require_once(APP . 'php/libs/seclib/Crypt/AES.php');
+        require_once(ROOT . 'libs/seclib/Crypt/AES.php');
         $key = hash('sha256', DOMAIN_HOSTING_SECRET);
         $iv = hash('md5', CryptoUtil::generateIv());
         $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
@@ -908,7 +908,7 @@ class User {
     /**
      * Create a user and it's identity in the database if the user doesn't already exist.
      *
-     * @param string $sProviderType Could be 'linkedin', 'facebook' or 'twitter'
+     * @param string $sProviderType Could be 'facebook'
      * @param string $sIdentifier A unique identification of the identity on a provider level (at least - some providers create these ids globally unique)
      * @param string $sProviderUsername A ussername provider generates for a user
      * @param string $sProfileFullname First name + last name (some providers have a full name field already)
@@ -1037,7 +1037,7 @@ class User {
      */
     public function cleanDB ( $aRequestData ) {
         // Validate Hosting Secret Proof
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
+        require_once(ROOT . 'utils/cryptoUtil.php');
         $bHostingProofValid = CryptoUtil::validateHostingProof(
                 $aRequestData['purpose'],
                 $aRequestData['nonce'],
@@ -1080,26 +1080,14 @@ class User {
             'identifier'	=> ''
         );		
         $sUriWithoutIdentity = substr( $sUri, 9, strlen($sUri) );
-        if ( strpos( $sUriWithoutIdentity, 'email' ) === 0 ) {
-            $aIdentity['type'] = 'email';
-            $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 6, strlen($sUriWithoutIdentity) );
-        } else if ( strpos( $sUriWithoutIdentity, 'phone' ) === 0 ) {
-            $aIdentity['type'] = 'phone';
-            $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 6, strlen($sUriWithoutIdentity) );
-        } else if ( strpos( $sUriWithoutIdentity, '//' ) == 0 ) {
+        if ( strpos( $sUriWithoutIdentity, '//' ) == 0 ) {
             if ( strpos( $sUriWithoutIdentity, '//facebook.com/' ) === 0 ) {
                 $aIdentity['type'] = 'facebook';
                 $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 15, strlen($sUriWithoutIdentity) );
-            } else if ( strpos( $sUriWithoutIdentity, '//twitter.com/' ) === 0 ) {
-                $aIdentity['type'] = 'twitter';
-                $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 14, strlen($sUriWithoutIdentity) );
-            } else if ( strpos( $sUriWithoutIdentity, '//facebook.com/' ) === 0 ) {
+            }  else if ( strpos( $sUriWithoutIdentity, '//facebook.com/' ) === 0 ) {
                 $aIdentity['type'] = 'facebook';
                 $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 15, strlen($sUriWithoutIdentity) );
-            } else if ( strpos( $sUriWithoutIdentity, 'linkedin.com' ) ) {
-                $aIdentity['type'] = 'linkedin';
-                $aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(MY_DOMAIN)-6, strlen($sUriWithoutIdentity) );
-            } else {
+            }  else {
                 $aIdentity['type'] = 'federated';
                 $aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(MY_DOMAIN)-6, strlen($sUriWithoutIdentity) );
             }
@@ -1119,15 +1107,7 @@ class User {
             case 'federated':
                 $sDBTable = 'federated';
                 break;
-            case 'email':
-                $sDBTable = 'legacy_email';
-                break;
-            case 'phone':
-                $sDBTable = 'legacy_phone';
-                break;
-            case 'linkedin':
             case 'facebook':
-            case 'twitter':
                 $sDBTable = 'legacy_oauth';
                 break;
         }
@@ -1135,7 +1115,7 @@ class User {
     }
 
     private function updateIdentityService ( $aRequestData, $DB ) {
-        require_once(APP . 'php/main/utils/loginUtil.php');
+        require_once(ROOT . 'utils/loginUtil.php');
         $aHostingData = LoginUtil::generateHostingData('hosted-identity-update');
 
         $aIdentityFromDB = $DB->select_single_to_array(
@@ -1159,7 +1139,7 @@ class User {
             'identity' => $aIdentity
         );
 
-        require_once(APP . 'php/main/utils/cryptoUtil.php');
+        require_once(ROOT . 'utils/cryptoUtil.php');
         LoginUtil::sendHostedIdentityUpdate(
                 CryptoUtil::generateRequestId(), 
                 $aRequestToBeSent, 
@@ -1197,21 +1177,6 @@ class User {
             switch($aIdentity['provider_type']) {
                 case 'facebook':
                     $sServerToken .= '"token":"' . $aIdentity['token'] . '"';
-                    break;
-                case 'linkedin':
-                    $sServerToken .= '"consumer_key":"' . LINKEDIN_CONSUMER_KEY . '",';
-                    $sServerToken .= '"consumer_secret":"' . LINKEDIN_CONSUMER_SECRET . '",';
-                    $sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-                    $sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
-                    break;
-                case 'twitter':
-                    $sServerToken .= '"consumer_key":"' . TWITTER_APP_ID . '",';
-                    $sServerToken .= '"consumer_secret":"' . TWITTER_APP_SECRET . '",';
-                    $sServerToken .= '"token":"' . $aIdentity['token'] . '",';
-                    $sServerToken .= '"secret":"' . $aIdentity['secret'] . '"';
-                    break;
-                case 'github':
-                    // TODO implement
                     break;
             }
             $sServerToken .= '}';

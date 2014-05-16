@@ -32,8 +32,8 @@
  */
 
 // Set required imports
-require_once ( APP . 'php/main/rest/restServerException.php' );
-require_once ( APP . 'php/main/utils/databaseUtil.php' );
+require_once ( ROOT . 'rest/restServerException.php' );
+require_once ( ROOT . 'utils/databaseUtil.php' );
 
 
 /**
@@ -74,11 +74,7 @@ class RequestUtil {
 													 ));
 			}
 			if ( !( $req['identity']['type'] == 'federated' || 
-					$req['identity']['type'] == 'email' || 
-					$req['identity']['type'] == 'phone' || 
-					$req['identity']['type'] == 'facebook' || 
-					$req['identity']['type'] == 'linkedin' || 
-					$req['identity']['type'] == 'twitter' ) ) {
+					$req['identity']['type'] == 'facebook' ) ) {
 				throw new RestServerException('001', array(
 													 'parameter' => 'type',
 													 'parameterValue' => $req['identity']['type']
@@ -145,11 +141,7 @@ class RequestUtil {
 												 ));
 		}
 		if ( !( $req['identity']['type'] == 'federated' || 
-				$req['identity']['type'] == 'email' || 
-				$req['identity']['type'] == 'phone' || 
-				$req['identity']['type'] == 'facebook' || 
-				$req['identity']['type'] == 'linkedin' || 
-				$req['identity']['type'] == 'twitter' ) ) {
+				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 												 'parameter' => 'type',
 												 'parameterValue' => $req['identity']['type']
@@ -225,12 +217,8 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'federated' || 
-				$req['identity']['type'] == 'email' || 
-				$req['identity']['type'] == 'phone' || 
-				$req['identity']['type'] == 'facebook' || 
-				$req['identity']['type'] == 'linkedin' || 
-				$req['identity']['type'] == 'twitter' ) ) {
+		if ( !( $req['identity']['type'] == 'federated' ||
+				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type',
 											     'parameterValue' => $req['identity']['type']
@@ -273,9 +261,7 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'facebook' || 
-				$req['identity']['type'] == 'linkedin' || 
-				$req['identity']['type'] == 'twitter' ) ) {
+		if ( !( $req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type_oauth-only',
 											     'parameterValue' => $req['identity']['type']
@@ -323,9 +309,7 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'facebook' || 
-				$req['identity']['type'] == 'linkedin' || 
-				$req['identity']['type'] == 'twitter' ) ) {
+		if ( !( $req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type_oauth-only',
 											     'parameterValue' => $req['identity']['type']
@@ -520,12 +504,8 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'federated' || 
-				$req['identity']['type'] == 'email' || 
-				$req['identity']['type'] == 'phone' || 
-				$req['identity']['type'] == 'facebook' || 
-				$req['identity']['type'] == 'linkedin' || 
-				$req['identity']['type'] == 'twitter' ) ) {
+		if ( !( $req['identity']['type'] == 'federated' ||
+				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type',
 											     'parameterValue' => $req['identity']['type']
@@ -758,7 +738,7 @@ class RequestUtil {
 			'type'								=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
 			'identifier'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
 			);
-			if ( $req['identity']['type'] == 'federated' || $req['identity']['type'] == 'phone' || $req['identity']['type'] == 'email' ) {
+			if ( $req['identity']['type'] == 'federated') {
 				$aProof = array (		
 				'serverNonce'						=> DatabaseUtil::protectFromSqlInjection( $req['proof']['serverNonce'] ),
 				'serverLoginProof'					=> DatabaseUtil::protectFromSqlInjection( $req['proof']['serverLoginProof'] )
