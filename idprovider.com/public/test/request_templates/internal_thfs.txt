@@ -1,8 +1,0 @@
-{
-	"request": {
-		"$domain": "provider.com",
-		"$id": "abc",
-		"$handler": "identity-provider",
-		"$method": "internal_thfs"
-	}
-}
