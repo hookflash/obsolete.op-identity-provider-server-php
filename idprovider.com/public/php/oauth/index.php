@@ -34,7 +34,6 @@
 /**
  * TODO
  */
-
 // Set session_id
 if ( session_id() === '' ) {
 	session_start();
@@ -55,7 +54,7 @@ require (ROOT . 'login/legacyOAuthLogin.php');
 
 // Check if $_SESSION is well set 
 if ( !key_exists('identity', $_SESSION ) || !key_exists('type', $_SESSION['identity'] ) ) die('Identity type is missing.');
-if ( !in_array($_SESSION['identity']['type'], array('twitter', 'linkedin', 'facebook') ) ) die('Invalid OAuth provider.');
+if ( !in_array($_SESSION['identity']['type'], array('facebook') ) ) die('Invalid OAuth provider.');
 
 
 // Finish authentication with an OAuth provider

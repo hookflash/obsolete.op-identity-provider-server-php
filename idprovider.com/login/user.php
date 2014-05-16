@@ -926,7 +926,6 @@ class User {
                 '*', 
                 'where user_id="' . $aOAuthIdentity['user_id'] . '"'
                 );
-
         // Access existing user
         if ( $aUser && !empty( $aUser ) && $aOAuthIdentity && !empty( $aOAuthIdentity ) )
         {			
@@ -979,7 +978,6 @@ class User {
                         )
                     );
         }
-
         // Generate the return of a function
         return array(
             'created'               => $bNew,

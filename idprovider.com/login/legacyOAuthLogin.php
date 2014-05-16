@@ -265,7 +265,6 @@ class LegacyOAuthLogin {
     private function afterSuccessfullFacebookLogin () {
         // Set required imports
         require_once (ROOT . 'libs/oauth/facebook/facebook.php');
-
         // Create Facebook object
         $facebook = new Facebook(array(
             'appId'  => FACEBOOK_APP_ID,
@@ -286,7 +285,6 @@ class LegacyOAuthLogin {
                 exit();
             }
         }
-
         // Call identityServiceLoginFunction if there is an authenticated user, 
         // else redirect to login page
         if ($nUser) {						
@@ -326,16 +324,13 @@ class LegacyOAuthLogin {
         } else {
             $sRedirectURL .= '&'; // add '&' if the url already contains some parameters
         }
-
         // Verify the validity of given parameters
-        if ( $sProviderUserId == '' || $sProviderUsername == '' || $sProfileFullname == '' ) {
+        if ( $sProviderUserId == '' || $sProfileFullname == '' ) {
             $aAuthenticationResult['errorMessage'] = 'Sign in failed due to missing parameter values';
-
             $sRedirectURL .= urlencode('{"reason":{"error":"' . $aAuthenticationResult['errorMessage'] . '"}}');
             $_SESSION['identityServiceAuthenticationURL'] = $sRedirectURL;
             header ( 'Location: ' . $_SESSION['callbackURL'] );
         }
-
         // Get the parameters given as a successful login indication
         $aSignInResult = $this->oUser->signInAfterOAuthProviderLogin(
                 $_SESSION['identity']['type'],
@@ -347,11 +342,9 @@ class LegacyOAuthLogin {
                 $sToken,
                 $sSecret
                 );
-
         // If there is no identity returned by signInAfterOAuthProviderLogin()
         if ( !$aSignInResult || empty( $aSignInResult ) ) {
             $aAuthenticationResult['errorMessage'] = 'Sign in failed';
-
             $sRedirectURL .= urlencode('{"reason":{"error":"' . $aAuthenticationResult['errorMessage'] . '"}}');
         }
         // Since everything went well:
@@ -389,7 +382,6 @@ class LegacyOAuthLogin {
             $sResult = urlencode($sResult);
             $sRedirectURL .= $sResult;
         }
-
         // Do the redirect
         $_SESSION['identityServiceAuthenticationURL'] = $sRedirectURL;
         header ( 'Location: ' . $_SESSION['callbackURL'] );
