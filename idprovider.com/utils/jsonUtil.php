@@ -61,7 +61,7 @@ class JsonUtil {
 	 */
 	public static function jsonToArray( $sBody, $bIsRequest = true ) {
 		// Set required imports
-		require_once ( APP . 'php/main/utils/arrayUtil.php' );
+		require_once ( ROOT . 'utils/arrayUtil.php' );
 		
 		// Challange JSON
 		if ( !( JsonUtil::isJsonString($sBody) ) ) {
@@ -126,7 +126,7 @@ class JsonUtil {
 	 */
 	public static function generalJsonToArray ( $sBody ) {
 		// Set required imports
-		require_once ( APP . 'php/main/utils/arrayUtil.php' );
+		require_once ( ROOT . 'utils/arrayUtil.php' );
 		
 		// Challange JSON
 		if ( !( JsonUtil::isJsonString($sBody) ) ) {

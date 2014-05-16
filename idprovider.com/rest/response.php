@@ -349,7 +349,7 @@ $sEnveloplessResponse
 			$this->sResponse = '"error":' . $aResponse['error'];
 		}
 		else {
-			require_once ( APP . 'php/main/utils/jsonUtil.php' );
+			require_once ( ROOT . 'utils/jsonUtil.php' );
 
 //			LOG_EVENT('JSON converted: ' . var_export($aResponse, true));
 

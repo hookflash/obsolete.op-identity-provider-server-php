@@ -42,7 +42,6 @@ define('LOG', true);
 if ( !defined('ROOT') ) {
         define('ROOT', dirname(dirname(__FILE__)) . "/");
 }
-
 require (ROOT . 'config/config-custom.php');
 
 
@@ -62,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 // Debug logging system
 
-require ( (dirname(ROOT)) . '/vendor/autoload.php');
+require ( ROOT . 'vendor/autoload.php');
 
 use Monolog\Logger;
 use Monolog\Formatter\JsonFormatter;
@@ -114,4 +113,3 @@ function APIEventLog($sText, $iErrorCode='200', $sAPISessionID='') {
                 'session_dump'=>var_export($_SESSION, true),
         ));
 }
-

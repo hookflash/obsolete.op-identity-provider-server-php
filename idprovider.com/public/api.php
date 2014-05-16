@@ -36,7 +36,6 @@
  * This script provides the dispatching functionality for the rest server.
  * Also it implements all the API functions.
  */
-die('jebo mamu');
 // Set time
 date_default_timezone_set('UTC');
 
@@ -54,20 +53,15 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports
 if ( !defined('ROOT') ) {
-	define('ROOT', dirname(dirname(__FILE__)));
+	define('ROOT', dirname(dirname(__FILE__)) . "/");
 }
-if ( !defined('APP') ) {
-	define('APP', ROOT . '/app/');
-}
-
-require (APP . 'php/config/config.php');
-require (APP . 'php/libs/mySQL/class-mysqlidb.php');
-
-require (APP . 'php/main/rest/restServer.php');
-require (APP . 'php/main/rest/request.php');
-require (APP . 'php/main/rest/response.php');
-require (APP . 'php/main/utils/requestUtil.php');
-require_once ( APP . 'php/main/rest/restServerException.php' );
+require (ROOT . 'config/config.php');
+require (ROOT . 'libs/mySQL/class-mysqlidb.php');
+require (ROOT . 'rest/restServer.php');
+require (ROOT . 'rest/request.php');
+require (ROOT . 'rest/response.php');
+require (ROOT . 'utils/requestUtil.php');
+require_once ( ROOT . 'rest/restServerException.php' );
 
 // Create database object
 $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
@@ -115,7 +109,7 @@ function internal_tryHFService()
 {
 	global $oRequest;
 	global $oResponse;
-	require_once(APP . 'php/main/utils/loginUtil.php');
+	require_once(ROOT . 'utils/loginUtil.php');
 	$aResult = LoginUtil::sendProviderDelete();
 	$oResponse->addPar('result', $aResult);
 	$oResponse->run();
@@ -127,7 +121,7 @@ function internal_calculateServerLoginFinalProof()
 	global $oRequest;
 	global $oResponse;
 	
-	require_once(APP . 'php/main/utils/cryptoUtil.php');
+	require_once(ROOT . 'utils/cryptoUtil.php');
 	$sServerLoginInnerProof = CryptoUtil::generateServerLoginInnerProof ( $oRequest->aPars['request']['identity']['identifier'],
 																	 	  $oRequest->aPars['request']['identity']['passwordHash'],
 																	 	  $oRequest->aPars['request']['identity']['secretSalt'],
@@ -143,7 +137,7 @@ function internal_calculateServerLoginFinalProof()
 function internal_calculateIdentityAccessSecretProof () {
 	global $oRequest;
 	global $oResponse;
-	require_once(APP . 'php/main/utils/cryptoUtil.php');
+	require_once(ROOT . 'utils/cryptoUtil.php');
 	$sIdentityAccessSecretProof = CryptoUtil::generateAccessSecretProof ( $oRequest->aPars['request']['identity']['uri'],
 																		  $oRequest->aPars['request']['clientNonce'],
 																		  $oRequest->aPars['request']['identity']['accessSecretExpires'],
@@ -157,8 +151,8 @@ function internal_calculateIdentityAccessSecretProof () {
 // TODO delete
 function internal_parseRolodexCredentialsToken () {
     global $oRequest;
-    require_once(APP . 'php/main/utils/cryptoUtil.php');
-    include(APP . 'php/libs/seclib/Crypt/AES.php');
+    require_once(ROOT . 'utils/cryptoUtil.php');
+    include(ROOT . 'libs/seclib/Crypt/AES.php');
     $key = hash('sha256', "01234567890123456789012345678901");
     
     $sTokenEncrypted = $oRequest->aPars['request']['rolodexCredentialsTokenEncrypted'];
@@ -173,7 +167,7 @@ function internal_parseRolodexCredentialsToken () {
 
 // TODO delete
 function internal_encryptRolodexCredentialsToken () {
-    include(APP . 'php/libs/seclib/Crypt/AES.php');
+    include(ROOT . 'libs/seclib/Crypt/AES.php');
 
     $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
     $key = hash('sha256', "01234567890123456789012345678901");
@@ -274,7 +268,7 @@ function login()
 		$oResponse->run($exception);
 	}
 	
-	require_once (APP . 'php/main/utils/loginUtil.php');
+	require_once (ROOT . 'utils/loginUtil.php');
 	
 	// In case of a successful login
 	if ( key_exists( 'identity', $aLoginResult ) &&
@@ -317,7 +311,7 @@ function serverNonceGet()
 	global $oResponse;
 	
 	// Perform generation of the nonce
-	require_once(APP . 'php/main/utils/cryptoUtil.php');
+	require_once(ROOT . 'utils/cryptoUtil.php');
 	$sServerNonce = CryptoUtil::generateSelfValidatingNonce(10);
 	
 	// Fill the response with data and fire it
@@ -343,7 +337,7 @@ function identitySaltsGet()
 		$aRequestData = RequestUtil::takeIdentitySaltsGetRequestData( $oRequest );
 		
 		// Get the salts from the database
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$aSalts = $oUser->getIdentitySalts($aRequestData['identity']['type'], $aRequestData['identity']['identifier']);
 		
@@ -386,7 +380,7 @@ function identitySaltsSet()
 		$aRequestData = RequestUtil::takeIdentitySaltsSetRequestData( $oRequest );
 		
 		// Try setting the salts into the database (after token authentication succeeds)
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$aIdentitySaltsSettingResult = $oUser->setIdentitySalts($aRequestData);
 		
@@ -415,7 +409,7 @@ function oAuthProviderAuthentication()
 
 		// Create LegacyOAuthLogin object
 		$sIdentityType = $oRequest->aPars['request']['identity']['type'];
-		require_once(APP . 'php/main/identity/legacyOAuthLogin.php');
+		require_once(ROOT . 'identity/legacyOAuthLogin.php');
 		$oLegacyOAuthLogin = new LegacyOAuthLogin( $sIdentityType, $oRequest );
 		
 		// Try starting an OAuth authentication process
@@ -447,7 +441,7 @@ function pinValidation ()
 		$aRequestData = RequestUtil::takePinValidationRequestData( $oRequest );
 		
 		// Challange the given pin
-		require_once(APP . 'php/main/identity/pinValidation.php');
+		require_once(ROOT . 'identity/pinValidation.php');
 		$oPinValidation = new PinValidation();
 		$oPinValidation->validatePin($aRequestData['pin'], $DB);
 	} catch (Exception $exception) {
@@ -480,7 +474,7 @@ function linkedinTokenExchange ()
 	$aRequestData = RequestUtil::takeLinkedinTokenExhangeRequestData( $oRequest );
 	
 	// Create a LegacyOAuthLogin object
-	require_once(APP . 'php/main/identity/legacyOAuthLogin.php');
+	require_once(ROOT . 'identity/legacyOAuthLogin.php');
 	$oLegacyOAuthLogin = new LegacyOAuthLogin('linkedin', $aRequestData);
 	
 	// Perform the exchangeToken method
@@ -516,7 +510,7 @@ function profileGet ()
 		RequestUtil::validateProfileGetRequest( $oRequest );
 		
 		// Try getting the data about user's public profile
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$aProfile = $oUser->getPublicProfile($oRequest);
 	} catch (Exception $exception) {
@@ -550,7 +544,7 @@ function profileUpdate ()
 		RequestUtil::validateProfileUpdateRequest( $oRequest );
 		
 		// Try updateing users public profile
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->updateProfile($oRequest);
 	} catch (Exception $exception) {
@@ -583,7 +577,7 @@ function passwordChange ()
 		RequestUtil::validatePasswordChangeRequest( $oRequest );
 		
 		// Try changing password
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->changePassword($oRequest);
 	} catch (Exception $exception) {
@@ -624,7 +618,7 @@ function lockboxHalfKeyStore ()
 		RequestUtil::validateLockboxHalfKeyStoreRequest( $oRequest );
 		
 		// Try inserting the key
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->storeLockboxHalfKeyEncrypted( $oRequest, 'lockbox-update' );
 	} catch (Exception $exception) {
@@ -650,7 +644,7 @@ function identityAccessValidate ()
 		RequestUtil::validateIdentityAccessValidateRequest( $oRequest );
 		
 		// Try inserting the key
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->validateIdentityAccess( $oRequest );
 	} catch (Exception $exception) {
@@ -676,7 +670,7 @@ function identityAccessRolodexCredentialsGet ()
 		RequestUtil::validateIdentityAccessRolodexCredentialsGetRequest( $oRequest );
 		
 		// Try inserting the key
-		require_once(APP . 'php/main/identity/user.php');
+		require_once(ROOT . 'identity/user.php');
 		$oUser = new User($DB);
 		$sServerToken = $oUser->getIdentityAccessRolodexCredentials( $oRequest );
 		$aRolodex['serverToken'] = $sServerToken;
@@ -705,7 +699,7 @@ function hostingDataGet ()
 	$aRequestData = RequestUtil::takeHostingDataGetRequestData( $oRequest );
         
         // Try calculating hosting data
-        require_once(APP . 'php/main/utils/loginUtil.php');
+        require_once(ROOT . 'utils/loginUtil.php');
         $aHostingData = LoginUtil::generateHostingData($aRequestData['purpose']);
     } catch (Exception $exception) {
 	$oResponse->run($exception);
@@ -730,7 +724,7 @@ function federatedContactsGet ()
         RequestUtil::validateFederatedContactsGetRequest( $oRequest );
         
         // TODO
-        require_once(APP . 'php/main/identity/federatedLogin.php');
+        require_once(ROOT . 'identity/federatedLogin.php');
         $oFederatedLogin = new FederatedLogin($DB, 'federated', $oRequest);
         $aIdentityList = $oFederatedLogin->getContacts();
     } catch (Exception $exception) {
@@ -758,7 +752,7 @@ function devtoolsDatabaseCleanProvider ()
 	    $aRequestData = RequestUtil::takeDevtoolsDatabaseCleanProviderRequestData( $oRequest );
         
         // Perform db clean
-        require_once(APP . 'php/main/identity/user.php');
+        require_once(ROOT . 'identity/user.php');
         $oUser = new User($DB);
         $oUser->cleanDB( $aRequestData );
     } catch (Exception $exception) {
@@ -807,18 +801,18 @@ function createLogin ($DB, $sIdentityCategory, $sIdentityType, $aRequest ) {
 	
 	switch ($sIdentityCategory) {
 		case 'federated':
-			require_once(APP . 'php/main/identity/federatedLogin.php');
+			require_once(ROOT . 'identity/federatedLogin.php');
 			return new FederatedLogin($DB, $sIdentityType, $aRequest);
 		case 'legacy':
-			require_once(APP . 'php/main/identity/legacyLogin.php');
+			require_once(ROOT . 'identity/legacyLogin.php');
 			return new LegacyLogin($DB, $sIdentityType, $aRequest);
 		case 'legacyOAuth':
-			require_once(APP . 'php/main/identity/legacyOAuthLogin.php');
+			require_once(ROOT . 'identity/legacyOAuthLogin.php');
 			return new LegacyOAuthLogin($sIdentityType, $aRequest);
 	}
 }
 
 
 
-
+die("PROSO SVE API.php")
 ?>
