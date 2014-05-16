@@ -48,13 +48,10 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports
 if ( !defined('ROOT') ) {
-    define('ROOT', dirname(dirname(__FILE__)));
-}
-if ( !defined('APP') ) {
-    define('APP', ROOT . '/app/');
+    define('ROOT', dirname(dirname(__FILE__)) . "/");
 }
 
-require (APP . 'php/config/config.php');
+require (ROOT . 'config/config.php');
 
 
 // We collect some configuration values and populate the template before

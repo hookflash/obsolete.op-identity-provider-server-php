@@ -36,11 +36,8 @@
 if ( !defined('ROOT') ) {
 	define('ROOT', dirname(dirname(dirname(dirname(dirname(__FILE__))))));
 }
-if ( !defined('APP') ) {
-	define('APP', ROOT . '/app/');
-}
 
-require_once ( APP . 'php/config/config.php');
+require_once ( ROOT . 'config/config.php');
 
 /**
  * Class SmsUtil provides the SMS sending functionality

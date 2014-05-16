@@ -16,11 +16,8 @@ if ( !isset( $_SESSION['created'] ) ) {
 if ( !defined('ROOT') ) {
 	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
 }
-if ( !defined('APP') ) {
-	define('APP', ROOT . '/app/');
-}
-require_once (APP . 'php/config/config.php');
-require_once (APP . 'php/main/utils/uploadUtil.php');
+require_once (ROOT . 'config/config.php');
+require_once (ROOT . 'utils/uploadUtil.php');
 
 // Start the uploadAvatar function
 UploadUtil::uploadAvatar();

@@ -49,12 +49,9 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports and define path constants
 if ( !defined(ROOT) ) {
-	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
+	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . "/");
 }
-if ( !defined(APP) ) {
-	define('APP', ROOT . '/app/');
-}
-require (APP . 'php/main/identity/legacyOAuthLogin.php');
+require (ROOT . 'identity/legacyOAuthLogin.php');
 
 // Check if $_SESSION is well set 
 if ( !key_exists('identity', $_SESSION ) || !key_exists('type', $_SESSION['identity'] ) ) die('Identity type is missing.');

@@ -73,20 +73,8 @@ class LoginUtil {
             case 'federated':
                 $sUri = 'identity://' . $sMyDomain . '/' . $aRequestData['identity']['identifier'];
                 break;
-            case 'email':
-                // TODO
-                break;
-            case 'phone':
-                // TODO
-                break;
             case 'facebook':
                 $sUri = 'identity://facebook.com/' . $aRequestData['identity']['identifier'];
-                break;
-            case 'twitter':
-                // TODO
-                break;
-            case 'linkedin':
-                // TODO
                 break;
         }
         return $sUri;

@@ -7,7 +7,7 @@
  *
  */
 
-require_once(APP . '/php/libs/oauth/OAuth.php');
+require_once(ROOT . 'libs/oauth/OAuth.php');
 
 /**
  * This class acts as a library for the LinkedIn OAuth REST API calls

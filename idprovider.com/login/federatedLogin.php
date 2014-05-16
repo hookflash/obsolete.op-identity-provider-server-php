@@ -36,10 +36,10 @@
 date_default_timezone_set('UTC');
     
 // Set required imports
-require (APP . 'php/main/utils/loginUtil.php');
-require (APP . 'php/main/identity/user.php');
-require_once (APP . 'php/main/utils/cryptoUtil.php');
-require_once (APP . 'php/main/utils/requestUtil.php');
+require (ROOT . 'utils/loginUtil.php');
+require (ROOT . 'identity/user.php');
+require_once (ROOT . 'utils/cryptoUtil.php');
+require_once (ROOT . 'utils/requestUtil.php');
     
 /**
  * Class FederatedLogin provides all the needed features
@@ -160,7 +160,7 @@ class FederatedLogin {
         $aRequestData = RequestUtil::takeSignUpRequestData($this->aRequest);
                     
         // Adding profile data to the request data
-        require_once (APP . 'php/main/utils/profileUtil.php');
+        require_once (ROOT . 'utils/profileUtil.php');
         $aRequestData['identity']['profile'] = 
                 ProfileUtil::PROFILE_ULR_BASE . 'identifier=' . 
                 $aRequestData['identity']['identifier'];

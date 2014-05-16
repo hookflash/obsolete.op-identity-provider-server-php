@@ -36,13 +36,10 @@
 if ( !defined('ROOT') ) {
 	define('ROOT', dirname(dirname(dirname(dirname(dirname(__FILE__))))));
 }
-if ( !defined('APP') ) {
-	define('APP', ROOT . '/app/');
-}
 
-require_once ( APP . 'php/config/config.php');
-require_once ( APP . 'php/libs/smtp/class.phpmailer.php');
-require_once ( APP . 'php/libs/smtp/class.smtp.php');
+require_once ( ROOT . 'config/config.php');
+require_once ( ROOT . 'libs/smtp/class.phpmailer.php');
+require_once ( ROOT . 'libs/smtp/class.smtp.php');
 
 /**
  * Class SmtpUtil provides the mail sending functionality
