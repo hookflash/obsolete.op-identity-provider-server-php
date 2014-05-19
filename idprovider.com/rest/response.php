@@ -66,7 +66,7 @@ class Response {
 		$this->responseID = isset($oRequest->aPars['request_attr']['id']) ? $oRequest->aPars['request_attr']['id'] : false;
 		$this->resultMethod = isset($oRequest->aPars['request_attr']['method']) ? $oRequest->aPars['request_attr']['method'] : '';
 		$this->handler = isset($oRequest->aPars['request_attr']['handler']) ? $oRequest->aPars['request_attr']['handler'] : '';
-                $this->appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
+        $this->appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 	}
 
 /*------------------
@@ -350,12 +350,7 @@ $sEnveloplessResponse
 		}
 		else {
 			require_once ( ROOT . 'utils/jsonUtil.php' );
-
-//			LOG_EVENT('JSON converted: ' . var_export($aResponse, true));
-
 			$this->sResponse = JsonUtil::arrayToJson( $aResponse );
-
-//			LOG_EVENT('JSON to: ' . var_export($this->sResponse, true));
 		}
 	}
 

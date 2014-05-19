@@ -104,82 +104,6 @@ LOG_EVENT('RESPONSE: ' . var_export(ob_get_contents(), true));
 
 //------------------------------------------------------------------------------------------------------------------//
 
-// TODO delete
-function internal_tryHFService()
-{
-	global $oRequest;
-	global $oResponse;
-	require_once(ROOT . 'utils/loginUtil.php');
-	$aResult = LoginUtil::sendProviderDelete();
-	$oResponse->addPar('result', $aResult);
-	$oResponse->run();
-}
-
-// TODO delete
-function internal_calculateServerLoginFinalProof()
-{
-	global $oRequest;
-	global $oResponse;
-	
-	require_once(ROOT . 'utils/cryptoUtil.php');
-	$sServerLoginInnerProof = CryptoUtil::generateServerLoginInnerProof ( $oRequest->aPars['request']['identity']['identifier'],
-																	 	  $oRequest->aPars['request']['identity']['passwordHash'],
-																	 	  $oRequest->aPars['request']['identity']['secretSalt'],
-																 	 	  $oRequest->aPars['request']['identity']['serverPasswordSalt'] );
-	$sServerLoginProof = CryptoUtil::generateServerLoginProof ( $sServerLoginInnerProof,
-																$oRequest->aPars['request']['serverNonce'] );
-																			
-	$oResponse->addPar('serverLoginProof', $sServerLoginProof);
-	$oResponse->run();
-}
-
-// TODO delete
-function internal_calculateIdentityAccessSecretProof () {
-	global $oRequest;
-	global $oResponse;
-	require_once(ROOT . 'utils/cryptoUtil.php');
-	$sIdentityAccessSecretProof = CryptoUtil::generateAccessSecretProof ( $oRequest->aPars['request']['identity']['uri'],
-																		  $oRequest->aPars['request']['clientNonce'],
-																		  $oRequest->aPars['request']['identity']['accessSecretExpires'],
-																		  $oRequest->aPars['request']['identity']['accessToken'],
-																		  $oRequest->aPars['request']['purpose'],
-																		  $oRequest->aPars['request']['identity']['accessSecret'] );
-	$oResponse->addPar('identityAccessSecretProof', $sIdentityAccessSecretProof);
-	$oResponse->run();
-}
-
-// TODO delete
-function internal_parseRolodexCredentialsToken () {
-    global $oRequest;
-    require_once(ROOT . 'utils/cryptoUtil.php');
-    include(ROOT . 'libs/seclib/Crypt/AES.php');
-    $key = hash('sha256', "01234567890123456789012345678901");
-    
-    $sTokenEncrypted = $oRequest->aPars['request']['rolodexCredentialsTokenEncrypted'];
-    $aTokenEncrypted = explode('-', $sTokenEncrypted);
-    
-    $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
-    $cipher->setKey(DOMAIN_HOSTING_SECRET);
-    $cipher->setIV(CryptoUtil::hexToStr($aTokenEncrypted[0]));
-    
-    echo CryptoUtil::hexToStr(CryptoUtil::decrypt($aTokenEncrypted[1],CryptoUtil::hexToStr($aTokenEncrypted[0]),DOMAIN_HOSTING_SECRET));
-}
-
-// TODO delete
-function internal_encryptRolodexCredentialsToken () {
-    include(ROOT . 'libs/seclib/Crypt/AES.php');
-
-    $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
-    $key = hash('sha256', "01234567890123456789012345678901");
-    $iv = hash('md5', "0123456789012345");
-    $cipher->setKey($key);
-    $cipher->setIV($iv);
-
-    //$plaintext = '{"service":"github","consumer_key":"264ea34924b00a5fa84e","consumer_secret":"6d21988222de0f9cc3c0257b70357a5b22bd23b8","token":"ffd648ab7b9461bbfc48405dd26e0fc12aedbb57"}';
-    $plaintext = 'MY-DATA-AND-HERE-IS-MORE-DATA';
-    echo $cipher->decrypt($cipher->encrypt($plaintext));
-}
-
 /**
  * Implementation of services-get method on identity provider side
  *
@@ -420,78 +344,6 @@ function oAuthProviderAuthentication()
 	}
 	
 	$oResponse->addPar('providerRedirectURL', $aAuthenticationResult['redirectURL']);
-	$oResponse->run();
-}
-
-/**
- * Implementation of pin-validation method
- *
- */
-function pinValidation ()
-{
-	global $oRequest;
-	global $oResponse;
-	global $DB;
-	
-	try {
-		// Check request validity
-		RequestUtil::validatePinValidationRequest( $oRequest );
-		
-		// Take data from request
-		$aRequestData = RequestUtil::takePinValidationRequestData( $oRequest );
-		
-		// Challange the given pin
-		require_once(ROOT . 'login/pinValidation.php');
-		$oPinValidation = new PinValidation();
-		$oPinValidation->validatePin($aRequestData['pin'], $DB);
-	} catch (Exception $exception) {
-		$oResponse->run($exception);
-	}
-
-	// Fill the response with the data and fire it
-	$oResponse->addPar('pinValidationSucceeded', 'true');
-	$oResponse->run();	
-}
-
-/**
- * Implementation of linkedin-token-exchange method
- *
- */
-function linkedinTokenExchange ()
-{	
-	global $oRequest;
-	global $oResponse;
-	
-	// Check request validity
-	if ( !( RequestUtil::validateLinkedinTokenExchangeRequest( $oRequest ) ) )
-	{
-		// Throw Missing parameters error
-		$oResponse->errorResponse('002');
-		$oResponse->run(); die();
-	}
-	
-	// Take data from request
-	$aRequestData = RequestUtil::takeLinkedinTokenExhangeRequestData( $oRequest );
-	
-	// Create a LegacyOAuthLogin object
-	require_once(ROOT . 'login/LegacyOAuthLogin.php');
-	$oLegacyOAuthLogin = new LegacyOAuthLogin('linkedin', $aRequestData);
-	
-	// Perform the exchangeToken method
-	$aTokenExchangeResult = $oLegacyOAuthLogin->performTokenExchange($aRequestData);
-	
-	if ( $aTokenExchangeResult['errorIndicator'] != 'none' ) {
-		// Throw whatever error occured during the process
-		$oResponse->errorResponse($aTokenExchangeResult['errorIndicator'], $aTokenExchangeResult['errorMessage']);
-		$oResponse->run(); die();
-	}
-	
-	// Fill the response with the data and fire it
-	$oResponse->addPar('nonce', $aTokenExchangeResult['nonce']);
-	if ( key_exists('identitySecretSalt', $aTokenExchangeResult) && key_exists('serverPasswordSalt', $aTokenExchangeResult) ) {
-		$oResponse->addPar('identitySecretSalt', $aTokenExchangeResult['identitySecretSalt']);
-		$oResponse->addPar('serverPasswordSalt', $aTokenExchangeResult['serverPasswordSalt']);	
-	}
 	$oResponse->run();
 }
 
@@ -761,6 +613,7 @@ function devtoolsDatabaseCleanProvider ()
     // Result
     $oResponse->run();
 }
+
 //------------------------------------------------------------------------------------------------------------------//
 
 

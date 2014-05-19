@@ -45,7 +45,7 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports
 if ( !defined('ROOT') ) {
-	define('ROOT', dirname(dirname(dirname(dirname(dirname(__FILE__))))));
+	define('ROOT', dirname(dirname(__FILE__)) . '/');
 }
 require_once ( ROOT . 'config/config.php' );
 
@@ -175,7 +175,7 @@ class UploadUtil {
 	}
 	
 	private function getUploadedFileUrl ( $sFileName ) {
-		$sURL = PROVIDER_HOST . '/php/service/avatars/' . $sFileName;
+		$sURL = PROVIDER_HOST . '/get/service/avatars/' . $sFileName;
 		return $sURL;
 	}
 

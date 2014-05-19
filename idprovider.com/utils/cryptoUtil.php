@@ -78,86 +78,21 @@ class CryptoUtil {
 		return CryptoUtil::makeRandomString(16 * 8);
 	}
         
-        /**
-         * Convert string to hex
-         * @param type $string
-         * @return type
-         */
-        public static function strToHex($string)
+    /**
+     * Convert hex to string
+     * @param type $hex
+     * @return type
+     */
+    public static function hexToStr($hex)
+    {
+        $string='';
+        for ($i=0; $i < strlen($hex)-1; $i+=2)
         {
-            $hex='';
-            for ($i=0; $i < strlen($string); $i++)
-            {
-                $hex .= dechex(ord($string[$i]));
-            }
-            return $hex;
+            $string .= chr(hexdec($hex[$i].$hex[$i+1]));
         }
-        
-        /**
-         * Convert hex to string
-         * @param type $hex
-         * @return type
-         */
-        public static function hexToStr($hex)
-        {
-            $string='';
-            for ($i=0; $i < strlen($hex)-1; $i+=2)
-            {
-                $string .= chr(hexdec($hex[$i].$hex[$i+1]));
-            }
-            return $string;
-        }
-        
-        /**
-         * TEST.
-         */
-        public static function hexbin($hex) {
-            $bin = decbin(hexdec($hex)); 
-            return $bin; 
-        }
-        /**
-         * TEST. Result = 0 (after called binhex(hexbin(hex)))
-         */
-        public static function binhex($bin) {
-            $hex = dechex(bindec($bin)); 
-            return $hex;
-        }
-        /**
-         * TEST. **WORKS**
-         */
-        public static function hexbin1($hex){
-            $bin='';
-            for($i=0;$i<strlen($hex);$i++)
-                $bin.=str_pad(decbin(hexdec($hex{$i})),4,'0',STR_PAD_LEFT);
-            return $bin;
-        } 
-        /**
-         * TEST. **WORKS** (after called binhex1(hexbin1(hex)))
-         */
-        public static function binhex1($bin){
-            $hex='';
-            for($i=strlen($bin)-4;$i>=0;$i-=4)
-                $hex.=dechex(bindec(substr($bin,$i,4)));
-            return strrev($hex);
-        }
-        /**
-         * TEST. Result = Error: pack(): Type H: illegal hex digit -
-         */
-        public static function hextobin($hexstr){
-            $n = strlen($hexstr);
-            $sbin="";  
-            $i=0;
-            while($i<$n)
-            {      
-                $a =substr($hexstr,$i,2);          
-                $c = pack("H*",$a);
-                if ($i==0){$sbin=$c;}
-                else {$sbin.=$c;}
-                $i+=2;
-            }
-            return $sbin;
-        } 
-	
+        return $string;
+    }
+
 	/**
 	 * Encrypts given value using secret key
 	 *
@@ -168,37 +103,14 @@ class CryptoUtil {
 	 */
 	public static function encrypt($sValue, $iv, $sSecretKey)
 	{
-            /*
-	    $sEncr = mcrypt_encrypt(
-                MCRYPT_RIJNDAEL_128,
-                $sSecretKey, $sValue, 
-                MCRYPT_MODE_ECB, 
-                $iv
-            );
-            $sEncr = base64_encode($sEncr);
-	    return rtrim($sEncr, "\0");*/
-            
-            //--------------//
-            
-            /*
-            $sEncr = mcrypt_encrypt(
-                MCRYPT_RIJNDAEL_128,
-                $sSecretKey, $sValue, 
-                MCRYPT_MODE_NOFB, 
-                $iv
-            );
-	    return rtrim($sEncr, "\0");*/
-            
-            //--------------//
-            
-            require_once(ROOT . 'libs/seclib/Crypt/AES.php');
+        require_once(ROOT . 'libs/seclib/Crypt/AES.php');
 
-            $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
-            $key = hash('sha256', $sSecretKey);
-            $iv = hash('md5', $iv);
-            $cipher->setKey($key);
-            $cipher->setIV($iv);
-            return $cipher->encrypt($sValue);
+        $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
+        $key = hash('sha256', $sSecretKey);
+        $iv = hash('md5', $iv);
+        $cipher->setKey($key);
+        $cipher->setIV($iv);
+        return $cipher->encrypt($sValue);
 	}
 	
 	/**
@@ -211,37 +123,14 @@ class CryptoUtil {
 	 */
 	public static function decrypt($sValue, $iv, $sSecretKey)
 	{
-            /*
-	    $sValue = base64_decode($sValue);
-	    $sDecr = mcrypt_decrypt(
-                MCRYPT_RIJNDAEL_256,
-                $sSecretKey, $sValue, 
-                MCRYPT_MODE_ECB, 
-                $iv
-            );
-            return rtrim($sDecr, "\0");*/
-            //$sValue = CryptoUtil::hexToStr($sValue);
-	    
-            //--------------//
-            
-            /*$sDecr = mcrypt_decrypt(
-                MCRYPT_RIJNDAEL_128,
-                $sSecretKey, $sValue, 
-                MCRYPT_MODE_NOFB,
-                $iv
-            );
-            return rtrim($sDecr, "\0");*/
-            
-            //--------------//
-            
-            require_once(ROOT . 'libs/seclib/Crypt/AES.php');
+        require_once(ROOT . 'libs/seclib/Crypt/AES.php');
 
-            $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
-            $key = hash('sha256', $sSecretKey);
-            $iv = hash('md5', $iv);
-            $cipher->setKey($key);
-            $cipher->setIV($iv);
-            return $cipher->decrypt($sValue);
+        $cipher = new Crypt_AES(CRYPT_AES_MODE_CFB);
+        $key = hash('sha256', $sSecretKey);
+        $iv = hash('md5', $iv);
+        $cipher->setKey($key);
+        $cipher->setIV($iv);
+        return $cipher->decrypt($sValue);
 	}
 	
 	/**
@@ -271,7 +160,6 @@ class CryptoUtil {
 	public static function generateSelfValidatingNonce ( $nExpiryMinutes ) {
 		$sExpiry = time() + 60 * $nExpiryMinutes;
 		$sNonce = CryptoUtil::generateNonce();
-		// hmac algorithm is necessary here...
 		$sHashValidation = CryptoUtil::gimmeHmac('validate:' . PROVIDER_MAGIC_VALUE . ':' . $sExpiry . ':' . $sNonce, PROVIDER_MAGIC_VALUE);
 		return $sNonce . '-' . $sExpiry . '-' . $sHashValidation;
 	}
@@ -375,15 +263,6 @@ class CryptoUtil {
             }
             
             return true;
-	}
-	
-	/**
-	 * Generates a PIN
-	 * 
-	 * @return string Returns generated pin
-	 */
-	public static function generatePin () {
-		return mt_rand( mt_rand(100000, 200000), mt_rand(900000, 999999) );
 	}
 	
 	/**
@@ -533,22 +412,22 @@ class CryptoUtil {
 	    }
 	    return $return;
 	}
-	//TODO private
-	public static function generateServerLoginInnerProof ( $sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt ) {
+	
+	private static function generateServerLoginInnerProof ( $sIdentifier, $sPasswordHash, $sIdentitySecretSalt, $sServerPasswordSalt ) {
 		$sServerLoginInnerProofInnerHmac = CryptoUtil::gimmeHmac('password-hash:' . $sIdentifier . ':' . base64_encode($sServerPasswordSalt), $sPasswordHash);
 		$sIdentitySaltHash = CryptoUtil::gimmeHash('salt:' . $sIdentifier . ':' . base64_encode($sIdentitySecretSalt));
 		return CryptoUtil::gimmeHash(PROVIDER_MAGIC_VALUE . ':' . $sServerLoginInnerProofInnerHmac . ':' . $sIdentitySaltHash);
 	}
-	//TODO private
-	public static function generateServerLoginProof ( $sServerLoginInnerProof, $sServerNonce ) {
+	
+	private static function generateServerLoginProof ( $sServerLoginInnerProof, $sServerNonce ) {
 		return CryptoUtil::gimmeHmac('final:' . $sServerLoginInnerProof . ':' . $sServerNonce, PROVIDER_MAGIC_VALUE);
 	}
 	
 	private static function generateInnerToken ( $sClientAuthenticationToken, $sIdentityType, $sIdentifier, $sAuthenticationNonce ) {
 		return CryptoUtil::gimmeHash('innerToken:' . $sClientAuthenticationToken . ':' . $sIdentityType . $sIdentifier . ':' . $sAuthenticationNonce . ':' . PROVIDER_MAGIC_VALUE);
 	}
-	// TODO private
-	public static function generateAccessSecretProof ( $sUri, $sClientNonce, $sAccessSecretExpires, $sAccessToken, $sPurpose, $sAccessSecret ) {
+	
+	private static function generateAccessSecretProof ( $sUri, $sClientNonce, $sAccessSecretExpires, $sAccessToken, $sPurpose, $sAccessSecret ) {
 		$sMessage = 'identity-access-validate:' . $sUri . ':' . $sClientNonce . ':' . $sAccessSecretExpires . ':' . $sAccessToken . ':' . $sPurpose;
 		APIEventLog('identityAccessSecretProof generation message=' . $sMessage);
 		return CryptoUtil::gimmeHmac( $sMessage, $sAccessSecret );

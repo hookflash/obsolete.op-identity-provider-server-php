@@ -28,12 +28,6 @@ define('FACEBOOK_APP_SECRET', '**********************************');
 define('TWITTER_APP_ID', '************');
 define('TWITTER_APP_SECRET', '**********************************');
 
-// Here you set your SMTP service parameters
-require(ROOT . 'config/special/smtp_config.php');
-
-// Here you set your SMS service parameters
-require(ROOT . 'config/special/sms_config.php');
-
 // Here you set your specific cryptographically random values
 define('PROVIDER_MAGIC_VALUE', '******************************');
 

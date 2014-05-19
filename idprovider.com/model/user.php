@@ -502,7 +502,6 @@ class User {
 
         // Interpret relogin key
         $aReloginKey = explode('-',$aRequestData['identity']['reloginKeyServerPart']);
-        // TODO replace CryptoUtil::hexToStr() with hex2bin() as soon as PHP 5.4. is installed
         $sReloginKey = CryptoUtil::decrypt(
                 CryptoUtil::hexToStr($aReloginKey[2]), 
                 CryptoUtil::gimmeHash($aReloginKey[1]), 
@@ -637,106 +636,6 @@ class User {
         }
 
         return $aLegacyOAuthIdentity;
-    }
-	
-    /**
-     * Get the identity data for legacy identities out of the database
-     *
-     * @param string $sIdentityType Could be: email or phone
-     * @param string $sIdentifier An identity to be logged in
-     * @return array $aLegacyIdentity Returns an array of data taken from database that is attached to given identity
-     */
-    public function signInUsingLegacy( $sIdentityType, $sIdentifier ) {
-        // Usage of globals
-        global $DB;
-
-        // Decide what table to look at
-        $sDBTable = $this->getAppropriateDatabaseTable($sIdentityType);
-
-        // Try getting an identity using given data, and check if that identity is associated with an existing user
-        $aLegacyIdentity = $DB->select_single_to_array(
-                $sDBTable, 
-                '*', 
-                'where identifier="' . $sIdentifier . '"'
-                );
-        $aUser = $DB->select_single_to_array(
-                'user', 
-                '*', 
-                'where user_id="' . $aLegacyIdentity['user_id'] . '"'
-                );
-
-        // Return the user if everything went well
-        if ( !( $aLegacyIdentity && $aUser ) ) {
-            return null;		
-        }
-
-        return $aLegacyIdentity;		
-    }
-	
-    /**
-     * Updates the PIN and the PIN-specific data in the database, next to the given identity
-     *
-     * @param string $sIdentityType Could be: 'email' or 'phone'
-     * @param string $sIdentifier An identity to update PIN-specific data for
-     * @param string $sPIN A PIN to be added into the database
-     * @param string $sCounter A number of PIN generation requests performed today (purpose : anti spam)
-     * @param string $sNextValidGenerationTime A timestamp that indicates when could user perform next pin generation request in case that ongoing pin validation fails (purpose : anti spam)
-     * @return number $nAffected Returnes the number of affected rows in database.
-     */
-    public function insertNewPIN ( 
-            $sIdentityType, 
-            $sIdentifier, 
-            $sPIN, 
-            $sCounter, 
-            $sNextValidGenerationTime, 
-            $sExpiry ) {
-        // Usage of globals
-        global $DB;
-
-        // Decide what table to look at
-        $sDBTable = $this->getAppropriateDatabaseTable($sIdentityType);
-
-        // Update the identity
-        $nAffected = $DB->update(
-                $sDBTable,
-                array (
-                    'temporary_pin' 			=> $sPIN,
-                    'pin_daily_generation_counter' 	=> $sCounter,
-                    'next_valid_pin_generation_time'	=> $sNextValidGenerationTime,
-                    'updated'				=> time(),
-                    'pin_expiry'			=> $sExpiry
-                    ),
-                'where identifier="' . $sIdentifier . '"'
-                );
-
-        return $nAffected;
-    }
-	
-    /**
-     * Sets the account_accessed parameter of the given identity to 'true',
-     * in order to enable scenario differentiation functionality to work correctly.
-     *
-     * @param string $sIdentityType Could be 'email' or 'phone'
-     * @param string $sIdentifier An identity to update the account_accessed parameter
-     * @return number $nAffected Returns the number of affected rows
-     */
-    public function setLegacyAccountAccessed ( $sIdentityType, $sIdentifier ) {
-        // Usage of globals
-        global $DB;
-
-        // Decide what table to look at
-        $sDBTable = $this->getAppropriateDatabaseTable($sIdentityType);
-
-        // Update the account in order to enable scenario differentiation functionality
-        $nAffected = $DB->update(
-                $sDBTable,
-                array( 
-                    'account_accessed' => 1 
-                    ),
-                'where identifier="' . $sIdentifier . '" and account_accessed=0'
-                );
-
-        return $nAffected;
     }
 	
     /**
@@ -1161,7 +1060,7 @@ class User {
 
     private function generateServerTokenCredentials( $aIdentity ) {
         $aRolodexSupportedIdentityTypes = array(
-            'facebook',
+            'facebook'
         );    
 
         $sServerToken = '';

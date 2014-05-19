@@ -65,12 +65,7 @@ class Request {
 		if ( $this->bIsJson ) {
 			require_once ( ROOT . 'utils/jsonUtil.php' );
 
-//			LOG_EVENT('JSON converted: ' . var_export($sBody, true));
-
 			if ( $this->aPars = JsonUtil::jsonToArray($sBody) ){
-
-//				LOG_EVENT('JSON to: ' . var_export($this->aPars, true));
-
 				$this->sBody = $sBody;
 				APIEventLog($sBody);
 			}

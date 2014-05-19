@@ -48,7 +48,7 @@ class RestServerException extends Exception {
 	'400' => 'Bad Request',
 	'401' => 'Unauthorized',
 	'403' => 'Forbidden',
-        '404' => 'Not Found',    
+    '404' => 'Not Found',    
 	'406' => 'Not Acceptable',
 	'409' => 'Conflict',
 	'420' => 'Enhance You Calm',
@@ -138,35 +138,10 @@ class RestServerException extends Exception {
 				$this->sErrorMessage = 'Wrong parameter format: \'' . $this->aErrorMessageParameters['parameter'] .
 										'\' has to be ' . $this->aErrorMessageParameters['format'] . '.';
 				break;
-                        case '011':
-                                $this->sHttpErrorCode = '404';
-                                $this->sErrorMessage = 'Not Found';
-                                break;
-			// PIN-dedicated error
-			case '020':
-				$this->sHttpErrorCode = '403';
-				$this->sErrorMessage = 'PIN error occured: ';
-				if ($this->aErrorMessageParameters['parameter'] == 'pinGenerationCooldown') {
-					$this->sHttpErrorCode = '403';
-					$this->sErrorMessage .= 'PIN generation cooldown did not expire yet.';
-				}
-				if ($this->aErrorMessageParameters['parameter'] == 'pinSendingFailed') {
-					$this->sHttpErrorCode = '500';
-					$this->sErrorMessage .= 'PIN sending via third party service failed.';
-				}
-				if ($this->aErrorMessageParameters['parameter'] == 'noPinValidationRequiredUserInSession') {
-					$this->sHttpErrorCode = '420';
-					$this->sErrorMessage .= 'No user is in pinValidationRequired Login State.';
-				}
-				if ($this->aErrorMessageParameters['parameter'] == 'pinInvalid') {
-					$this->sHttpErrorCode = '403';
-					$this->sErrorMessage .= 'Pin is incorrect.';
-				}
-				if ($this->aErrorMessageParameters['parameter'] == 'pinExpired') {
-					$this->sHttpErrorCode = '403';
-					$this->sErrorMessage .= 'Pin expired.';
-				}
-				break;
+            case '011':
+                    $this->sHttpErrorCode = '404';
+                    $this->sErrorMessage = 'Not Found';
+                    break;
 		}
 	}
 

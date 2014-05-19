@@ -323,21 +323,6 @@ class RequestUtil {
 	}
 	
 	/**
-	 * Validates the pinValidation request
-	 *
-	 * @param array $req Parameters of the request
-	 * @return boolean Returns true if the request is valid, otherwise returns false
-	 */
-	public static function validatePinValidationRequest ( $oRequest ){
-		$req = $oRequest->aPars['request'];
-		if ( !( key_exists( 'pin', $req ) && $req['pin'] != null ) ) {
-			throw new RestServerException('002', array(
-												 'parameter' => 'pin'
-												 ));
-		}
-	}
-	
-	/**
 	 * Validates the profileGet request
 	 *
 	 * @param array $req Parameters of the request
@@ -846,21 +831,6 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public static function takeLinkedinTokenExhangeRequestData ( $oRequest ){
-		$req = $oRequest->aPars['request'];
-                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
-		return array(
-                'appid'     => $appid,
-		'identifier'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
-		);
-	}
-	
-	/**
-	 * Take data from the request in a safe manner and return an array of it
-	 *
-	 * @param array $req The request to take data from
-	 * @return array of needed given-by-request data
-	 */
 	public static function takeOAuthProviderAuthenticationRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
@@ -872,21 +842,6 @@ class RequestUtil {
 		'clientAuthenticationToken'				=> DatabaseUtil::protectFromSqlInjection( $req['clientAuthenticationToken'] ),
 		'callbackURL'							=> DatabaseUtil::protectFromSqlInjection( $req['callbackURL'] ),
 		'identity' 								=> $aIdentity
-		);
-	}
-	
-	/**
-	 * Take data from the request in a safe manner and return an array of it
-	 *
-	 * @param array $req The request to take data from
-	 * @return array of needed given-by-request data
-	 */
-	public static function takePinValidationRequestData ( $oRequest ){
-		$req = $oRequest->aPars['request'];
-                $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
-		return array(
-                'appid'     => $appid,
-		'pin'									=> DatabaseUtil::protectFromSqlInjection( $req['pin'] )
 		);
 	}
 	
