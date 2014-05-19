@@ -99,7 +99,7 @@ class LegacyOAuthLogin {
         $_SESSION['identity'] = $aRequestData['identity'];
 
         // Return the redirect URL 
-        $aAuthenticationResult['redirectURL'] = 'http://' . DOMAIN . '/php/oauth/oauthLogin.php'; //Jasno da ovo ne radi
+        $aAuthenticationResult['redirectURL'] = 'http://' . DOMAIN . '/get/oauth/oauthLogin.php';
         APIEventLog('aAuthenticationResult[redirectURL]=' . $aAuthenticationResult['redirectURL']);
 
         LOG_EVENT('$aAuthenticationResult: ' . var_export($aAuthenticationResult, true));
@@ -249,7 +249,7 @@ class LegacyOAuthLogin {
         $url = $facebook->getLoginUrl(
                 array(
                     'scope' => 'email, read_stream, publish_stream, offline_access, status_update, share_item', 
-                    'redirect_uri' => 'http://' . $_SERVER['HTTP_HOST'] . '/php/oauth/index.php'
+                    'redirect_uri' => 'http://' . $_SERVER['HTTP_HOST'] . '/get/oauth/index.php'
                 )
                 );								  
 

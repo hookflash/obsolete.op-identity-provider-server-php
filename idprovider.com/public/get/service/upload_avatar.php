@@ -14,7 +14,7 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports
 if ( !defined('ROOT') ) {
-	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
+	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . '/');
 }
 require_once (ROOT . 'config/config.php');
 require_once (ROOT . 'utils/uploadUtil.php');

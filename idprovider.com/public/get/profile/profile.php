@@ -31,11 +31,11 @@ either expressed or implied, of the FreeBSD Project.
 
 
 <?php 
-    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
-    require_once (ROOT . '/app/php/config/config.php');
-    require_once (ROOT . '/app/php/main/utils/cryptoUtil.php');
-    require_once (ROOT . '/app/php/main/utils/profileUtil.php');
-    require_once (ROOT . '/app/php/main/utils/jsonUtil.php');
+    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . '/');
+    require_once (ROOT . 'config/config.php');
+    require_once (ROOT . 'utils/cryptoUtil.php');
+    require_once (ROOT . 'utils/profileUtil.php');
+    require_once (ROOT . 'jsonUtil.php');
 	
     if (!isset($_GET['vprofile'])) {
         $_GET['vprofile'] = 0;

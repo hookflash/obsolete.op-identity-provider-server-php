@@ -32,10 +32,10 @@
  */
 
 if ( !defined('ROOT') ) {
-    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))));
+    define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . '/');
 }
 
-require (ROOT . '/app/php/config/config.php');
+require (ROOT . 'config/config.php');
 
 print '{
   "result": {
