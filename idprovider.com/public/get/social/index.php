@@ -50,16 +50,16 @@ if ( !isset( $_SESSION['created'] ) ) {
 if ( !defined(ROOT) ) {
 	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . "/");
 }
-require (ROOT . 'login/LegacyOAuthLogin.php');
+require (ROOT . 'login/SocialLogin.php');
 
 // Check if $_SESSION is well set 
 if ( !key_exists('identity', $_SESSION ) || !key_exists('type', $_SESSION['identity'] ) ) die('Identity type is missing.');
-if ( !in_array($_SESSION['identity']['type'], array('facebook') ) ) die('Invalid OAuth provider.');
+if ( !in_array($_SESSION['identity']['type'], array('facebook') ) ) die('Invalid social provider.');
 
 
-// Finish authentication with an OAuth provider
-$oLegacyOAuthLogin = new LegacyOAuthLogin($_SESSION['identity']['type'], null);
-$oLegacyOAuthLogin->afterSuccessfullOAuthLogin();
+// Finish authentication with a social provider
+$oSocialLogin = new SocialLogin($_SESSION['identity']['type'], null);
+$oSocialLogin->afterSuccessfullSocialLogin();
 
 LOG_EVENT('RESPONSE: ' . var_export(ob_get_contents(), true));
 

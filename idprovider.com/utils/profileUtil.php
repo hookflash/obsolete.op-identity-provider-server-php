@@ -54,7 +54,7 @@ class ProfileUtil {
     /**
      * Try sending a profile-get request using cURL, for given data
      * 
-     * @param string $sIdentityType could be: 'federated', 'email', 'phone', 'facebook', 'linkedin', 'twitter'
+     * @param string $sIdentityType could be: 'custom', 'email', 'phone', 'facebook', 'linkedin', 'twitter'
      * @param string $sIdentifier An identifier of the identity (such as username or e-mail)
      * @return array $aResultObject An array created from JSON result
      */

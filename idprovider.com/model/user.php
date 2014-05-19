@@ -75,7 +75,7 @@ class User {
      * Try getting the identitySecretSalt and the serverPasswordSalt of a user from the database
      * and return these two as a result 
      *
-     * @param string $sIdentityType could be: federated, facebook
+     * @param string $sIdentityType could be: custom, facebook
      * @param string $sIdentifier An identity to fetch the salts for
      * @return array Returns the salts of the given identity
      */
@@ -87,7 +87,7 @@ class User {
         $sDBTable = $this->getAppropriateDatabaseTable($sIdentityType);
 
         // Get the identity from the database
-        if ( $sDBTable != 'legacy_oauth' ) {
+        if ( $sDBTable != 'social' ) {
             $aIdentity = $DB->select_single_to_array(
                     $sDBTable, 
                     '*', 
@@ -129,10 +129,10 @@ class User {
         $aRequestData = RequestUtil::takeProfileGetRequestData($oRequest);
 
         // Challange user's existance
-        if ( !$this->isThereSuchUser('federated', $aRequestData['identity']['identifier']) ) {
+        if ( !$this->isThereSuchUser('custom', $aRequestData['identity']['identifier']) ) {
             throw new RestServerException('003',
                     array(
-                        'type' => 'federated',
+                        'type' => 'custom',
                         'identifier' => $aRequestData['identity']['identifier']
                         )
                     );
@@ -140,7 +140,7 @@ class User {
         
         // Get the data out of the db
         $aIdentity = $DB->select_single_to_array(
-                'federated', 
+                'custom', 
                 '*', 
                 'where identifier="' . $aRequestData['identity']['identifier'] . '"'
                 );
@@ -182,10 +182,10 @@ class User {
         $aRequestData = RequestUtil::takeProfileUpdateRequestData($oRequest);
 
         // Challange user's existance
-        if ( !$this->isThereSuchUser('federated', $aRequestData['identity']['identifier']) ) {
+        if ( !$this->isThereSuchUser('custom', $aRequestData['identity']['identifier']) ) {
             throw new RestServerException('003',
                     array(
-                        'type' => 'federated',
+                        'type' => 'custom',
                         'identifier' => $aRequestData['identity']['identifier']
                         )
                     );
@@ -200,10 +200,10 @@ class User {
                     );
         }
 
-        // Update the federated table data
+        // Update the custom table data
         if ( isset( $aRequestData['identity']['displayName'] ) ) {
             $DB->update(
-                    'federated',
+                    'custom',
                     array (
                         'display_name' 	=> $aRequestData['identity']['displayName'],
                         'updated'		=> time()
@@ -213,8 +213,8 @@ class User {
         }
         // Update the avatars table data
         $aIdentity = $DB->select_single_to_array(
-                'federated', 
-                'federated_id', 
+                'custom', 
+                'custom_id', 
                 'where identifier="' . $aRequestData['identity']['identifier'] . '"'
                 );
         $aCouldNotAdd = array();
@@ -277,10 +277,10 @@ class User {
         $aRequestData = RequestUtil::takePasswordChangeRequestData($oRequest);
 
         // Challange user's existance
-        if ( !$this->isThereSuchUser('federated', $aRequestData['identity']['identifier']) ) {
+        if ( !$this->isThereSuchUser('custom', $aRequestData['identity']['identifier']) ) {
             throw new RestServerException('003', 
                     array(
-                        'type' => 'federated',
+                        'type' => 'custom',
                         'identifier' => $aRequestData['identity']['identifier']
                         )
                     );
@@ -297,7 +297,7 @@ class User {
 
         // Get the identity from the database
         $aIdentity = $DB->select_single_to_array(
-                'federated', 
+                'custom', 
                 '*', 
                 'where identifier="' . $aRequestData['identity']['identifier'] . '"'
                 );
@@ -315,7 +315,7 @@ class User {
         // Change the password hash
         $time = time();
         $DB->update(
-                'federated', 
+                'custom', 
                 array( 
                     'password_hash' => $aRequestData['identity']['newPasswordHash'], 
                     'updated' => $time 
@@ -361,7 +361,7 @@ class User {
     /**
      * Checks if there is a user in database that is suitable
      *
-     * @param string $sIdentityType Could be: federated, facebook
+     * @param string $sIdentityType Could be: custom, facebook
      * @param string $sIdentifier Identity to look for
      * @return boolean Returns true if there is such iser, otherwise returns false
      */
@@ -372,7 +372,7 @@ class User {
         $sDBTable = $this->getAppropriateDatabaseTable($sIdentityType);
 
         // Try getting the identity from the database
-        if ( $sDBTable != 'legacy_oauth' ) {
+        if ( $sDBTable != 'social' ) {
             $aIdentity = $DB->select_single_to_array(
                     $sDBTable, 
                     '*', 
@@ -396,7 +396,7 @@ class User {
     /**
      * Create new identity and attach it to new user.
      *
-     * @param string $sIdentityType Could be: federated, facebook
+     * @param string $sIdentityType Could be: custom, facebook
      * @param string $sIdentifier Identity to create
      * @param string $sPasswordHash Hash of the password to store in the database
      * @param string $sIdentitySecretSalt Identity secret salt to store
@@ -432,9 +432,9 @@ class User {
             return $aUser;
         }
 
-        // Distinguish federated and legacy identity type insertions
+        // Distinguish custom and legacy identity type insertions
         $sUpdated = time();
-        if ( $sDBTable == 'federated' ) {
+        if ( $sDBTable == 'custom' ) {
             $sUser = $DB->insert('user', array( 'appid' => $this->extractAppId($appid), 'updated' => $sUpdated ) );
             $DB->insert(
                     $sDBTable, 
@@ -571,26 +571,26 @@ class User {
      * Get the identity data out of the database
      *
      * @param string $sIdentifier An identity to be logged in
-     * @return array $aFederatedIdentity Returns an array of data taken from database that is attached to given identity
+     * @return array $aCustomIdentity Returns an array of data taken from database that is attached to given identity
      */
-    public function signInUsingFederated( $sIdentifier, $appid ) {
+    public function signInUsingCustom( $sIdentifier, $appid ) {
         // Usage of globals
         global $DB;
 
         // Try getting an identity using given data, and check if that identity is associated with an existing user
-        $aFederatedIdentity = $DB->select_single_to_array(
-                'federated', 
+        $aCustomIdentity = $DB->select_single_to_array(
+                'custom', 
                 '*', 
                 'where identifier="' . $sIdentifier . '"'
                 );
         $aUser = $DB->select_single_to_array(
                 'user', 
                 '*', 
-                'where user_id="' . $aFederatedIdentity['user_id'] . '"'
+                'where user_id="' . $aCustomIdentity['user_id'] . '"'
                 );
 
         // Return the user if everything went well
-        if ( !( $aFederatedIdentity && $aUser ) ) {
+        if ( !( $aCustomIdentity && $aUser ) ) {
                 return null;		
         }
 
@@ -601,41 +601,41 @@ class User {
                     'updated'	=> time(),
                     'appid'     => $this->extractAppId($appid,$aUser['appid'])
                 ),
-                'where user_id="' . $aFederatedIdentity['user_id'] . '"'
+                'where user_id="' . $aCustomIdentity['user_id'] . '"'
         );
 
-        return $aFederatedIdentity;
+        return $aCustomIdentity;
     }
 	
     /**
-     * Get the identity data for legacyOAuth identities out of the database
+     * Get the identity data for social identities out of the database
      *
      * @param string $sIdentityType Could be: facebook
      * @param string $sIdentifier An identity to be logged in
-     * @return array $aLegacyOAuthIdentity Returns an array of data taken from database that is attached to given identity
+     * @return array $aSocialIdentity Returns an array of data taken from database that is attached to given identity
      */
-    public function signInUsingLegacyOAuth( $sIdentityType, $sIdentifier ) {
+    public function signInUsingSocial( $sIdentityType, $sIdentifier ) {
         // Usage of globals
         global $DB;
 
         // Try getting an identity using given data, and check if that identity is associated with an existing user
-        $aLegacyOAuthIdentity = $DB->select_single_to_array(
-                'legacy_oauth', 
+        $aSocialIdentity = $DB->select_single_to_array(
+                'social', 
                 '*',
                 'where identifier="' . $sIdentifier . '" and provider_type="' . $sIdentityType . '"'
                 );
         $aUser = $DB->select_single_to_array(
                 'user', 
                 '*', 
-                'where user_id="' . $aLegacyOAuthIdentity['user_id'] . '"'
+                'where user_id="' . $aSocialIdentity['user_id'] . '"'
                 );
 
         // Return the user if everything went well
-        if ( !( $aLegacyOAuthIdentity && $aUser ) ) {
+        if ( !( $aSocialIdentity && $aUser ) ) {
             return null;		
         }
 
-        return $aLegacyOAuthIdentity;
+        return $aSocialIdentity;
     }
 	
     /**
@@ -813,26 +813,26 @@ class User {
      * @param string $sProfileFullname First name + last name (some providers have a full name field already)
      * @return array Returns array of data that will be added into the header URL after a final redirect
      */
-    public function signInAfterOAuthProviderLogin( $sProviderType, $sIdentifier, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sToken, $sSecret ) {
+    public function signInAfterSocialProviderLogin( $sProviderType, $sIdentifier, $sProviderUsername, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sToken, $sSecret ) {
         // Try getting a user and an identity from the database for the given providerType and identifier
-        $aOAuthIdentity = $this->DB->select_single_to_array(
-                'legacy_oauth', 
+        $aSocialIdentity = $this->DB->select_single_to_array(
+                'social', 
                 '*', 
                 'where provider_type="' . $sProviderType . '" and identifier="' . $sIdentifier . '"'
                 );
         $aUser = $this->DB->select_single_to_array(
                 'user', 
                 '*', 
-                'where user_id="' . $aOAuthIdentity['user_id'] . '"'
+                'where user_id="' . $aSocialIdentity['user_id'] . '"'
                 );
         // Access existing user
-        if ( $aUser && !empty( $aUser ) && $aOAuthIdentity && !empty( $aOAuthIdentity ) )
+        if ( $aUser && !empty( $aUser ) && $aSocialIdentity && !empty( $aSocialIdentity ) )
         {			
             $bNew = 0;
             $sUpdated = time();
             $sUser = $aUser['user_id'];
             $this->DB->update( 
-                    'legacy_oauth',
+                    'social',
                     array (
                         'token'     => $sToken,
                         'secret'    => $sSecret,
@@ -845,7 +845,7 @@ class User {
                     array (
                         'updated'   => $sUpdated
                         ),
-                    'where user_id="' . $aOAuthIdentity['user_id'] . '"'
+                    'where user_id="' . $aSocialIdentity['user_id'] . '"'
                     );
         }
         // Create new user
@@ -862,7 +862,7 @@ class User {
                         ) 
                     );
             $this->DB->insert(
-                    'legacy_oauth',
+                    'social',
                     array( 
                         'user_id' => $sUser,
                         'provider_type' => $sProviderType,
@@ -882,9 +882,9 @@ class User {
             'created'               => $bNew,
             'providerType'          => $sProviderType,
             'identifier'            => $sIdentifier,
-            'updated'               => $bNew ? $sUpdated : $aOAuthIdentity['updated'],
-            'identitySecretSalt'    => ( !$bNew ) ? $aOAuthIdentity['secret_salt'] : '',
-            'serverPasswordSalt'    => ( !$bNew ) ? $aOAuthIdentity['server_password_salt'] : '',
+            'updated'               => $bNew ? $sUpdated : $aSocialIdentity['updated'],
+            'identitySecretSalt'    => ( !$bNew ) ? $aSocialIdentity['secret_salt'] : '',
+            'serverPasswordSalt'    => ( !$bNew ) ? $aSocialIdentity['server_password_salt'] : '',
         );
     }
         
@@ -906,15 +906,15 @@ class User {
                 'where appid="' . $aUser['appid'] . '"'
                 );
         print_r($aUsers); die();
-        // Fetch all federated identities by list of user_id-s
+        // Fetch all custom identities by list of user_id-s
         $aContacts = array();
         foreach($aUsers as $value) {
-            $aFederatedIdentity = $this->DB->select_to_array(
-                    'federated',
+            $aCustomIdentity = $this->DB->select_to_array(
+                    'custom',
                     '*',
                     'where user_id=' . $value['user_id']
                     );
-            array_push($aContacts, $aFederatedIdentity);
+            array_push($aContacts, $aCustomIdentity);
         }
 
         // Exclude the identity that requested the list of contacts
@@ -985,7 +985,7 @@ class User {
                 $aIdentity['type'] = 'facebook';
                 $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 15, strlen($sUriWithoutIdentity) );
             }  else {
-                $aIdentity['type'] = 'federated';
+                $aIdentity['type'] = 'custom';
                 $aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(MY_DOMAIN)-6, strlen($sUriWithoutIdentity) );
             }
         }
@@ -1001,11 +1001,11 @@ class User {
     private function getAppropriateDatabaseTable ( $sIdentityType ) {
         $sDBTable = '';
         switch ($sIdentityType) {
-            case 'federated':
-                $sDBTable = 'federated';
+            case 'custom':
+                $sDBTable = 'custom';
                 break;
             case 'facebook':
-                $sDBTable = 'legacy_oauth';
+                $sDBTable = 'social';
                 break;
         }
         return $sDBTable;
@@ -1016,8 +1016,8 @@ class User {
         $aHostingData = LoginUtil::generateHostingData('hosted-identity-update');
 
         $aIdentityFromDB = $DB->select_single_to_array(
-                'federated', 
-                'federated_id, updated', 
+                'custom', 
+                'custom_id, updated', 
                 'where identifier="' . $aRequestData['identity']['identifier'] . '"'
                 );
         $aAvatarsFromDB = $DB->select_to_array(

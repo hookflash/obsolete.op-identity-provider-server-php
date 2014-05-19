@@ -266,7 +266,7 @@ class CryptoUtil {
 	}
 	
 	/**
-	 * Generates the server authentication token that is valid for 30 minutes for the legacy OAuth login scenarios
+	 * Generates the server authentication token that is valid for 30 minutes for the social login scenarios
 	 *
 	 * @param string $sClientAuthenticationToken The authentication token generated and sent by the client
 	 * @param string $sIdentityType Could be: facebook, twitter or linkedin
@@ -366,7 +366,7 @@ class CryptoUtil {
 	 * @param string $sAccessToken The accessToken that client received from the server earlier
 	 * @param string $sAccessSecretProof The proof the client calculated. That's what the server also calculates to challange it
 	 * @param string $sAccessSecretExpires The window in which the proof is valid
-	 * @param string $sIdentityType Could be: 'federated', 'email', 'phone', 'facebook', 'twitter' or 'linkedin'
+	 * @param string $sIdentityType Could be: 'custom', 'email', 'phone', 'facebook', 'twitter' or 'linkedin'
 	 * @param string $sIdentifier The identity that is performing the validation
 	 * @param string $sUri Full identity uri
 	 * @param string $sPurpose A string we use to calculate the proof (different requests have different purpose values)

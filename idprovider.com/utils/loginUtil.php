@@ -70,7 +70,7 @@ class LoginUtil {
         $sUri = '';
         $sMyDomain = str_replace('https://','',DOMAIN);
         switch ($aRequestData['identity']['type']) {
-            case 'federated':
+            case 'custom':
                 $sUri = 'identity://' . $sMyDomain . '/' . $aRequestData['identity']['identifier'];
                 break;
             case 'facebook':
@@ -218,43 +218,6 @@ class LoginUtil {
         }
     }
 	
-    public static function sendProviderDelete () {
-        // import necessary files
-        require_once(ROOT . 'utils/curlUtil.php');
-        require_once(ROOT . 'utils/cryptoUtil.php');
-
-        // URL of identityService server
-        $url = HF_SERVICE_DOMAIN . 'registration';
-
-        // Request data
-        $requestData = '' .
-        '{' .
-            '"request": {' .
-                '"$domain": "' . DOMAIN . '",' .
-                '"$id": "' . CryptoUtil::generateRequestId() . '",' .
-                '"$handler": "customer-service",' .
-                '"$method": "provider-delete",' .
-
-                '"provider": {' .
-                    '"providerId": 100' .
-                '}' .
-            '}' .
-        '}';
-
-        // Send cURL request
-        $sResult = CurlUtil::sendPostRequest($url, $requestData);
-        die($sResult);
-        // Convert the result to an array
-        $aResultObject = JsonUtil::jsonToArray($sResult, false);
-
-        // If the id of the request matches with the id of the result, return the marshalled result, otherwise return null
-        if ( ( $aResultObject != null ) && ( key_exists ( 'id', $aResultObject['request_attr'] ) ) && ( $aResultObject['request_attr']['id'] == $nRequestId ) ) {
-            return $aResultObject['request'];
-        } else {
-            return null;
-        }
-    }
-	
     //--------------------------------------------------------------------------------------------------------------------------//
 	
     /*-------------------
@@ -278,7 +241,7 @@ class LoginUtil {
 class LoginStates {
 	 
     const SUCCEEDED = 'Succeeded';
-    const OAUTH_AUTHENTICATION_SUCCEEDED = 'OAuthAuthenticationSucceeded';
+    const SOCIAL_AUTHENTICATION_SUCCEEDED = 'SocialAuthenticationSucceeded';
     const PIN_VALIDATION_REQUIRED = 'PinValidationRequired';
 	
 }

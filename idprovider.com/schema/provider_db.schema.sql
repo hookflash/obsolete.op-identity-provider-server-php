@@ -78,14 +78,14 @@ CREATE TABLE `avatar` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `federated`
+-- Table structure for table `custom`
 --
 
-DROP TABLE IF EXISTS `federated`;
+DROP TABLE IF EXISTS `custom`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `federated` (
-  `federated_id` int(10) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `custom` (
+  `custom` int(10) NOT NULL AUTO_INCREMENT,
   `user_id` int(10) NOT NULL,
   `identifier` varchar(64) COLLATE utf8_bin NOT NULL,
   `password_hash` varchar(64) COLLATE utf8_bin DEFAULT NULL,
@@ -99,9 +99,9 @@ CREATE TABLE `federated` (
   `updated` bigint(10) DEFAULT NULL,
   `relogin_key` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `relogin_expires` bigint(10) DEFAULT NULL,
-  PRIMARY KEY (`federated_id`),
-  KEY `FK_user_id_cascade_federated` (`user_id`),
-  CONSTRAINT `FK_user_id_cascade_federated` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+  PRIMARY KEY (`custom_id`),
+  KEY `FK_user_id_cascade_custom` (`user_id`),
+  CONSTRAINT `FK_user_id_cascade_custom` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1530 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -138,14 +138,14 @@ CREATE TABLE `legacy_email` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `legacy_oauth`
+-- Table structure for table `social`
 --
 
-DROP TABLE IF EXISTS `legacy_oauth`;
+DROP TABLE IF EXISTS `social`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `legacy_oauth` (
-  `oauth_id` int(10) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `social` (
+  `social_id` int(10) NOT NULL AUTO_INCREMENT,
   `user_id` int(10) NOT NULL,
   `provider_type` varchar(10) COLLATE utf8_bin NOT NULL,
   `identifier` varchar(64) COLLATE utf8_bin NOT NULL,
@@ -160,9 +160,9 @@ CREATE TABLE `legacy_oauth` (
   `secret` varchar(350) COLLATE utf8_bin DEFAULT NULL,
   `lockbox_half_key_encrypted` varchar(100) COLLATE utf8_bin DEFAULT NULL,
   `updated` bigint(10) DEFAULT NULL,
-  PRIMARY KEY (`oauth_id`),
-  KEY `FK_user_id_cascade_oauth` (`user_id`),
-  CONSTRAINT `FK_user_id_cascade_oauth` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+  PRIMARY KEY (`social_id`),
+  KEY `FK_user_id_cascade_social` (`user_id`),
+  CONSTRAINT `FK_user_id_cascade_social` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1148 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

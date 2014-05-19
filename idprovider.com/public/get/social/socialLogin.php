@@ -51,12 +51,12 @@ if ( !isset( $_SESSION['created'] ) ) {
 if ( !defined('ROOT') ) {
     define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . "/");
 }
-require (ROOT . 'login/LegacyOAuthLogin.php');
+require (ROOT . 'login/SocialLogin.php');
 
-// Start the login using LegacyOAuthLogin object
-$oLegacyOAuthLogin = new LegacyOAuthLogin($_SESSION['identity']['type'], null);
+// Start the login using SocialLogin object
+$oSocialLogin = new SocialLogin($_SESSION['identity']['type'], null);
 
-$oLegacyOAuthLogin->startOAuthLogin();
+$oSocialLogin->startSocialLogin();
 
 LOG_EVENT('RESPONSE: ' . var_export(ob_get_contents(), true));
 

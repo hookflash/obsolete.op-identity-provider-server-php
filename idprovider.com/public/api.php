@@ -79,7 +79,7 @@ $server->registerPostMethod('login', 'login');
 $server->registerPostMethod('server-nonce-get', 'serverNonceGet');
 $server->registerPostMethod('identity-salts-get', 'identitySaltsGet');
 $server->registerPostMethod('identity-salts-set', 'identitySaltsSet');
-$server->registerPostMethod('oauth-provider-authentication', 'oAuthProviderAuthentication');
+$server->registerPostMethod('social-provider-authentication', 'socialProviderAuthentication');
 $server->registerPostMethod('hosting-data-get', 'hostingDataGet');
 $server->registerPostMethod('pin-validation', 'pinValidation');
 $server->registerPostMethod('linkedin-token-exchange', 'linkedinTokenExchange');
@@ -318,10 +318,10 @@ function identitySaltsSet()
 }
 
 /**
- * Implementation of oauth-provider-authentication method
+ * Implementation of social-provider-authentication method
  *
  */
-function oAuthProviderAuthentication()
+function socialProviderAuthentication()
 {
 	global $DB;
 	global $oRequest;
@@ -329,15 +329,15 @@ function oAuthProviderAuthentication()
 	
 	try {
 		// Check request validity
-		RequestUtil::validateOAuthProviderAuthenticationRequest( $oRequest );
+		RequestUtil::validateSocialProviderAuthenticationRequest( $oRequest );
 
-		// Create LegacyOAuthLogin object
+		// Create SocialLogin object
 		$sIdentityType = $oRequest->aPars['request']['identity']['type'];
-		require_once(ROOT . 'login/LegacyOAuthLogin.php');
-		$oLegacyOAuthLogin = new LegacyOAuthLogin( $sIdentityType, $oRequest );
+		require_once(ROOT . 'login/SocialLogin.php');
+		$oSocialLogin = new SocialLogin( $sIdentityType, $oRequest );
 		
-		// Try starting an OAuth authentication process
-		$aAuthenticationResult = $oLegacyOAuthLogin->authentication();
+		// Try starting a social authentication process
+		$aAuthenticationResult = $oSocialLogin->authentication();
 			
 	} catch (Exception $exception) {
 		$oResponse->run($exception);
@@ -576,9 +576,9 @@ function federatedContactsGet ()
         RequestUtil::validateFederatedContactsGetRequest( $oRequest );
         
         // TODO
-        require_once(ROOT . 'login/FederatedLogin.php');
-        $oFederatedLogin = new FederatedLogin($DB, 'federated', $oRequest);
-        $aIdentityList = $oFederatedLogin->getContacts();
+        require_once(ROOT . 'login/CustomLogin.php');
+        $oCustomLogin = new CustomLogin($DB, 'custom', $oRequest);
+        $aIdentityList = $oCustomLogin->getContacts();
     } catch (Exception $exception) {
         $oResponse->run($exception);
     }
@@ -625,14 +625,14 @@ function devtoolsDatabaseCleanProvider ()
  * Determine loginType based on identityType
  *
  * @param string $sIdentityType Defines the type of the identity trying to log in
- * @return string Returns 'federated' (for identityType 'federated'), 'legacy' (for identityType 'email' or 'phone') or 'legacyOAuth' (for 'linkedin', 'facebook', 'twiter')
+ * @return string Returns 'custom' (for identityType 'custom'), 'legacy' (for identityType 'email' or 'phone') or 'social' (for 'linkedin', 'facebook', 'twiter')
  */
 function getIdentityCategory ( $sIdentityType ) {
 	switch ($sIdentityType) {
-		case 'federated':
-			return 'federated';
+		case 'custom':
+			return 'custom';
 		case 'facebook':
-			return 'legacyOAuth';
+			return 'social';
 	}
 }
 
@@ -643,17 +643,17 @@ function getIdentityCategory ( $sIdentityType ) {
  * @param string $sIdentityCategory An id category to switch against.
  * @param string $sIdentityType An identity type to create the login object with
  * @param array $post An array of request data to create the login object with.
- * @return object Could be one of these: FederatedLogin object, LegacyLogin object or LegacyOAuthLogin object.
+ * @return object Could be one of these: CustomLogin object, LegacyLogin object or SocialLogin object.
  */
 function createLogin ($DB, $sIdentityCategory, $sIdentityType, $aRequest ) {
 	
 	switch ($sIdentityCategory) {
-		case 'federated':
-			require_once(ROOT . 'login/FederatedLogin.php');
-			return new FederatedLogin($DB, $sIdentityType, $aRequest);
-		case 'legacyOAuth':
-			require_once(ROOT . 'login/LegacyOAuthLogin.php');
-			return new LegacyOAuthLogin($sIdentityType, $aRequest);
+		case 'custom':
+			require_once(ROOT . 'login/CustomLogin.php');
+			return new CustomLogin($DB, $sIdentityType, $aRequest);
+		case 'social':
+			require_once(ROOT . 'login/SocialLogin.php');
+			return new SocialLogin($sIdentityType, $aRequest);
 	}
 }
 

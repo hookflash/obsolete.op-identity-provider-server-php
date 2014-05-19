@@ -122,17 +122,17 @@ function performTests() {
     } else {
         $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'avatar\' found!');
     }
-    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'federated'");
-    if ($dbcheck[0]['Tables_in_provider_db (federated)'] != 'federated') {
-        $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'federated\' not found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'custom'");
+    if ($dbcheck[0]['Tables_in_provider_db (custom)'] != 'custom') {
+        $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'custom\' not found!');
     } else {
-        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'federated\' found!');
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'custom\' found!');
     }
-    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_oauth'");
-    if ($dbcheck[0]['Tables_in_provider_db (legacy_oauth)'] != 'legacy_oauth') {
-        $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_oauth\' not found!');
+    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'social'");
+    if ($dbcheck[0]['Tables_in_provider_db (social)'] != 'social') {
+        $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'social\' not found!');
     } else {
-        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_oauth\' found!');
+        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'social\' found!');
     }
     $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_phone'");
     if ($dbcheck[0]['Tables_in_provider_db (legacy_phone)'] != 'legacy_phone') {

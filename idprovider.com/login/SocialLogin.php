@@ -56,10 +56,10 @@ require_once (ROOT . 'utils/requestUtil.php');
 require_once (ROOT . 'libs/mySQL/class-mysqlidb.php');
 
 /**
- * Class LegacyOAuthLogin provides all the needed features 
- * for the social networks (facebook, linkedin, twitter, github) login scenarios
+ * Class SocialLogin provides all the needed features 
+ * for the social networks (facebook, linkedin, twitter, github...) login scenarios
  */
-class LegacyOAuthLogin {
+class SocialLogin {
 
     public $DB = null;
     public $sIdentityType = '';
@@ -84,13 +84,13 @@ class LegacyOAuthLogin {
      * This function does two basic things:
      * 1. It reads the request data and places it into the session for later use
      * 2. It genererates and returns the URL for the client to 
-     *      redirect immediately after in order to perfrom an OAuth login
+     *      redirect immediately after in order to perfrom a social login
      *
      * @return array $aAuthenticationResult An array that just has the redirectURL set
      */
     public function authentication() { 
         // Take data from the request
-        $aRequestData = RequestUtil::takeOAuthProviderAuthenticationRequestData($this->aRequest);
+        $aRequestData = RequestUtil::takeSocialProviderAuthenticationRequestData($this->aRequest);
 
         // Store data in session for later use
         $_SESSION['appid'] = $aRequestData['appid'];
@@ -99,7 +99,7 @@ class LegacyOAuthLogin {
         $_SESSION['identity'] = $aRequestData['identity'];
 
         // Return the redirect URL 
-        $aAuthenticationResult['redirectURL'] = 'http://' . DOMAIN . '/get/oauth/oauthLogin.php';
+        $aAuthenticationResult['redirectURL'] = 'http://' . DOMAIN . '/get/social/socialLogin.php';
         APIEventLog('aAuthenticationResult[redirectURL]=' . $aAuthenticationResult['redirectURL']);
 
         LOG_EVENT('$aAuthenticationResult: ' . var_export($aAuthenticationResult, true));
@@ -108,7 +108,7 @@ class LegacyOAuthLogin {
     }
 	
     /**
-     * Logs the user in with a given 'legacyOAuth' identity
+     * Logs the user in with a given 'social' identity
      *
      * @return array $aLoginResult Returns array of data to be returnd to the client that performed the login request in the first place
      */
@@ -117,7 +117,7 @@ class LegacyOAuthLogin {
         $aRequestData = RequestUtil::takeLoginRequestData($this->aRequest);
 
         // Try logging the user in using the given identity
-        $aUser = $this->oUser->signInUsingLegacyOAuth(
+        $aUser = $this->oUser->signInUsingSocial(
             $aRequestData['identity']['type'],
             $aRequestData['identity']['identifier']
         );
@@ -169,7 +169,7 @@ class LegacyOAuthLogin {
             $aUser 
         );
 
-        LOG_EVENT('legacyOAuthLogin - login - $aIdentityUpdateResult: ' . var_export($aIdentityUpdateResult, true));
+        LOG_EVENT('SocialLogin - login - $aIdentityUpdateResult: ' . var_export($aIdentityUpdateResult, true));
 
         // Return 'Login failed' error
         if ( $aIdentityUpdateResult == null || key_exists( 'error', $aIdentityUpdateResult ) ) {
@@ -192,8 +192,8 @@ class LegacyOAuthLogin {
      * Just a switch that branches out the execution based on given identity type
      * 
      */
-    public function startOAuthLogin() {
-        // Switch the execution based on OAuth provider
+    public function startSocialLogin() {
+        // Switch the execution based on social provider
         switch ( $this->sIdentityType ){
             // case 'linkedin':
             //     $this->loginUsingLinkedIn();
@@ -213,8 +213,8 @@ class LegacyOAuthLogin {
      * Just a switch that branches out the execution based on given identity type
      * 
      */
-    public function afterSuccessfullOAuthLogin() {
-        // Switch the execution based on OAuth provider
+    public function afterSuccessfullSocialLogin() {
+        // Switch the execution based on social provider
         switch ( $this->sIdentityType ){
             // case 'linkedin':
             //     $this->afterSuccessfullLinkedinLogin();
@@ -233,7 +233,7 @@ class LegacyOAuthLogin {
     //--------------------------------------------------------------------------------------------------------------------------//
 	
     /*-----------------------------
-      OAuth login start functions
+      Social login start functions
     -----------------------------*/
     private function loginUsingFacebook () {
         // Set required imports
@@ -249,7 +249,7 @@ class LegacyOAuthLogin {
         $url = $facebook->getLoginUrl(
                 array(
                     'scope' => 'email, read_stream, publish_stream, offline_access, status_update, share_item', 
-                    'redirect_uri' => 'http://' . $_SERVER['HTTP_HOST'] . '/get/oauth/index.php'
+                    'redirect_uri' => 'http://' . $_SERVER['HTTP_HOST'] . '/get/social/index.php'
                 )
                 );								  
 
@@ -259,7 +259,7 @@ class LegacyOAuthLogin {
     }
 	
     /*-----------------------------------------
-      after successfull OAuth login functions
+      after successfull social login functions
     -----------------------------------------*/
 
     private function afterSuccessfullFacebookLogin () {
@@ -332,7 +332,7 @@ class LegacyOAuthLogin {
             header ( 'Location: ' . $_SESSION['callbackURL'] );
         }
         // Get the parameters given as a successful login indication
-        $aSignInResult = $this->oUser->signInAfterOAuthProviderLogin(
+        $aSignInResult = $this->oUser->signInAfterSocialProviderLogin(
                 $_SESSION['identity']['type'],
                 $sProviderUserId,
                 $sProviderUsername,
@@ -342,7 +342,7 @@ class LegacyOAuthLogin {
                 $sToken,
                 $sSecret
                 );
-        // If there is no identity returned by signInAfterOAuthProviderLogin()
+        // If there is no identity returned by signInAfterSocialProviderLogin()
         if ( !$aSignInResult || empty( $aSignInResult ) ) {
             $aAuthenticationResult['errorMessage'] = 'Sign in failed';
             $sRedirectURL .= urlencode('{"reason":{"error":"' . $aAuthenticationResult['errorMessage'] . '"}}');
@@ -360,7 +360,7 @@ class LegacyOAuthLogin {
                     );
             // Fill the result with valid values
             require_once (ROOT . 'utils/loginUtil.php');
-            $aAuthenticationResult['loginState'] = LoginStates::OAUTH_AUTHENTICATION_SUCCEEDED;				
+            $aAuthenticationResult['loginState'] = LoginStates::SOCIAL_AUTHENTICATION_SUCCEEDED;				
             $aIdentity = array (
                 'type'			=> $aSignInResult['providerType'],
                 'identifier'	=> $aSignInResult['identifier']
@@ -385,44 +385,6 @@ class LegacyOAuthLogin {
         // Do the redirect
         $_SESSION['identityServiceAuthenticationURL'] = $sRedirectURL;
         header ( 'Location: ' . $_SESSION['callbackURL'] );
-    }
-
-    private function validateSignatureForTokenExchange ( $consumer_key, $consumer_secret, $credentials ) {
-        // Create a default result
-        $aResult = array (
-        'validationSucceeded' => 'false',
-        'validationMessage'   => 'Not validated'
-        );
-
-        // Official LinkedIn signature validation		
-        if ($credentials->signature_version == 1) {
-            if ($credentials->signature_order && is_array($credentials->signature_order)) {
-                $base_string = '';
-                // build base string from values ordered by signature_order
-                foreach ($credentials->signature_order as $key) {
-                    if (isset($credentials->$key)) {
-                        $base_string .= $credentials->$key;
-                    } else {
-                        $aResult['validationMessage'] = "Missing signature parameter: $key";
-                    }
-                }
-                // hex encode an HMAC-SHA1 string
-                $signature =  base64_encode(hash_hmac('sha1', $base_string, $consumer_secret, true));
-                // check if our signature matches the cookie's
-                if ($signature == $credentials->signature) {
-                        $aResult['validationSucceeded'] = 'true';
-                    $aResult['validationMessage'] = 'Signature validation succeeded';
-                } else {
-                    $aResult['validationMessage'] = 'Signature validation failed';    
-                }
-            } else {
-                $aResult['validationMessage'] = 'Signature order missing';
-            }
-        } else {
-            $aResult['validationMessage'] = 'Unknown cookie version';
-        }
-
-        return $aResult;
     }
 
     private function informIdentityServiceAboutSignUp ( $sIdentityType, $sProviderUserId, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sUpdated ) {

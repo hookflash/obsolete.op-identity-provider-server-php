@@ -42,15 +42,15 @@ require_once (ROOT . 'utils/cryptoUtil.php');
 require_once (ROOT . 'utils/requestUtil.php');
     
 /**
- * Class FederatedLogin provides all the needed features
- * for the federated identities login scenarios.
+ * Class CustomLogin provides all the needed features
+ * for the custom identity login scenarios.
  * (INFO: An identity that is provided by this identity provider and is being 
- *  identified with username/password combination is considered as federated.)
+ *  identified with username/password combination is considered as custom.)
  */
-class FederatedLogin {
+class CustomLogin {
     
     public $DB = null;
-    public $sIdentityType = 'federated';
+    public $sIdentityType = 'custom';
     public $aRequest = null;
     public $oUser = null;
             
@@ -58,7 +58,7 @@ class FederatedLogin {
      * A constructor setting all the needed instance variables
      *
      * @param $DB mysql database
-     * @param $sIdentityType should always be 'federated'
+     * @param $sIdentityType should always be 'custom'
      * @param $aRequest The request that has all the needed data to perform a login
      */
     public function __construct($DB, $sIdentityType, $aRequest) {
@@ -70,7 +70,7 @@ class FederatedLogin {
     }
             
     /**
-     * Logs the user in with a given federated identity
+     * Logs the user in with a given custom identity
      *
      * @return array $aLoginResult Returns array of data to be returnd to 
      * the client that performed the login request in the first place
@@ -83,7 +83,7 @@ class FederatedLogin {
         }
 
         // Try logging the user in using the given identity
-        $aUser = $this->oUser->signInUsingFederated(
+        $aUser = $this->oUser->signInUsingCustom(
             $aRequestData['identity']['identifier'],
             $aRequestData['appid']
         );
@@ -128,7 +128,7 @@ class FederatedLogin {
                 $aRequestData['identity']['identifier']);
         $aIdentityAccessResult['updated'] = $aUser['updated'];
 
-        // Generate and store a federated relogin key if needed, 
+        // Generate and store a custom relogin key if needed, 
         // otherwise return the same reloginKey that has just been used
         $sReloginKey = key_exists('reloginKeyServerPart',$aRequestData['identity']) ?
                 $aRequestData['identity']['reloginKeyServerPart'] : 
@@ -149,7 +149,7 @@ class FederatedLogin {
    }
             
     /**
-     * Create new federated account with the given 
+     * Create new custom account with the given 
      * identity, passwordHash, identitySecretSalt and serverPasswordSalt
      *
      * @return array Returns just an error indicator. 
@@ -170,7 +170,7 @@ class FederatedLogin {
                     
         // Try creating new user with given parameters
         $aSignUpResult = $this->oUser->signUp( 
-                'federated',
+                'custom',
                 $aRequestData['identity']['identifier'], 
                 $aRequestData['identity']['passwordHash'], 
                 $aRequestData['identity']['secretSalt'], 
@@ -185,7 +185,7 @@ class FederatedLogin {
         if ( !$aSignUpResult['signUpSucceeded']) {			
             throw new RestServerException('004', 
                     array(
-                        'type' => 'federated',
+                        'type' => 'custom',
                         'identifier' => $aRequestData['identity']['identifier']
                     ));
         }
@@ -226,7 +226,7 @@ class FederatedLogin {
 
         // Fetch the user
         $aIdentity = $this->oUser->parseIdentityUri($aRequestData['identity']['uri']);
-        $aUser = $this->oUser->signInUsingFederated(
+        $aUser = $this->oUser->signInUsingCustom(
                 $aIdentity['identifier'], 
                 $aRequestData['appid']
                 );

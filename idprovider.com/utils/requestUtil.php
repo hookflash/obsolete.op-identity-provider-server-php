@@ -73,7 +73,7 @@ class RequestUtil {
 													 'parameter' => 'type'
 													 ));
 			}
-			if ( !( $req['identity']['type'] == 'federated' || 
+			if ( !( $req['identity']['type'] == 'custom' || 
 					$req['identity']['type'] == 'facebook' ) ) {
 				throw new RestServerException('001', array(
 													 'parameter' => 'type',
@@ -85,7 +85,7 @@ class RequestUtil {
 													 'parameter' => 'identifier'
 													 ));
 			}
-			if ( $req['identity']['type'] == 'federated' || $req['identity']['type'] == 'email' || $req['identity']['type'] == 'phone' ) {
+			if ( $req['identity']['type'] == 'custom' || $req['identity']['type'] == 'email' || $req['identity']['type'] == 'phone' ) {
 				if ( !( key_exists( 'proof', $req ) && $req['proof'] != null ) ) {
 					throw new RestServerException('002', array(
 														 'parameter' => 'proof'
@@ -140,7 +140,7 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'federated' || 
+		if ( !( $req['identity']['type'] == 'custom' || 
 				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 												 'parameter' => 'type',
@@ -200,7 +200,7 @@ class RequestUtil {
 	
 	/**
 	 * Validates if the identitySaltsGet request has already set not empty identity type and identifier.
-	 * Also, it validates if identity type has one of six allowed values (federated, email, phone, facebook, linkedin and twitter).
+	 * Also, it validates if identity type has one of six allowed values (custom, email, phone, facebook, linkedin and twitter).
 	 *
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
@@ -217,7 +217,7 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'federated' ||
+		if ( !( $req['identity']['type'] == 'custom' ||
 				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type',
@@ -234,7 +234,7 @@ class RequestUtil {
 	/**
 	 * Validates if the identitySaltsSet request has already set not empty authentication tokens and the identity with salts.
 	 * Also, it validates if identity type has one of three allowed values (facebook, linkedin and twitter) out of total six
-	 * (this limitation is made because the only sequnce where this request needs to be called if the FreshAccount/LegacyOAuth sequence).
+	 * (this limitation is made because the only sequnce where this request needs to be called if the FreshAccount/Social sequence).
 	 *
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
@@ -263,7 +263,7 @@ class RequestUtil {
 		}
 		if ( !( $req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
-											     'parameter' => 'type_oauth-only',
+											     'parameter' => 'type_social-only',
 											     'parameterValue' => $req['identity']['type']
 											     ));
 		}
@@ -285,14 +285,14 @@ class RequestUtil {
 	}
 	
 	/**
-	 * Validates if the oAuthProviderAuthentication request has already set not empty clientAuthenticationToken and the identity type.
+	 * Validates if the SocialProviderAuthentication request has already set not empty clientAuthenticationToken and the identity type.
 	 * Also, it validates if identity type has one of three allowed values (facebook, linkedin and twitter) out of total six
-	 * (this limitation is made because the only sequnce where this request needs to be called if the FreshAccount/LegacyOAuth sequence).
+	 * (this limitation is made because the only sequnce where this request needs to be called if the FreshAccount/Social sequence).
 	 *
 	 * @param array $req Parameters of the request
 	 * @return boolean Returns true if the request is valid, otherwise returns false
 	 */
-	public static function validateOAuthProviderAuthenticationRequest ( $oRequest ){
+	public static function validateSocialProviderAuthenticationRequest ( $oRequest ){
 		$req = $oRequest->aPars['request'];
 		if ( !( key_exists( 'clientAuthenticationToken', $req ) && $req['clientAuthenticationToken'] != null ) ) {
 			throw new RestServerException('002', array(
@@ -311,7 +311,7 @@ class RequestUtil {
 		}
 		if ( !( $req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
-											     'parameter' => 'type_oauth-only',
+											     'parameter' => 'type_social-only',
 											     'parameterValue' => $req['identity']['type']
 											     ));
 		}
@@ -489,7 +489,7 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'federated' ||
+		if ( !( $req['identity']['type'] == 'custom' ||
 				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type',
@@ -723,7 +723,7 @@ class RequestUtil {
 			'type'								=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
 			'identifier'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
 			);
-			if ( $req['identity']['type'] == 'federated') {
+			if ( $req['identity']['type'] == 'custom') {
 				$aProof = array (		
 				'serverNonce'						=> DatabaseUtil::protectFromSqlInjection( $req['proof']['serverNonce'] ),
 				'serverLoginProof'					=> DatabaseUtil::protectFromSqlInjection( $req['proof']['serverLoginProof'] )
@@ -831,7 +831,7 @@ class RequestUtil {
 	 * @param array $req The request to take data from
 	 * @return array of needed given-by-request data
 	 */
-	public static function takeOAuthProviderAuthenticationRequestData ( $oRequest ){
+	public static function takeSocialProviderAuthenticationRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		$aIdentity = array(
