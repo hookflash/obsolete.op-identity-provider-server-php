@@ -337,7 +337,7 @@ function identitySaltsGet()
 		$aRequestData = RequestUtil::takeIdentitySaltsGetRequestData( $oRequest );
 		
 		// Get the salts from the database
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$aSalts = $oUser->getIdentitySalts($aRequestData['identity']['type'], $aRequestData['identity']['identifier']);
 		
@@ -380,7 +380,7 @@ function identitySaltsSet()
 		$aRequestData = RequestUtil::takeIdentitySaltsSetRequestData( $oRequest );
 		
 		// Try setting the salts into the database (after token authentication succeeds)
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$aIdentitySaltsSettingResult = $oUser->setIdentitySalts($aRequestData);
 		
@@ -510,7 +510,7 @@ function profileGet ()
 		RequestUtil::validateProfileGetRequest( $oRequest );
 		
 		// Try getting the data about user's public profile
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$aProfile = $oUser->getPublicProfile($oRequest);
 	} catch (Exception $exception) {
@@ -544,7 +544,7 @@ function profileUpdate ()
 		RequestUtil::validateProfileUpdateRequest( $oRequest );
 		
 		// Try updateing users public profile
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->updateProfile($oRequest);
 	} catch (Exception $exception) {
@@ -577,7 +577,7 @@ function passwordChange ()
 		RequestUtil::validatePasswordChangeRequest( $oRequest );
 		
 		// Try changing password
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->changePassword($oRequest);
 	} catch (Exception $exception) {
@@ -618,7 +618,7 @@ function lockboxHalfKeyStore ()
 		RequestUtil::validateLockboxHalfKeyStoreRequest( $oRequest );
 		
 		// Try inserting the key
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->storeLockboxHalfKeyEncrypted( $oRequest, 'lockbox-update' );
 	} catch (Exception $exception) {
@@ -644,7 +644,7 @@ function identityAccessValidate ()
 		RequestUtil::validateIdentityAccessValidateRequest( $oRequest );
 		
 		// Try inserting the key
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$aUpdateResult = $oUser->validateIdentityAccess( $oRequest );
 	} catch (Exception $exception) {
@@ -670,7 +670,7 @@ function identityAccessRolodexCredentialsGet ()
 		RequestUtil::validateIdentityAccessRolodexCredentialsGetRequest( $oRequest );
 		
 		// Try inserting the key
-		require_once(ROOT . 'login/user.php');
+		require_once(ROOT . 'model/User.php');
 		$oUser = new User($DB);
 		$sServerToken = $oUser->getIdentityAccessRolodexCredentials( $oRequest );
 		$aRolodex['serverToken'] = $sServerToken;
@@ -752,7 +752,7 @@ function devtoolsDatabaseCleanProvider ()
 	    $aRequestData = RequestUtil::takeDevtoolsDatabaseCleanProviderRequestData( $oRequest );
         
         // Perform db clean
-        require_once(ROOT . 'login/user.php');
+        require_once(ROOT . 'model/User.php');
         $oUser = new User($DB);
         $oUser->cleanDB( $aRequestData );
     } catch (Exception $exception) {

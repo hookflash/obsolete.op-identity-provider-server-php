@@ -49,7 +49,7 @@ if ( !isset( $_SESSION['created'] ) ) {
 
 // Set required imports
 require (ROOT . 'utils/loginUtil.php');
-require (ROOT . 'login/user.php');
+require (ROOT . 'model/User.php');
 require_once (ROOT . 'utils/cryptoUtil.php');
 require_once (ROOT . 'config/config.php');
 require_once (ROOT . 'utils/requestUtil.php');
