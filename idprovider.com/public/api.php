@@ -409,7 +409,7 @@ function oAuthProviderAuthentication()
 
 		// Create LegacyOAuthLogin object
 		$sIdentityType = $oRequest->aPars['request']['identity']['type'];
-		require_once(ROOT . 'login/legacyOAuthLogin.php');
+		require_once(ROOT . 'login/LegacyOAuthLogin.php');
 		$oLegacyOAuthLogin = new LegacyOAuthLogin( $sIdentityType, $oRequest );
 		
 		// Try starting an OAuth authentication process
@@ -474,7 +474,7 @@ function linkedinTokenExchange ()
 	$aRequestData = RequestUtil::takeLinkedinTokenExhangeRequestData( $oRequest );
 	
 	// Create a LegacyOAuthLogin object
-	require_once(ROOT . 'login/legacyOAuthLogin.php');
+	require_once(ROOT . 'login/LegacyOAuthLogin.php');
 	$oLegacyOAuthLogin = new LegacyOAuthLogin('linkedin', $aRequestData);
 	
 	// Perform the exchangeToken method
@@ -724,7 +724,7 @@ function federatedContactsGet ()
         RequestUtil::validateFederatedContactsGetRequest( $oRequest );
         
         // TODO
-        require_once(ROOT . 'login/federatedLogin.php');
+        require_once(ROOT . 'login/FederatedLogin.php');
         $oFederatedLogin = new FederatedLogin($DB, 'federated', $oRequest);
         $aIdentityList = $oFederatedLogin->getContacts();
     } catch (Exception $exception) {
@@ -796,13 +796,10 @@ function createLogin ($DB, $sIdentityCategory, $sIdentityType, $aRequest ) {
 	
 	switch ($sIdentityCategory) {
 		case 'federated':
-			require_once(ROOT . 'login/federatedLogin.php');
+			require_once(ROOT . 'login/FederatedLogin.php');
 			return new FederatedLogin($DB, $sIdentityType, $aRequest);
-		case 'legacy':
-			require_once(ROOT . 'login/legacyLogin.php');
-			return new LegacyLogin($DB, $sIdentityType, $aRequest);
 		case 'legacyOAuth':
-			require_once(ROOT . 'login/legacyOAuthLogin.php');
+			require_once(ROOT . 'login/LegacyOAuthLogin.php');
 			return new LegacyOAuthLogin($sIdentityType, $aRequest);
 	}
 }

@@ -50,7 +50,7 @@ if ( !isset( $_SESSION['created'] ) ) {
 if ( !defined(ROOT) ) {
 	define('ROOT', dirname(dirname(dirname(dirname(__FILE__)))) . "/");
 }
-require (ROOT . 'login/legacyOAuthLogin.php');
+require (ROOT . 'login/LegacyOAuthLogin.php');
 
 // Check if $_SESSION is well set 
 if ( !key_exists('identity', $_SESSION ) || !key_exists('type', $_SESSION['identity'] ) ) die('Identity type is missing.');
