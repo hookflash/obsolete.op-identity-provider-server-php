@@ -85,7 +85,7 @@ DROP TABLE IF EXISTS `custom`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `custom` (
-  `custom` int(10) NOT NULL AUTO_INCREMENT,
+  `custom_id` int(10) NOT NULL AUTO_INCREMENT,
   `user_id` int(10) NOT NULL,
   `identifier` varchar(64) COLLATE utf8_bin NOT NULL,
   `password_hash` varchar(64) COLLATE utf8_bin DEFAULT NULL,
