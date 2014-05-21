@@ -46,7 +46,6 @@ if ( !isset( $_SESSION['created'] ) ) {
     session_regenerate_id(true);
     $_SESSION['created'] = time();
 }
-
 // Set required imports
 require (ROOT . 'utils/loginUtil.php');
 require (ROOT . 'model/User.php');

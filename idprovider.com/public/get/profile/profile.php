@@ -35,7 +35,7 @@ either expressed or implied, of the FreeBSD Project.
     require_once (ROOT . 'config/config.php');
     require_once (ROOT . 'utils/cryptoUtil.php');
     require_once (ROOT . 'utils/profileUtil.php');
-    require_once (ROOT . 'jsonUtil.php');
+    require_once (ROOT . 'utils/jsonUtil.php');
 	
     if (!isset($_GET['vprofile'])) {
         $_GET['vprofile'] = 0;
