@@ -39,8 +39,8 @@ date_default_timezone_set('UTC');
 require_once(ROOT . 'utils/cryptoUtil.php');
 require_once(ROOT . 'utils/jsonUtil.php');
 
-define('PROFILE_ULR_BASE_CONST', DOMAIN . '/php/profile/profile.php?');
-define('VPROFILE_ULR_BASE_CONST', DOMAIN . '/php/profile/profile.php?vprofile=1');
+define('PROFILE_ULR_BASE_CONST', DOMAIN . '/get/profile/profile.php?');
+define('VPROFILE_ULR_BASE_CONST', DOMAIN . '/get/profile/profile.php?vprofile=1');
 
 /**
  * Class ProfileUtil is a utility class that provides public profile data for given input.
