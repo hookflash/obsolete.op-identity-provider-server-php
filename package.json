@@ -11,5 +11,11 @@
 	},
     "devMappings": {
         "app-php": "github.com/freedom-platform/app-php/~0.1.0"
-    }
+    },
+	"config": {
+		"pio.deploy.converter": {
+			"sourcePath": ".",
+			"scriptsPath": "scripts/digitalocean"
+		}
+	}
 }

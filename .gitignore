@@ -5,3 +5,4 @@ node_modules/
 /vendor/
 .program.json
 debug.log
+/.pio.cache/
