@@ -41,8 +41,12 @@ define('LOG', true);
 
 if ( !defined('ROOT') ) {
         define('ROOT', dirname(dirname(__FILE__)) . "/");
-}
-require (ROOT . 'config/config-custom.php');
+} 
+
+
+//die("fadsadfg     " . file_exists(ROOT . 'config/config-custom.php'));
+
+require_once(ROOT . 'config/config-custom.php');
 
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {

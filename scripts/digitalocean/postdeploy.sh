@@ -20,6 +20,9 @@ sudo chmod -Rf ug+x $PIO_SCRIPTS_PATH
 #######################################################
 
 
+echo "Installing cURL ..."
+sudo apt-get -y install curl libcurl3 libcurl3-dev php5-curl
+
 echo "Linking service into apache document root ..."
 rm -f /var/www/html/$PIO_SERVICE_ID || true
 ln -s $PIO_SERVICE_PATH/live/install /var/www/html/$PIO_SERVICE_ID
@@ -97,6 +100,7 @@ function provisionTable(config, callback) {
 
 function main(callback) {
 	return parseConfig(function(err, config) {
+		FS.writeFile("'$PIO_SERVICE_PATH'/sync/source/idprovider.com/config/mysql.json", JSON.stringify(config.client), callback);
 		return provisionTable(config, callback);
 	});
 }
@@ -109,3 +113,10 @@ main(function(err) {
 	process.exit(0);
 });
 '
+
+echo "Configure PHP example server ..."
+rm -f $PIO_SERVICE_PATH/configured/$CONFIGURED_DIR/install/idprovider.com/config/config-custom.php || true
+cp -Rf /opt/services/config/live/install/identity-provider-config.php $PIO_SERVICE_PATH/configured/$CONFIGURED_DIR/install/idprovider.com/config/config-custom.php
+chown -Rf www-data:www-data /opt/services/config/live/install/identity-provider-config.php
+
+
