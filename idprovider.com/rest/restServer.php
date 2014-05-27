@@ -136,7 +136,6 @@ class RestServer {
 	 *
 	 */
 	public function run() {
-		
 		if ( isset( $this->oRequest->aPars['request_attr']['method'] ) ) {
 
 			$aRoutes = $this->aRoutes[ $this->sMethod ];

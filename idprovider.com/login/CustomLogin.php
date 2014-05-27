@@ -158,7 +158,7 @@ class CustomLogin {
     public function signUp() {
         // Take data from the request
         $aRequestData = RequestUtil::takeSignUpRequestData($this->aRequest);
-                    
+        
         // Adding profile data to the request data
         require_once (ROOT . 'utils/profileUtil.php');
         $aRequestData['identity']['profile'] = 

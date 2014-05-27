@@ -50,7 +50,7 @@ class JsonUtil {
 	    } catch (Exception $e) {
 	    	return false;
 	    }
-	    return ( is_object($object) ) ? true : false;
+	    return is_object($object);
 	}
 	
 	/**
@@ -94,14 +94,14 @@ class JsonUtil {
 		$sId 		= $aRawArrayFromJson[$sMessageType]['$id'];
 		$sHandler	= $aRawArrayFromJson[$sMessageType]['$handler'];
 		$sMethod 	= $aRawArrayFromJson[$sMessageType]['$method'];
-                $sAppId 	= isset($aRawArrayFromJson[$sMessageType]['$appid']) ? 
-                        $aRawArrayFromJson[$sMessageType]['$appid'] : '';
+		$sAppId 	= isset($aRawArrayFromJson[$sMessageType]['$appid']) ? 
+		$aRawArrayFromJson[$sMessageType]['$appid'] : '';
 		if ( $sDomain == '' || $sId == '' || $sHandler == '' || $sMethod == ''){
 			return null;
 		}		
 		$aRequestAttr = array (
 			'domain' 	=> $sDomain,
-                        'appid' 	=> $sAppId,
+			'appid' 	=> $sAppId,
 			'id' 		=> $sId,
 			'handler' 	=> $sHandler,
 			'method' 	=> $sMethod

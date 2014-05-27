@@ -421,7 +421,7 @@ class User {
 
         // Decide what table to look at
         $sDBTable = $this->getAppropriateDatabaseTable($sIdentityType);
-
+        
         // Check if the identifier is alredy taken, and if so, return false
         $aIdentity = $DB->select_single_to_array(
                 $sDBTable, 

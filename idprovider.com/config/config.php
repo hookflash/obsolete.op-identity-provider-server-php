@@ -44,8 +44,6 @@ if ( !defined('ROOT') ) {
 } 
 
 
-//die("fadsadfg     " . file_exists(ROOT . 'config/config-custom.php'));
-
 require_once(ROOT . 'config/config-custom.php');
 
 

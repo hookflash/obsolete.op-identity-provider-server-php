@@ -68,11 +68,6 @@ $DB = new mysqldb(APP_DB_NAME, APP_DB_HOST, APP_DB_USER, APP_DB_PASS);
 
 // Create RestServer object and define the relationship between a request method and a php function
 $server = new RestServer();
-$server->registerPostMethod('internal_cslfp', 'internal_calculateServerLoginFinalProof');
-$server->registerPostMethod('internal_thfs', 'internal_tryHFService');
-$server->registerPostMethod('internal_ciasp', 'internal_calculateIdentityAccessSecretProof');
-$server->registerPostMethod('internal_prct', 'internal_parseRolodexCredentialsToken');
-$server->registerPostMethod('internal_erct', 'internal_encryptRolodexCredentialsToken');
 $server->registerPostMethod('services-get', 'servicesGet');
 $server->registerPostMethod('sign-up', 'signUp');
 $server->registerPostMethod('login', 'login');

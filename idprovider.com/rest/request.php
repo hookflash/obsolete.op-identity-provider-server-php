@@ -64,7 +64,7 @@ class Request {
 		// Try converting a body to an array of parameters (taking in consideration the format of the request: whether it's JSON or XML)
 		if ( $this->bIsJson ) {
 			require_once ( ROOT . 'utils/jsonUtil.php' );
-
+			
 			if ( $this->aPars = JsonUtil::jsonToArray($sBody) ){
 				$this->sBody = $sBody;
 				APIEventLog($sBody);
