@@ -36,8 +36,8 @@ if ( !defined('ROOT') ) {
 	define('ROOT', dirname(dirname(dirname(__FILE__))) . "/");
 }
 
-define(UNDERLINE_DIV, '<div id="info">--------------------------------------------------------<br/></div>');
-define(NEW_LINE_DIV, '<br/>');
+define('UNDERLINE_DIV', '<div id="info">--------------------------------------------------------<br/></div>');
+define('NEW_LINE_DIV', '<br/>');
 
 $numErrors = 0;
 $sResult = performTests();
