@@ -100,7 +100,11 @@ function provisionTable(config, callback) {
 
 function main(callback) {
 	return parseConfig(function(err, config) {
-		FS.writeFile("'$PIO_SERVICE_PATH'/sync/source/idprovider.com/config/mysql.json", JSON.stringify(config.client), callback);
+		if (err) return callback(err);
+		if (!FS.existsSync("/opt/data/config")) {
+			FS.mkdirSync("/opt/data/config");
+		}
+		FS.writeFileSync("/opt/data/config/mysql.json", JSON.stringify(config.client));
 		return provisionTable(config, callback);
 	});
 }
@@ -113,10 +117,3 @@ main(function(err) {
 	process.exit(0);
 });
 '
-
-echo "Configure PHP example server ..."
-rm -f $PIO_SERVICE_PATH/configured/$CONFIGURED_DIR/install/idprovider.com/config/config-custom.php || true
-cp -Rf /opt/services/config/live/install/identity-provider-config.php $PIO_SERVICE_PATH/configured/$CONFIGURED_DIR/install/idprovider.com/config/config-custom.php
-chown -Rf www-data:www-data /opt/services/config/live/install/identity-provider-config.php
-
-

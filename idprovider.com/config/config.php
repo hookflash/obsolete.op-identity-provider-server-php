@@ -39,12 +39,16 @@
 
 define('LOG', true);
 
-if ( !defined('ROOT') ) {
-        define('ROOT', dirname(dirname(__FILE__)) . "/");
-} 
 
+if (file_exists("/opt/data/config/identity-provider-config.php")) {
+    require_once("/opt/data/config/identity-provider-config.php");
+} else {
+    if ( !defined('ROOT') ) {
+       define('ROOT', dirname(dirname(__FILE__)) . "/");
+    } 
+    require_once(ROOT . 'config/config-custom.php');
+}
 
-require_once(ROOT . 'config/config-custom.php');
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
