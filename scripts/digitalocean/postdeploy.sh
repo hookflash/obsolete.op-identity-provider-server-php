@@ -29,6 +29,16 @@ ln -s $PIO_SERVICE_PATH/live/install /var/www/html/$PIO_SERVICE_ID
 chown -Rf www-data:www-data $PIO_SERVICE_PATH/live/install
 
 echo "Configuring apache ..."
+sudo aptitude install -y libapache2-mod-proxy-html libxml2-dev
+a2enmod proxy
+a2enmod proxy_http
+a2enmod proxy_ajp
+a2enmod rewrite
+a2enmod deflate
+a2enmod headers
+a2enmod proxy_balancer
+a2enmod proxy_connect
+a2enmod proxy_html
 rm -f /etc/apache2/sites-enabled/000-default.conf || true
 cp -f $PIO_SCRIPTS_PATH/apache.conf /etc/apache2/sites-enabled/$PIO_SERVICE_ID.conf
 
