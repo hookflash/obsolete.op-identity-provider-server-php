@@ -72,7 +72,7 @@ if (isset($_SERVER['QUERY_STRING'])) {
         $IGNORE_BASE = true;
     }
     if (isset($query['custom']) && $query['custom'] === 'false') {
-        $HIDE_FEDERATED = true;
+        $HIDE_CUSTOM = true;
     }
     if (isset($query['skin'])) {
         echo '<link rel="stylesheet" href="style-' . $query['skin'] . '.css" />';
@@ -86,7 +86,7 @@ $config['HIDE_CUSTOM'] = (isset($HIDE_CUSTOM) && $HIDE_CUSTOM) ? 'true' : 'false
 
 $config['ASSET_PATH'] = '/client-www/';
 
-$template = file_get_contents(__DIR__ . '/../../dependencies/op-identity-provider-client/www/login.tpl');
+$template = file_get_contents(LOGIN_TEMPLATE_PATH);
 
 foreach ( $config as $name => $value ) {
     $template = str_replace('{{ config.' . $name . ' }}', $value, $template);
