@@ -84,7 +84,7 @@ if (isset($_SERVER['QUERY_STRING'])) {
 $config['IGNORE_BASE'] = (isset($IGNORE_BASE) && $IGNORE_BASE) ? 'true' : 'false';
 $config['HIDE_CUSTOM'] = (isset($HIDE_CUSTOM) && $HIDE_CUSTOM) ? 'true' : 'false';
 
-$config['ASSET_PATH'] = '/client-www/';
+$config['ASSET_PATH'] = INNER_FRAME_ROOT;
 
 $template = file_get_contents(LOGIN_TEMPLATE_PATH);
 
