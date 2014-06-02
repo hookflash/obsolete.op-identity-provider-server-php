@@ -85,6 +85,7 @@ $config['IGNORE_BASE'] = (isset($IGNORE_BASE) && $IGNORE_BASE) ? 'true' : 'false
 $config['HIDE_CUSTOM'] = (isset($HIDE_CUSTOM) && $HIDE_CUSTOM) ? 'true' : 'false';
 
 $config['ASSET_PATH'] = INNER_FRAME_ROOT;
+$config['HF_LOGGER_HOST'] = HF_LOGGER_HOST;
 
 $template = file_get_contents(LOGIN_TEMPLATE_PATH);
 
