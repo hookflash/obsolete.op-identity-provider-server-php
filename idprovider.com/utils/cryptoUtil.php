@@ -376,14 +376,14 @@ class CryptoUtil {
 		APIEventLog('function call: validateIdentityAccessSecretProof(' .
 					'clientNonce=' . $sClientNonce . ' accessToken=' . $sAccessToken . ' accessSecretProof=' . $sAccessSecretProof . ' accessSecretExpires=' . $sAccessSecretExpires . ' uri=' . $sUri . ' purpose=' . $sPurpose);
 		// Challange the token first
-                $aAccessToken = explode('-', $sAccessToken);
-                if ($aAccessToken[0] != $sIdentityType ||           // type must match
-                        $aAccessToken[1] != $sIdentifier ||         // identifier must match
-                        $aAccessToken[2] < time() ) {               // token must not be expired
-                    return false;
-                }
+        $aAccessToken = explode('-', $sAccessToken);
+        if ($aAccessToken[0] != $sIdentityType ||           // type must match
+                $aAccessToken[1] != $sIdentifier ||         // identifier must match
+                $aAccessToken[2] < time() ) {               // token must not be expired
+            return false;
+        }
 
-                // Calculate accessSecret
+        // Calculate accessSecret
 		$sAccessSecret = CryptoUtil::calculateAccessSecret($sAccessToken);
 		APIEventLog('accessSecret=' . $sAccessSecret);
 											

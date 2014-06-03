@@ -960,8 +960,8 @@ class User {
     /**
      * TODO
      *
-     * @param unknown_type $sUri
-     * @return unknown
+     * @param string $sUri
+     * @return array
      */
     public function parseIdentityUri ( $sUri ) {
         if ( strpos($sUri, 'identity:') !== 0 ) {
@@ -981,12 +981,9 @@ class User {
             if ( strpos( $sUriWithoutIdentity, '//facebook.com/' ) === 0 ) {
                 $aIdentity['type'] = 'facebook';
                 $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 15, strlen($sUriWithoutIdentity) );
-            }  else if ( strpos( $sUriWithoutIdentity, '//facebook.com/' ) === 0 ) {
-                $aIdentity['type'] = 'facebook';
-                $aIdentity['identifier'] = substr( $sUriWithoutIdentity, 15, strlen($sUriWithoutIdentity) );
-            }  else {
+            } else {
                 $aIdentity['type'] = 'custom';
-                $aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(MY_DOMAIN)-6, strlen($sUriWithoutIdentity) );
+                $aIdentity['identifier'] = substr( $sUriWithoutIdentity, strlen(DOMAIN)+3, strlen($sUriWithoutIdentity) );
             }
         }
         return $aIdentity;
