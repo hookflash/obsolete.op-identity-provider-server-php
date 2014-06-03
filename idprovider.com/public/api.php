@@ -624,6 +624,7 @@ function devtoolsDatabaseCleanProvider ()
  */
 function getIdentityCategory ( $sIdentityType ) {
 	switch ($sIdentityType) {
+		case 'federated' : // <- deprecated
 		case 'custom':
 			return 'custom';
 		case 'facebook':

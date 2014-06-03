@@ -73,7 +73,8 @@ class RequestUtil {
 													 'parameter' => 'type'
 													 ));
 			}
-			if ( !( $req['identity']['type'] == 'custom' || 
+			if ( !( $req['identity']['type'] == 'federated' || // <- depracated
+					$req['identity']['type'] == 'custom' || 
 					$req['identity']['type'] == 'facebook' ) ) {
 				throw new RestServerException('001', array(
 													 'parameter' => 'type',
@@ -85,7 +86,8 @@ class RequestUtil {
 													 'parameter' => 'identifier'
 													 ));
 			}
-			if ( $req['identity']['type'] == 'custom' || $req['identity']['type'] == 'email' || $req['identity']['type'] == 'phone' ) {
+			if ( $req['identity']['type'] == 'federated' || // <- deprecated
+				 $req['identity']['type'] == 'custom' || $req['identity']['type'] == 'email' || $req['identity']['type'] == 'phone' ) {
 				if ( !( key_exists( 'proof', $req ) && $req['proof'] != null ) ) {
 					throw new RestServerException('002', array(
 														 'parameter' => 'proof'
@@ -140,7 +142,8 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'custom' || 
+		if ( !( $req['identity']['type'] == 'federated' || // <- deprecated
+				$req['identity']['type'] == 'custom' || 
 				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 												 'parameter' => 'type',
@@ -217,7 +220,8 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'custom' ||
+		if ( !( $req['identity']['type'] == 'federated' || // <- deprecated
+				$req['identity']['type'] == 'custom' ||
 				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type',
@@ -489,7 +493,8 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'custom' ||
+		if ( !( $req['identity']['type'] == 'federated' || // <- deprecated
+				$req['identity']['type'] == 'custom' ||
 				$req['identity']['type'] == 'facebook' ) ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type',
@@ -707,23 +712,24 @@ class RequestUtil {
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
 		if ( key_exists( 'afterPinValidation', $req ) ) {
 			return array (
-                        'appid'     => $appid,
-			'afterPinValidation'				=> DatabaseUtil::protectFromSqlInjection( $req['afterPinValidation'] )
+			'appid'     							=> $appid,
+			'afterPinValidation'					=> DatabaseUtil::protectFromSqlInjection( $req['afterPinValidation'] )
 			);
 		} elseif ( key_exists( 'reloginKeyServerPart', $req['identity'] ) ) {
 			$aIdentity = array (
-			'reloginKeyServerPart'				=> DatabaseUtil::protectFromSqlInjection( $req['identity']['reloginKeyServerPart'] )
+			'reloginKeyServerPart'					=> DatabaseUtil::protectFromSqlInjection( $req['identity']['reloginKeyServerPart'] )
 			);
 			return array (
-                        'appid'     => $appid,
-			'identity'							=> $aIdentity
+			'appid'     							=> $appid,
+			'identity'								=> $aIdentity
 			);
 		} else {
 			$aIdentity = array (
-			'type'								=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
-			'identifier'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
+			'type'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
+			'identifier'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
 			);
-			if ( $req['identity']['type'] == 'custom') {
+			if ( $req['identity']['type'] == 'federated' || // <- deprecated
+				 $req['identity']['type'] == 'custom') {
 				$aProof = array (		
 				'serverNonce'						=> DatabaseUtil::protectFromSqlInjection( $req['proof']['serverNonce'] ),
 				'serverLoginProof'					=> DatabaseUtil::protectFromSqlInjection( $req['proof']['serverLoginProof'] )
@@ -734,10 +740,16 @@ class RequestUtil {
 				'serverAuthenticationToken'			=> DatabaseUtil::protectFromSqlInjection( $req['proof']['serverAuthenticationToken'] )
 				);
 			}
+
+			// Deprecated names handling
+			if ( $aIdentity['type'] == 'federated' ) {
+				$aIdentity['type'] = 'custom';
+			}
+			
 			return array (
-                        'appid'     => $appid,
-			'proof'								=> $aProof,
-			'identity'							=> $aIdentity
+			'appid'     							=> $appid,
+			'proof'									=> $aProof,
+			'identity'								=> $aIdentity
 			);
 		}
 	}
@@ -777,9 +789,15 @@ class RequestUtil {
 																						  $req['identity']['displayName'] : '' ),
 		'avatars' 								=> $aAvatars
 		);
+
+		// Deprecated names handling
+		if ( $aIdentity['type'] == 'federated' ) {
+			$aIdentity['type'] = 'custom';
+		}
+			
 		return array(
-                'appid'     => $appid,
-		'identity' => $aIdentity
+		'appid'		=> $appid,
+		'identity'	=> $aIdentity
 		);
 	}
 	
@@ -792,13 +810,19 @@ class RequestUtil {
 	public static function takeIdentitySaltsGetRequestData ( $oRequest ){
 		$req = $oRequest->aPars['request'];
                 $appid = isset($oRequest->aPars['request_attr']['appid']) ? $oRequest->aPars['request_attr']['appid'] : '';
-		$aIdentiy = array(
+		$aIdentity = array(
 		'type'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] ),
 		'identifier' 							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] ),
 		);
+		
+		// Deprecated names handling
+		if ( $aIdentity['type'] == 'federated' ) {
+			$aIdentity['type'] = 'custom';
+		}
+
 		return array(
-                'appid'     => $appid,
-		'identity' => $aIdentiy
+		'appid'		=> $appid,
+		'identity'	=> $aIdentity
 		);
 	}
 	
@@ -817,8 +841,14 @@ class RequestUtil {
 		'secretSalt'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['secretSalt'] ),
 		'serverPasswordSalt'					=> DatabaseUtil::protectFromSqlInjection( $req['identity']['serverPasswordSalt'] ),
 		);
+
+		// Deprecated names handling
+		if ( $aIdentity['type'] == 'federated' ) {
+			$aIdentity['type'] = 'custom';
+		}
+
 		return array(
-                'appid'     => $appid,
+		'appid'     							=> $appid,
 		'clientAuthenticationToken'				=> DatabaseUtil::protectFromSqlInjection( $req['clientAuthenticationToken'] ),
 		'serverAuthenticationToken'				=> DatabaseUtil::protectFromSqlInjection( $req['serverAuthenticationToken'] ),
 		'identity' 								=> $aIdentity
@@ -838,7 +868,7 @@ class RequestUtil {
 		'type'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['type'] )
 		);
 		return array(
-                'appid'     => $appid,
+		'appid'     							=> $appid,
 		'clientAuthenticationToken'				=> DatabaseUtil::protectFromSqlInjection( $req['clientAuthenticationToken'] ),
 		'callbackURL'							=> DatabaseUtil::protectFromSqlInjection( $req['callbackURL'] ),
 		'identity' 								=> $aIdentity
@@ -857,8 +887,14 @@ class RequestUtil {
 		$aIdentity = array(
 		'identifier'							=> DatabaseUtil::protectFromSqlInjection( $req['identity']['identifier'] )
 		);
+
+		// Deprecated names handling
+		if ( $aIdentity['type'] == 'federated' ) {
+			$aIdentity['type'] = 'custom';
+		}
+
 		return array(
-                'appid'     => $appid,
+		'appid'     							=> $appid,
 		'identity' 								=> $aIdentity
 		);
 	}
@@ -907,7 +943,7 @@ class RequestUtil {
 		'removeAvatars'							=> $aRemoveAvatars
 		);
 		return array(
-                'appid'     => $appid,
+		'appid'     							=> $appid,
 		'identity' 								=> $aIdentity
 		);
 	}
@@ -931,7 +967,7 @@ class RequestUtil {
 		'newPasswordHash'						=> DatabaseUtil::protectFromSqlInjection( $req['identity']['newPasswordHash'] )
 		);
 		return array(
-                'appid'     => $appid,
+		'appid'     							=> $appid,
 		'clientToken'							=> DatabaseUtil::protectFromSqlInjection( $req['clientToken'] ),
 		'serverToken'							=> DatabaseUtil::protectFromSqlInjection( $req['serverToken'] ),
 		'identity' 								=> $aIdentity
@@ -958,8 +994,14 @@ class RequestUtil {
 		$aLockbox = array (
 		'keyEncrypted'							=> DatabaseUtil::protectFromSqlInjection( $req['lockbox']['keyEncrypted'] )
 		);
+
+		// Deprecated names handling
+		if ( $aIdentity['type'] == 'federated' ) {
+			$aIdentity['type'] = 'custom';
+		}
+
 		return array(
-                'appid'     => $appid,
+		'appid'     							=> $appid,
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'identity' 								=> $aIdentity,
 		'lockbox'								=> $aLockbox
@@ -982,7 +1024,7 @@ class RequestUtil {
 		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
 		);
 		return array(
-                'appid'     => $appid,
+		'appid'    								=> $appid,
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
 		'purpose'								=> DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
 		'identity' 								=> $aIdentity
@@ -1005,7 +1047,7 @@ class RequestUtil {
 		'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
 		);
 		return array(
-                'appid'     => $appid,
+		'appid'     							=> $appid,
 		'clientNonce'							=> DatabaseUtil::protectFromSqlInjection( $req['clientNonce'] ),
 		'identity' 								=> $aIdentity
 		);
@@ -1039,11 +1081,11 @@ class RequestUtil {
             'uri'									=> DatabaseUtil::protectFromSqlInjection( $req['identity']['uri'] )
             );
             return array(
-            'appid'                 => $appid,
-            'nonce'                 => DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
-            'hostingProof'          => DatabaseUtil::protectFromSqlInjection( $req['hostingProof'] ),
-            'hostingProofExpires'   => DatabaseUtil::protectFromSqlInjection( $req['hostingProofExpires'] ),
-            'identity'              => $aIdentity
+            'appid'                 				=> $appid,
+            'nonce'                 				=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
+            'hostingProof'          				=> DatabaseUtil::protectFromSqlInjection( $req['hostingProof'] ),
+            'hostingProofExpires'   				=> DatabaseUtil::protectFromSqlInjection( $req['hostingProofExpires'] ),
+            'identity'              				=> $aIdentity
             );
         }
         
@@ -1055,11 +1097,11 @@ class RequestUtil {
             $aAppids = explode(",",$req['appids']);
             
             return array(
-                'purpose'                   => DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
-                'nonce'                     => DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
-                'hostingSecretProof'        => DatabaseUtil::protectFromSqlInjection( $req['hostingProof'] ),
-                'hostingSecretProofExpires' => DatabaseUtil::protectFromSqlInjection( $req['hostingProofExpires'] ),
-                'appids'                    => $aAppids
+                'purpose'                   		=> DatabaseUtil::protectFromSqlInjection( $req['purpose'] ),
+                'nonce'                     		=> DatabaseUtil::protectFromSqlInjection( $req['nonce'] ),
+                'hostingSecretProof'        		=> DatabaseUtil::protectFromSqlInjection( $req['hostingProof'] ),
+                'hostingSecretProofExpires' 		=> DatabaseUtil::protectFromSqlInjection( $req['hostingProofExpires'] ),
+                'appids'                    		=> $aAppids
             );
         }
 }
