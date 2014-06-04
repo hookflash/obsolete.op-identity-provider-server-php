@@ -95,8 +95,7 @@ class LoginUtil {
         require_once(ROOT . 'utils/curlUtil.php');
         require_once(ROOT . 'utils/jsonUtil.php');
 
-        // URL of identityService server
-        $url = HF_SERVICE_DOMAIN . 'hostedidentity';
+        $url = HF_HOSTED_IDENTITY_SERVICE;
 
         $sAvatars = '';
         $nAvatar = 0;
@@ -180,8 +179,7 @@ class LoginUtil {
         // import necessary files
         require_once(ROOT . 'utils/curlUtil.php');
 
-        // URL of identityService server
-        $url = HF_SERVICE_DOMAIN . 'identity';
+        $url = HF_IDENTITY_SERVICE;
 
         // Request data
         $requestData = '' .

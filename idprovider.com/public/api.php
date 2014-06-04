@@ -109,7 +109,7 @@ function servicesGet()
 	$aError = array (
 		'$id' 		=> 302,
 		'#text' 	=> 'Found',
-		'location' 	=> HF_SERVICE_DOMAIN . 'services-get'
+		'location' 	=> HF_BOOTSTRAPPER_SERVICE
 	);
 	$oResponse->addPar('error', $aError);
 	$oResponse->run();

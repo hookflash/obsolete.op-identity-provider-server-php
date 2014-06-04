@@ -34,20 +34,21 @@
 //-- IMPORTANT --//
 
 // Here you set your application's standard protocol
-define('PROTOCOL', 'https://');
-
-// Here you set your domain
-define('MY_DOMAIN', PROTOCOL . $_SERVER['HTTP_HOST']);
+define('PROTOCOL', 'http://');
+define('DOMAIN', PROTOCOL . $_SERVER['HTTP_HOST']);
 
 // Here you set your database
 define('APP_DB_NAME', 'provider_db');
 define('APP_DB_HOST', 'localhost');
 define('APP_DB_USER', 'root');
-define('APP_DB_PASS', '*************');
+define('APP_DB_PASS', '');
 
 // Here you set your Hookflash service domain
-define('DOMAIN', $_SERVER['HTTP_HOST']);
-define('HF_SERVICE_DOMAIN', PROTOCOL . 'unstable.hookflash.me/');
+define('HF_BOOTSTRAPPER_SERVICE', 'http://hfservice-v1-rel-dev2-i.hcs.io/services-get');
+define('HF_HOSTED_IDENTITY_SERVICE', 'http://hfservice-v1-rel-dev2-i.hcs.io/hostedidentity');
+define('HF_IDENTITY_SERVICE', 'http://hfservice-v1-rel-dev2-i.hcs.io/identity');
+define('HF_PASSWORD1_BASEURI', 'http://hfservice-v1-rel-dev2-i.hcs.io/password1');
+define('HF_PASSWORD2_BASEURI', 'http://hfservice-v1-rel-dev2-i.hcs.io/password1');
 
 // Here you set your social keys and secrets
 define('LINKEDIN_CONSUMER_KEY', '***********');
@@ -69,9 +70,6 @@ define('DOMAIN_HOSTING_SECRET', '***************');
 define('UPLOAD_LOCATION', ROOT . 'public/get/service/avatars/');
 
 // Where to send JS logs
-define('HF_LOGGER_HOST', 'logger.hookflash.me');
-
-define('HF_PASSWORD1_BASEURI', '***************');
-define('HF_PASSWORD2_BASEURI', '***************');
+define('HF_LOGGER_HOST', 'logger-v1-rel-dev2-i.hcs.io');
 
 //^^ IMPORTANT ^^//

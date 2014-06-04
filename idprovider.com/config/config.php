@@ -90,13 +90,6 @@ LOG_EVENT($LOGGER, 'Request: ' . $_SERVER['REQUEST_URI']);
 LOG_EVENT('SESSION: ' . var_export($_SESSION, true));
 LOG_EVENT('POST DATA: ' . file_get_contents('php://input'));
 
-function siteURL($domainName="") {
-    $protocol = ((!empty( $_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-    if ($domainName=="") {
-        $domainName = $SERVER['HTTP_HOST'];
-    }
-    return $protocol.$domainName;
-}
 
 // Log events
 function APIEventLog($sText, $iErrorCode='200', $sAPISessionID='') {

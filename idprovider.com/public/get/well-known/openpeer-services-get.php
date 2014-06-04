@@ -46,7 +46,7 @@ print '{
     "error": {
       "$id": 302,
       "#text": "Found",
-      "location": "' . HF_SERVICE_DOMAIN . 'services-get"
+      "location": "' . HF_BOOTSTRAPPER_SERVICE . '"
     }
   }
 }';
