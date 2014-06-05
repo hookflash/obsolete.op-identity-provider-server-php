@@ -1,4 +1,8 @@
 nbproject/
 .rt/
 node_modules/
+/dependencies/
+/vendor/
 .program.json
+debug.log
+/.pio.cache/

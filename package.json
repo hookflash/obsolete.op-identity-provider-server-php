@@ -6,10 +6,16 @@
 	"private": true,
 	"config": {
 		"run": {
-			"packagePath": "server/var/www/idprovider.com/public"
+			"packagePath": "idprovider.com/public"
 		}
 	},
     "devMappings": {
         "app-php": "github.com/freedom-platform/app-php/~0.1.0"
-    }
+    },
+	"config": {
+		"pio.deploy.converter": {
+			"sourcePath": ".",
+			"scriptsPath": "scripts/digitalocean"
+		}
+	}
 }

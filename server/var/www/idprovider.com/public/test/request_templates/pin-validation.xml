@@ -1,8 +1,0 @@
-<request domain="provider.com" id="abc" handler="identity-provider" method="pin-validation">
-	<pin></pin>
-</request>
-<!--
-<result domain="provider.com" id="abc" handler="identity-provider" method="pin-validation" epoch="12345678">
-	<pinValidationSucceeded>={true, false}</pinValidationSucceeded>
-</result>
--->
