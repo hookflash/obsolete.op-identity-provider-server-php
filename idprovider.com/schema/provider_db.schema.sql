@@ -106,38 +106,6 @@ CREATE TABLE `custom` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `legacy_email`
---
-
-DROP TABLE IF EXISTS `legacy_email`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `legacy_email` (
-  `email_id` int(10) NOT NULL AUTO_INCREMENT,
-  `user_id` int(10) NOT NULL,
-  `identifier` varchar(64) COLLATE utf8_bin NOT NULL,
-  `password_hash` varchar(40) COLLATE utf8_bin NOT NULL,
-  `display_name` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `profile_url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
-  `vprofile_url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
-  `secret_encrypted` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `secret_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `server_password_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `account_accessed` bit(1) NOT NULL,
-  `pin_validated` bit(1) NOT NULL,
-  `temporary_pin` int(6) DEFAULT NULL,
-  `pin_expiry` bigint(10) DEFAULT NULL,
-  `pin_daily_generation_counter` int(1) NOT NULL DEFAULT '0',
-  `next_valid_pin_generation_time` bigint(10) DEFAULT NULL,
-  `lockbox_half_key_encrypted` varchar(100) COLLATE utf8_bin DEFAULT NULL,
-  `updated` bigint(10) DEFAULT NULL,
-  PRIMARY KEY (`email_id`),
-  KEY `FK_user_id_cascade` (`user_id`),
-  CONSTRAINT `FK_user_id_cascade` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1031 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `social`
 --
 
@@ -164,38 +132,6 @@ CREATE TABLE `social` (
   KEY `FK_user_id_cascade_social` (`user_id`),
   CONSTRAINT `FK_user_id_cascade_social` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1148 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `legacy_phone`
---
-
-DROP TABLE IF EXISTS `legacy_phone`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `legacy_phone` (
-  `phone_id` int(10) NOT NULL AUTO_INCREMENT,
-  `user_id` int(10) NOT NULL,
-  `identifier` varchar(64) COLLATE utf8_bin NOT NULL,
-  `password_hash` varchar(40) COLLATE utf8_bin NOT NULL,
-  `display_name` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `profile_url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
-  `vprofile_url` varchar(100) COLLATE utf8_bin DEFAULT NULL,
-  `secret_encrypted` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `secret_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `server_password_salt` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `account_accessed` bit(1) NOT NULL,
-  `pin_validated` bit(1) NOT NULL,
-  `temporary_pin` int(6) DEFAULT NULL,
-  `pin_expiry` bigint(10) DEFAULT NULL,
-  `pin_daily_generation_counter` int(1) NOT NULL DEFAULT '0',
-  `next_valid_pin_generation_time` bigint(10) DEFAULT NULL,
-  `lockbox_half_key_encrypted` varchar(100) COLLATE utf8_bin DEFAULT NULL,
-  `updated` bigint(10) DEFAULT NULL,
-  PRIMARY KEY (`phone_id`),
-  KEY `FK_user_id_cascade_phone` (`user_id`),
-  CONSTRAINT `FK_user_id_cascade_phone` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
