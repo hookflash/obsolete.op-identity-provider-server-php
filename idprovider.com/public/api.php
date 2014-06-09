@@ -328,11 +328,16 @@ function socialProviderAuthentication()
 
 		// Create SocialLogin object
 		$sIdentityType = $oRequest->aPars['request']['identity']['type'];
-		require_once(ROOT . 'login/SocialLogin.php');
-		$oSocialLogin = new SocialLogin( $sIdentityType, $oRequest );
+		if ( ! $sIdentityType=='oauth2' ) {
+			require_once(ROOT . 'login/SocialLogin.php');
+			$oLogin = new SocialLogin( $sIdentityType, $oRequest );
+		} else {
+			require_once(ROOT . 'login/CustomerLogin.php');
+			$oLogin = new CustomerLogin( $sIdentityType, $oRequest );
+		}
 		
 		// Try starting a social authentication process
-		$aAuthenticationResult = $oSocialLogin->authentication();
+		$aAuthenticationResult = $oLogin->authentication();
 			
 	} catch (Exception $exception) {
 		$oResponse->run($exception);
@@ -629,6 +634,10 @@ function getIdentityCategory ( $sIdentityType ) {
 			return 'custom';
 		case 'facebook':
 			return 'social';
+		case 'oauth2':
+			return 'oauth2';
+		default:
+			return $sIdentityType;
 	}
 }
 
@@ -650,6 +659,9 @@ function createLogin ($DB, $sIdentityCategory, $sIdentityType, $aRequest ) {
 		case 'social':
 			require_once(ROOT . 'login/SocialLogin.php');
 			return new SocialLogin($sIdentityType, $aRequest);
+		case 'oauth2':
+			require_once(ROOT . 'login/CustomerLogin.php');
+			return new CustomerLogin($sIdentityType, $aRequest);
 	}
 }
 

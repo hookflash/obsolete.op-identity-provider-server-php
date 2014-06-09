@@ -70,10 +70,10 @@ class RestServerException extends Exception {
 				$this->sErrorMessage = 'Invalid parameter value: parameter \'' . $this->aErrorMessageParameters['parameter'] .
 									   '\' = \'' . $this->aErrorMessageParameters['parameterValue'] . '\', however, it can only has one of these values: ';
 				if ( $this->aErrorMessageParameters['parameter'] == 'type' ) {
-					$this->sErrorMessage .= '\'facebook\', \'linkedin\', \'twitter\', \'custom\', \'email\', \'phone\'.';
+					$this->sErrorMessage .= '\'facebook\', \'linkedin\', \'twitter\', \'custom\', \'email\', \'phone\', \'oauth\'.';
 				}
 				if ( $this->aErrorMessageParameters['parameter'] == 'type_social-only' ) {
-					$this->sErrorMessage .= '\'facebook\', \'linkedin\', \'twitter\'.';
+					$this->sErrorMessage .= '\'facebook\', \'linkedin\', \'twitter\', \'oauth\'.';
 				}
 				if ( $this->aErrorMessageParameters['parameter'] == 'type_custom-legacy' ) {
 					$this->sErrorMessage .= '\'custom\', \'email\', \'phone\'.';
