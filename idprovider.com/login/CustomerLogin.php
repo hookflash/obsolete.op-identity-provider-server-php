@@ -199,7 +199,7 @@ class CustomerLogin {
 
 	    $client->client_id = CUSTOMER_OAUTH_SERVICE;
 	    $client->client_secret = CUSTOMER_OAUTH_SERVICE_SECRET;
-        $client->dialog_url = CUSTOMER_OAUTH_SERVICE_URL;
+        $client->dialog_url = $this->swapParameterValues(CUSTOMER_OAUTH_SERVICE_AUTHORIZE_URL, $client->client_id, $client->redirect_uri);
 
 	    if(strlen($client->client_id) == 0
 			|| strlen($client->client_secret) == 0) {
@@ -207,7 +207,7 @@ class CustomerLogin {
 		}
     
         if(($success = $client->Initialize()))
-		{     
+		{    
 		    if(($success = $client->Process()))
 		    {
 		        if(strlen($client->access_token))
@@ -305,6 +305,12 @@ class CustomerLogin {
     //     $_SESSION['identityServiceAuthenticationURL'] = $sRedirectURL;
     //     header ( 'Location: ' . $_SESSION['callbackURL'] );
     // }
+
+    private function swapParameterValues ( $url, $client_id, $redirect_url ) {
+        $url = str_replace('{CLIENT_ID}', $client_id, $url);
+        $url = str_replace('{REDIRECT_URI}', $redirect_url, $url);
+        return $url;
+    }
 
     private function informIdentityServiceAboutSignUp ( $sIdentityType, $sProviderUserId, $sProfileFullname, $sProfileUrl, $sProfileAvatarUrl, $sUpdated ) {
         $sIdentityUri = $this->generateIdentityUri($sIdentityType, $sProviderUserId);
