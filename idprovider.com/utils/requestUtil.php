@@ -313,7 +313,8 @@ class RequestUtil {
 												 'parameter' => 'type'
 												 ));
 		}
-		if ( !( $req['identity']['type'] == 'facebook' ) ) {
+		if ( !( $req['identity']['type'] == 'facebook' ) ||
+			 !( $req['identity']['type'] == 'oauth') ) {
 			throw new RestServerException('001', array(
 											     'parameter' => 'type_social-only',
 											     'parameterValue' => $req['identity']['type']

@@ -134,18 +134,7 @@ function performTests() {
     } else {
         $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'social\' found!');
     }
-    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_phone'");
-    if ($dbcheck[0]['Tables_in_provider_db (legacy_phone)'] != 'legacy_phone') {
-        $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_phone\' not found!');
-    } else {
-        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_phone\' found!');
-    }
-    $dbcheck = $DB->query_to_array("SHOW TABLES LIKE 'legacy_email'");
-    if ($dbcheck[0]['Tables_in_provider_db (legacy_email)'] != 'legacy_email') {
-        $sTestsOutcome = addFailure($sTestsOutcome, 'Table \'legacy_email\' not found!');
-    } else {
-        $sTestsOutcome = addSuccess($sTestsOutcome, 'Table \'legacy_email\' found!');
-    }
+    
     //------------------------------------------------------------------------//
     
     // Persistance layer operability tests

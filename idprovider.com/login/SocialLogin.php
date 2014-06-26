@@ -56,7 +56,8 @@ require_once (ROOT . 'libs/mySQL/class-mysqlidb.php');
 
 /**
  * Class SocialLogin provides all the needed features 
- * for the social networks (facebook, linkedin, twitter, github...) login scenarios
+ * for the social networks and oAuth services
+ * (facebook, linkedin, twitter, github...) login scenarios
  */
 class SocialLogin {
 
@@ -194,17 +195,9 @@ class SocialLogin {
     public function startSocialLogin() {
         // Switch the execution based on social provider
         switch ( $this->sIdentityType ){
-            // case 'linkedin':
-            //     $this->loginUsingLinkedIn();
-            //     break;
             case 'facebook':
                 $this->loginUsingFacebook();
                 break;
-            // case 'twitter':
-            //     $this->loginUsingTwitter();
-            //     break;
-            default:
-                // Onda error
         }
     }
 	
@@ -215,17 +208,9 @@ class SocialLogin {
     public function afterSuccessfullSocialLogin() {
         // Switch the execution based on social provider
         switch ( $this->sIdentityType ){
-            // case 'linkedin':
-            //     $this->afterSuccessfullLinkedinLogin();
-            //     break;
             case 'facebook':
                 $this->afterSuccessfullFacebookLogin();
                 break;
-            // case 'twitter':
-            //     $this->afterSuccessfullTwitterLogin();
-            //     break;
-            default:
-                // Onda error
         }
     }
 	

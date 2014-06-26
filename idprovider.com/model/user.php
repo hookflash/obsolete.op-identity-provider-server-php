@@ -469,19 +469,6 @@ class User {
                         );
                 $nAvatar++;
             }
-        } else if ( $sDBTable == 'legacy_email' || $sDBTable == 'legacy_phone' ) {
-            $sUser = $DB->insert('user', array( 'updated' => $sUpdated ) );
-            $DB->insert(
-                    $sDBTable, 
-                    array(
-                        'identifier' => $sIdentifier,
-                        'user_id' => $sUser,
-                        'password_hash' => $sPasswordHash,
-                        'secret_salt' => $sIdentitySecretSalt,
-                        'server_password_salt' => $sServerPasswordSalt,
-                        'updated' => $sUpdated
-                        )
-                    );
         }
 
         $aUser['signUpSucceeded'] = true;
